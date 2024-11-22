@@ -1,11 +1,57 @@
-// Update this page (the content is just a fallback if you fail to update the page)
+import { useState } from 'react';
+import { FilterPanel } from '@/components/FilterPanel';
+import { ResultsTable } from '@/components/ResultsTable';
+import { DetailView } from '@/components/DetailView';
+import { FilterCriteria, Person } from '@/types/population';
+import { mockPeople } from '@/data/mockData';
 
 const Index = () => {
+  const [selectedPerson, setSelectedPerson] = useState<Person | null>(null);
+  const [filteredData, setFilteredData] = useState<Person[]>(mockPeople);
+
+  const handleFilterChange = (filters: FilterCriteria) => {
+    const filtered = mockPeople.filter((person) => {
+      const ageMatch =
+        person.age >= filters.ageRange[0] && person.age <= filters.ageRange[1];
+      const genderMatch =
+        filters.gender.length === 0 || filters.gender.includes(person.gender);
+      const locationMatch =
+        filters.location.length === 0 ||
+        filters.location.includes(person.location);
+      const occupationMatch =
+        filters.occupation.length === 0 ||
+        filters.occupation.includes(person.occupation);
+
+      return ageMatch && genderMatch && locationMatch && occupationMatch;
+    });
+
+    setFilteredData(filtered);
+  };
+
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-100">
-      <div className="text-center">
-        <h1 className="text-4xl font-bold mb-4">Welcome to Your Blank App</h1>
-        <p className="text-xl text-gray-600">Start building your amazing project here!</p>
+    <div className="min-h-screen bg-gradient-to-br from-indigo-50 to-slate-50 p-6">
+      <div className="max-w-[1600px] mx-auto">
+        <h1 className="text-3xl font-bold mb-6">Population Dashboard</h1>
+        
+        <div className="grid grid-cols-12 gap-6">
+          <div className="col-span-12 lg:col-span-3">
+            <FilterPanel onFilterChange={handleFilterChange} />
+          </div>
+          
+          <div className="col-span-12 lg:col-span-5">
+            <div className="glass-card p-6">
+              <h2 className="text-lg font-semibold mb-4">Results</h2>
+              <ResultsTable
+                data={filteredData}
+                onSelectPerson={setSelectedPerson}
+              />
+            </div>
+          </div>
+          
+          <div className="col-span-12 lg:col-span-4">
+            <DetailView person={selectedPerson} />
+          </div>
+        </div>
       </div>
     </div>
   );
