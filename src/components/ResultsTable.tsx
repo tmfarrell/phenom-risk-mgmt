@@ -23,6 +23,7 @@ type SortConfig = {
 
 export const ResultsTable = ({ data, onSelectPerson }: ResultsTableProps) => {
   const [sortConfig, setSortConfig] = useState<SortConfig>(null);
+  const [selectedId, setSelectedId] = useState<string | null>(null);
 
   const handleSort = (key: keyof Person) => {
     setSortConfig((current) => {
@@ -34,6 +35,11 @@ export const ResultsTable = ({ data, onSelectPerson }: ResultsTableProps) => {
       }
       return { key, direction: 'asc' };
     });
+  };
+
+  const handleSelectPerson = (person: Person) => {
+    setSelectedId(person.id);
+    onSelectPerson(person);
   };
 
   const sortedData = [...data].sort((a, b) => {
@@ -71,8 +77,10 @@ export const ResultsTable = ({ data, onSelectPerson }: ResultsTableProps) => {
           {sortedData.map((person) => (
             <TableRow
               key={person.id}
-              className="cursor-pointer hover:bg-muted/50 table-cell-fade"
-              onClick={() => onSelectPerson(person)}
+              className={`cursor-pointer hover:bg-muted/50 table-cell-fade ${
+                selectedId === person.id ? 'bg-primary/10' : ''
+              }`}
+              onClick={() => handleSelectPerson(person)}
             >
               <TableCell>{person.name}</TableCell>
               <TableCell>{person.age}</TableCell>
