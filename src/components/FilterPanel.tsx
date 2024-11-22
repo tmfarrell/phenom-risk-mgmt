@@ -25,6 +25,18 @@ export const FilterPanel = ({ onFilterChange }: FilterPanelProps) => {
     occupation: [],
   });
 
+  const handleAgeRangeChange = (index: number, value: number) => {
+    const newAgeRange = [...filters.ageRange] as [number, number];
+    if (index === 0) {
+      // Left endpoint (minimum age)
+      newAgeRange[0] = Math.min(value, newAgeRange[1]);
+    } else {
+      // Right endpoint (maximum age)
+      newAgeRange[1] = Math.max(value, newAgeRange[0]);
+    }
+    setFilters({ ...filters, ageRange: newAgeRange });
+  };
+
   const handleApplyFilters = () => {
     onFilterChange(filters);
   };
@@ -46,20 +58,26 @@ export const FilterPanel = ({ onFilterChange }: FilterPanelProps) => {
         <h2 className="text-lg font-semibold mb-4">Filter Population</h2>
         
         <div className="space-y-4">
-          <div className="space-y-2">
-            <Label>Age Range</Label>
-            <Slider
-              min={20}
-              max={60}
-              step={1}
-              value={filters.ageRange}
-              onValueChange={(value) =>
-                setFilters({ ...filters, ageRange: value as [number, number] })
-              }
-            />
-            <div className="flex justify-between text-sm text-gray-500">
-              <span>{filters.ageRange[0]}</span>
-              <span>{filters.ageRange[1]}</span>
+          <div className="space-y-4">
+            <div>
+              <Label>Minimum Age: {filters.ageRange[0]}</Label>
+              <Slider
+                min={20}
+                max={60}
+                step={1}
+                value={[filters.ageRange[0]]}
+                onValueChange={(value) => handleAgeRangeChange(0, value[0])}
+              />
+            </div>
+            <div>
+              <Label>Maximum Age: {filters.ageRange[1]}</Label>
+              <Slider
+                min={20}
+                max={60}
+                step={1}
+                value={[filters.ageRange[1]]}
+                onValueChange={(value) => handleAgeRangeChange(1, value[0])}
+              />
             </div>
           </div>
 
