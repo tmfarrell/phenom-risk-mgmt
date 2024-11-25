@@ -7,6 +7,7 @@ import {
   TableHeader,
   TableRow,
 } from './ui/table';
+import { ScrollArea } from './ui/scroll-area';
 import { Person } from '../types/population';
 import { ArrowUpDown } from 'lucide-react';
 import { Button } from './ui/button';
@@ -73,23 +74,25 @@ export const ResultsTable = ({ data, onSelectPerson }: ResultsTableProps) => {
             ))}
           </TableRow>
         </TableHeader>
-        <TableBody>
-          {sortedData.map((person) => (
-            <TableRow
-              key={person.id}
-              className={`cursor-pointer hover:bg-muted/50 table-cell-fade ${
-                selectedId === person.id ? 'bg-primary/10' : ''
-              }`}
-              onClick={() => handleSelectPerson(person)}
-            >
-              <TableCell>{person.name}</TableCell>
-              <TableCell>{person.age}</TableCell>
-              <TableCell>{person.gender}</TableCell>
-              <TableCell>{person.location}</TableCell>
-              <TableCell>{person.occupation}</TableCell>
-            </TableRow>
-          ))}
-        </TableBody>
+        <ScrollArea className="h-[400px]">
+          <TableBody>
+            {sortedData.map((person) => (
+              <TableRow
+                key={person.id}
+                className={`cursor-pointer hover:bg-muted/50 table-cell-fade ${
+                  selectedId === person.id ? 'bg-primary/10' : ''
+                }`}
+                onClick={() => handleSelectPerson(person)}
+              >
+                <TableCell>{person.name}</TableCell>
+                <TableCell>{person.age}</TableCell>
+                <TableCell>{person.gender}</TableCell>
+                <TableCell>{person.location}</TableCell>
+                <TableCell>{person.occupation}</TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </ScrollArea>
       </Table>
     </div>
   );
