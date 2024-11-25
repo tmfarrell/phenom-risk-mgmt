@@ -1,4 +1,3 @@
-import { useState } from 'react';
 import {
   Table,
   TableBody,
@@ -57,24 +56,24 @@ export const ResultsTable = ({ data, onSelectPerson }: ResultsTableProps) => {
 
   return (
     <div className="rounded-md border">
-      <Table>
-        <TableHeader>
-          <TableRow>
-            {['name', 'age', 'gender', 'location', 'occupation'].map((key) => (
-              <TableHead key={key}>
-                <Button
-                  variant="ghost"
-                  onClick={() => handleSort(key as keyof Person)}
-                  className="hover:bg-transparent"
-                >
-                  {key.charAt(0).toUpperCase() + key.slice(1)}
-                  <ArrowUpDown className="ml-2 h-4 w-4" />
-                </Button>
-              </TableHead>
-            ))}
-          </TableRow>
-        </TableHeader>
-        <ScrollArea className="h-[400px]">
+      <ScrollArea className="h-[400px]">
+        <Table>
+          <TableHeader>
+            <TableRow>
+              {['name', 'age', 'gender', 'location', 'occupation'].map((key) => (
+                <TableHead key={key}>
+                  <Button
+                    variant="ghost"
+                    onClick={() => handleSort(key as keyof Person)}
+                    className="hover:bg-transparent"
+                  >
+                    {key.charAt(0).toUpperCase() + key.slice(1)}
+                    <ArrowUpDown className="ml-2 h-4 w-4" />
+                  </Button>
+                </TableHead>
+              ))}
+            </TableRow>
+          </TableHeader>
           <TableBody>
             {sortedData.map((person) => (
               <TableRow
@@ -92,8 +91,8 @@ export const ResultsTable = ({ data, onSelectPerson }: ResultsTableProps) => {
               </TableRow>
             ))}
           </TableBody>
-        </ScrollArea>
-      </Table>
+        </Table>
+      </ScrollArea>
     </div>
   );
 };
