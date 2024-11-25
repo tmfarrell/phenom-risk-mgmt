@@ -38,7 +38,7 @@ const Index = () => {
             <FilterPanel onFilterChange={handleFilterChange} />
           </div>
           
-          <div className="col-span-12 lg:col-span-5">
+          <div className="col-span-12 lg:col-span-9 space-y-6">
             <div className="glass-card p-6">
               <h2 className="text-lg font-semibold mb-4">Results</h2>
               <ResultsTable
@@ -46,9 +46,7 @@ const Index = () => {
                 onSelectPerson={setSelectedPerson}
               />
             </div>
-          </div>
-          
-          <div className="col-span-12 lg:col-span-4">
+            
             <DetailView person={selectedPerson} />
           </div>
         </div>
