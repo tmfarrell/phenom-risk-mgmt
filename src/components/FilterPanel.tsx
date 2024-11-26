@@ -43,7 +43,7 @@ export const FilterPanel = ({ onFilterChange }: FilterPanelProps) => {
   const handleSelectChange = (value: string, field: keyof FilterCriteria) => {
     setFilters({
       ...filters,
-      [field]: value === 'none' ? [] : [value],
+      [field]: value === 'all' ? [] : [value],
     });
   };
 
@@ -83,14 +83,14 @@ export const FilterPanel = ({ onFilterChange }: FilterPanelProps) => {
           <div className="space-y-2">
             <Label>Gender</Label>
             <Select
-              value={filters.gender[0] || 'none'}
+              value={filters.gender[0] || 'all'}
               onValueChange={(value) => handleSelectChange(value, 'gender')}
             >
               <SelectTrigger>
                 <SelectValue placeholder="Select gender" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="none">None</SelectItem>
+                <SelectItem value="all">All</SelectItem>
                 <SelectItem value="Male">Male</SelectItem>
                 <SelectItem value="Female">Female</SelectItem>
                 <SelectItem value="Other">Other</SelectItem>
@@ -101,14 +101,14 @@ export const FilterPanel = ({ onFilterChange }: FilterPanelProps) => {
           <div className="space-y-2">
             <Label>Location</Label>
             <Select
-              value={filters.location[0] || 'none'}
+              value={filters.location[0] || 'all'}
               onValueChange={(value) => handleSelectChange(value, 'location')}
             >
               <SelectTrigger>
                 <SelectValue placeholder="Select location" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="none">None</SelectItem>
+                <SelectItem value="all">All</SelectItem>
                 {locations.map((location) => (
                   <SelectItem key={location} value={location}>
                     {location}
@@ -121,14 +121,14 @@ export const FilterPanel = ({ onFilterChange }: FilterPanelProps) => {
           <div className="space-y-2">
             <Label>Occupation</Label>
             <Select
-              value={filters.occupation[0] || 'none'}
+              value={filters.occupation[0] || 'all'}
               onValueChange={(value) => handleSelectChange(value, 'occupation')}
             >
               <SelectTrigger>
                 <SelectValue placeholder="Select occupation" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="none">None</SelectItem>
+                <SelectItem value="all">All</SelectItem>
                 {occupations.map((occupation) => (
                   <SelectItem key={occupation} value={occupation}>
                     {occupation}
