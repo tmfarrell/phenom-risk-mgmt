@@ -41,11 +41,21 @@ export const FilterPanel = ({ onFilterChange }: FilterPanelProps) => {
   };
 
   return (
-    <Card className="p-6 space-y-6">
-      <div>
-        <h2 className="text-lg font-semibold mb-4">Filter Population</h2>
+    <Card className="p-4">
+      <div className="flex flex-col space-y-4">
+        <div className="flex items-center justify-between">
+          <h2 className="text-lg font-semibold">Filter Population</h2>
+          <div className="flex gap-2">
+            <Button onClick={handleApplyFilters} size="sm">
+              Apply Filters
+            </Button>
+            <Button onClick={handleReset} variant="outline" size="sm">
+              Reset
+            </Button>
+          </div>
+        </div>
         
-        <div className="space-y-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
           <div className="space-y-2">
             <Label>Age Range</Label>
             <Slider
@@ -120,15 +130,6 @@ export const FilterPanel = ({ onFilterChange }: FilterPanelProps) => {
               </SelectContent>
             </Select>
           </div>
-        </div>
-
-        <div className="flex gap-2 mt-6">
-          <Button onClick={handleApplyFilters} className="flex-1">
-            Apply Filters
-          </Button>
-          <Button onClick={handleReset} variant="outline" className="flex-1">
-            Reset
-          </Button>
         </div>
       </div>
     </Card>
