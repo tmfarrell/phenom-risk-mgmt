@@ -19,7 +19,7 @@ interface FilterPanelProps {
 
 export const FilterPanel = ({ onFilterChange }: FilterPanelProps) => {
   const [filters, setFilters] = useState<FilterCriteria>({
-    ageRange: [20, 60],
+    ageRange: [0, 100],
     gender: [],
     location: [],
     occupation: [],
@@ -31,7 +31,7 @@ export const FilterPanel = ({ onFilterChange }: FilterPanelProps) => {
 
   const handleReset = () => {
     const resetFilters: FilterCriteria = {
-      ageRange: [20, 60],
+      ageRange: [0, 100],
       gender: [],
       location: [],
       occupation: [],
@@ -66,8 +66,8 @@ export const FilterPanel = ({ onFilterChange }: FilterPanelProps) => {
           <div className="space-y-2">
             <Label>Age Range</Label>
             <Slider
-              min={20}
-              max={60}
+              min={0}
+              max={100}
               step={1}
               value={filters.ageRange}
               onValueChange={(value) =>
@@ -76,7 +76,7 @@ export const FilterPanel = ({ onFilterChange }: FilterPanelProps) => {
             />
             <div className="flex justify-between text-sm text-gray-500">
               <span>{filters.ageRange[0]}</span>
-              <span>{filters.ageRange[1]}</span>
+              <span>{filters.ageRange[1]}+</span>
             </div>
           </div>
 

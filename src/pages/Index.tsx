@@ -12,7 +12,8 @@ const Index = () => {
   const handleFilterChange = (filters: FilterCriteria) => {
     const filtered = mockPeople.filter((person) => {
       const ageMatch =
-        person.age >= filters.ageRange[0] && person.age <= filters.ageRange[1];
+        person.age >= filters.ageRange[0] && 
+        (filters.ageRange[1] === 100 ? true : person.age <= filters.ageRange[1]);
       const genderMatch =
         filters.gender.length === 0 || filters.gender.includes(person.gender);
       const locationMatch =
