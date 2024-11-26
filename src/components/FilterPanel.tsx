@@ -40,6 +40,13 @@ export const FilterPanel = ({ onFilterChange }: FilterPanelProps) => {
     onFilterChange(resetFilters);
   };
 
+  const handleSelectChange = (value: string, field: keyof FilterCriteria) => {
+    setFilters({
+      ...filters,
+      [field]: value === 'none' ? [] : [value],
+    });
+  };
+
   return (
     <Card className="p-4">
       <div className="flex flex-col space-y-4">
@@ -76,14 +83,14 @@ export const FilterPanel = ({ onFilterChange }: FilterPanelProps) => {
           <div className="space-y-2">
             <Label>Gender</Label>
             <Select
-              onValueChange={(value) =>
-                setFilters({ ...filters, gender: [value] })
-              }
+              value={filters.gender[0] || 'none'}
+              onValueChange={(value) => handleSelectChange(value, 'gender')}
             >
               <SelectTrigger>
                 <SelectValue placeholder="Select gender" />
               </SelectTrigger>
               <SelectContent>
+                <SelectItem value="none">None</SelectItem>
                 <SelectItem value="Male">Male</SelectItem>
                 <SelectItem value="Female">Female</SelectItem>
                 <SelectItem value="Other">Other</SelectItem>
@@ -94,14 +101,14 @@ export const FilterPanel = ({ onFilterChange }: FilterPanelProps) => {
           <div className="space-y-2">
             <Label>Location</Label>
             <Select
-              onValueChange={(value) =>
-                setFilters({ ...filters, location: [value] })
-              }
+              value={filters.location[0] || 'none'}
+              onValueChange={(value) => handleSelectChange(value, 'location')}
             >
               <SelectTrigger>
                 <SelectValue placeholder="Select location" />
               </SelectTrigger>
               <SelectContent>
+                <SelectItem value="none">None</SelectItem>
                 {locations.map((location) => (
                   <SelectItem key={location} value={location}>
                     {location}
@@ -114,14 +121,14 @@ export const FilterPanel = ({ onFilterChange }: FilterPanelProps) => {
           <div className="space-y-2">
             <Label>Occupation</Label>
             <Select
-              onValueChange={(value) =>
-                setFilters({ ...filters, occupation: [value] })
-              }
+              value={filters.occupation[0] || 'none'}
+              onValueChange={(value) => handleSelectChange(value, 'occupation')}
             >
               <SelectTrigger>
                 <SelectValue placeholder="Select occupation" />
               </SelectTrigger>
               <SelectContent>
+                <SelectItem value="none">None</SelectItem>
                 {occupations.map((occupation) => (
                   <SelectItem key={occupation} value={occupation}>
                     {occupation}
