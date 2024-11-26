@@ -33,12 +33,10 @@ const Index = () => {
       <div className="max-w-[1600px] mx-auto">
         <h1 className="text-3xl font-bold mb-6">Population Dashboard</h1>
         
-        <div className="grid grid-cols-12 gap-6">
-          <div className="col-span-12 lg:col-span-3">
-            <FilterPanel onFilterChange={handleFilterChange} />
-          </div>
+        <div className="flex flex-col space-y-6">
+          <FilterPanel onFilterChange={handleFilterChange} />
           
-          <div className="col-span-12 lg:col-span-9 space-y-6">
+          <div className="space-y-6">
             <div className="glass-card p-6">
               <h2 className="text-lg font-semibold mb-4">Results</h2>
               <ResultsTable
