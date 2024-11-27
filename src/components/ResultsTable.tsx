@@ -76,7 +76,7 @@ export const ResultsTable = ({ data, onSelectPerson }: ResultsTableProps) => {
                     onClick={() => handleSort(key as keyof Person)}
                     className="hover:bg-transparent"
                   >
-                    {key.charAt(0).toUpperCase() + key.slice(1)}
+                    {key === 'change' ? 'Relative Risk' : key.charAt(0).toUpperCase() + key.slice(1)}
                     <ArrowUpDown className="ml-2 h-4 w-4" />
                   </Button>
                 </TableHead>
@@ -107,7 +107,7 @@ export const ResultsTable = ({ data, onSelectPerson }: ResultsTableProps) => {
                   ) : (
                     <ArrowDown className="h-4 w-4" />
                   )}
-                  {`${normalizeValue(person.change).toFixed(2)}x (${person.change >= 0 ? '+' : ''}${person.change.toFixed(2)})`}
+                  {`${normalizeValue(person.change).toFixed(2)}x (${person.change >= 0 ? '+' : ''}${(person.change * 0.3).toFixed(2)})`}
                 </TableCell>
               </TableRow>
             ))}
