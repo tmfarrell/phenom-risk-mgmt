@@ -10,7 +10,8 @@ export const mockPeople: Person[] = [
     occupation: 'Software Engineer',
     email: 'john.smith@example.com',
     phone: '(555) 123-4567',
-    avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=John'
+    avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=John',
+    change: 2.45
   },
   {
     id: '2',
@@ -21,7 +22,8 @@ export const mockPeople: Person[] = [
     occupation: 'Product Manager',
     email: 'sarah.j@example.com',
     phone: '(555) 234-5678',
-    avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Sarah'
+    avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Sarah',
+    change: 6.78
   },
   {
     id: '3',
@@ -32,7 +34,8 @@ export const mockPeople: Person[] = [
     occupation: 'Data Scientist',
     email: 'michael.c@example.com',
     phone: '(555) 345-6789',
-    avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Michael'
+    avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Michael',
+    change: -1.23
   },
   {
     id: '4',
@@ -43,7 +46,8 @@ export const mockPeople: Person[] = [
     occupation: 'Designer',
     email: 'emily.d@example.com',
     phone: '(555) 456-7890',
-    avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Emily'
+    avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Emily',
+    change: 3.45
   },
   {
     id: '5',
@@ -54,7 +58,8 @@ export const mockPeople: Person[] = [
     occupation: 'Marketing Manager',
     email: 'david.w@example.com',
     phone: '(555) 567-8901',
-    avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=David'
+    avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=David',
+    change: -2.67
   },
   {
     id: '6',
@@ -65,7 +70,8 @@ export const mockPeople: Person[] = [
     occupation: 'Software Engineer',
     email: 'lisa.b@example.com',
     phone: '(555) 678-9012',
-    avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Lisa'
+    avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Lisa',
+    change: 5.89
   },
   {
     id: '7',
@@ -76,7 +82,8 @@ export const mockPeople: Person[] = [
     occupation: 'Product Manager',
     email: 'james.t@example.com',
     phone: '(555) 789-0123',
-    avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=James'
+    avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=James',
+    change: -4.12
   },
   {
     id: '8',
@@ -87,7 +94,8 @@ export const mockPeople: Person[] = [
     occupation: 'Data Scientist',
     email: 'maria.g@example.com',
     phone: '(555) 890-1234',
-    avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Maria'
+    avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Maria',
+    change: 7.34
   },
   {
     id: '9',
@@ -98,7 +106,8 @@ export const mockPeople: Person[] = [
     occupation: 'Designer',
     email: 'robert.l@example.com',
     phone: '(555) 901-2345',
-    avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Robert'
+    avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Robert',
+    change: -0.78
   },
   {
     id: '10',
@@ -109,7 +118,8 @@ export const mockPeople: Person[] = [
     occupation: 'Marketing Manager',
     email: 'jennifer.k@example.com',
     phone: '(555) 012-3456',
-    avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Jennifer'
+    avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Jennifer',
+    change: 1.56
   }
 ];
 
