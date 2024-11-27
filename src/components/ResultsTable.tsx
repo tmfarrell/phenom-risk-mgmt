@@ -25,6 +25,11 @@ type SortConfig = {
 // Threshold for change value (can be adjusted as needed)
 const CHANGE_THRESHOLD = 5.0;
 
+// Helper function to ensure value is >= 1
+const normalizeValue = (value: number): number => {
+  return Math.abs(value) < 1 ? 1 + Math.abs(value) : Math.abs(value);
+};
+
 export const ResultsTable = ({ data, onSelectPerson }: ResultsTableProps) => {
   const [sortConfig, setSortConfig] = useState<SortConfig>(null);
   const [selectedId, setSelectedId] = useState<string | null>(null);
@@ -94,15 +99,15 @@ export const ResultsTable = ({ data, onSelectPerson }: ResultsTableProps) => {
                 <TableCell>{person.occupation}</TableCell>
                 <TableCell 
                   className={`flex items-center gap-2 ${
-                    person.change > CHANGE_THRESHOLD ? 'text-red-500' : ''
+                    normalizeValue(person.change) > CHANGE_THRESHOLD ? 'text-red-500' : ''
                   }`}
                 >
-                  {person.change.toFixed(2)}
                   {person.change > 0 ? (
                     <ArrowUp className="h-4 w-4" />
                   ) : (
                     <ArrowDown className="h-4 w-4" />
                   )}
+                  {`${normalizeValue(person.change).toFixed(2)}x (${person.change >= 0 ? '+' : ''}${person.change.toFixed(2)})`}
                 </TableCell>
               </TableRow>
             ))}
