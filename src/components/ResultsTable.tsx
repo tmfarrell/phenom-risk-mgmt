@@ -9,7 +9,7 @@ import {
 } from './ui/table';
 import { ScrollArea } from './ui/scroll-area';
 import { Person } from '../types/population';
-import { ArrowUpDown } from 'lucide-react';
+import { ArrowUpDown, ArrowUp, ArrowDown } from 'lucide-react';
 import { Button } from './ui/button';
 
 interface ResultsTableProps {
@@ -21,6 +21,9 @@ type SortConfig = {
   key: keyof Person;
   direction: 'asc' | 'desc';
 } | null;
+
+// Threshold for change value (can be adjusted as needed)
+const CHANGE_THRESHOLD = 5.0;
 
 export const ResultsTable = ({ data, onSelectPerson }: ResultsTableProps) => {
   const [sortConfig, setSortConfig] = useState<SortConfig>(null);
@@ -61,7 +64,7 @@ export const ResultsTable = ({ data, onSelectPerson }: ResultsTableProps) => {
         <Table>
           <TableHeader>
             <TableRow>
-              {['name', 'age', 'gender', 'location', 'occupation'].map((key) => (
+              {['name', 'age', 'gender', 'location', 'occupation', 'change'].map((key) => (
                 <TableHead key={key}>
                   <Button
                     variant="ghost"
@@ -89,6 +92,18 @@ export const ResultsTable = ({ data, onSelectPerson }: ResultsTableProps) => {
                 <TableCell>{person.gender}</TableCell>
                 <TableCell>{person.location}</TableCell>
                 <TableCell>{person.occupation}</TableCell>
+                <TableCell 
+                  className={`flex items-center gap-2 ${
+                    person.change > CHANGE_THRESHOLD ? 'text-red-500' : ''
+                  }`}
+                >
+                  {person.change.toFixed(2)}
+                  {person.change > 0 ? (
+                    <ArrowUp className="h-4 w-4" />
+                  ) : (
+                    <ArrowDown className="h-4 w-4" />
+                  )}
+                </TableCell>
               </TableRow>
             ))}
           </TableBody>

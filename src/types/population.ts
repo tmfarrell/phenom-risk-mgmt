@@ -8,6 +8,7 @@ export interface Person {
   email: string;
   phone: string;
   avatar: string;
+  change: number;  // New field for the floating point change
 }
 
 export interface FilterCriteria {
