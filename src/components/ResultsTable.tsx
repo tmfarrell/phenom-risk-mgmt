@@ -22,10 +22,8 @@ type SortConfig = {
   direction: 'asc' | 'desc';
 } | null;
 
-// Threshold for change value (can be adjusted as needed)
 const CHANGE_THRESHOLD = 5.0;
 
-// Helper function to ensure value is >= 1
 const normalizeValue = (value: number): number => {
   return Math.abs(value) < 1 ? 1 + Math.abs(value) : Math.abs(value);
 };
@@ -64,56 +62,91 @@ export const ResultsTable = ({ data, onSelectPerson }: ResultsTableProps) => {
   });
 
   return (
-    <div className="rounded-md border">
-      <ScrollArea className="h-[400px]">
-        <Table>
-          <TableHeader>
-            <TableRow>
-              {['name', 'age', 'gender', 'location', 'occupation', 'change'].map((key) => (
-                <TableHead key={key}>
+    <div className="rounded-md border relative">
+      <div className="flex">
+        {/* Frozen first column */}
+        <div className="z-20 bg-background border-r">
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead className="w-[200px]">
                   <Button
                     variant="ghost"
-                    onClick={() => handleSort(key as keyof Person)}
+                    onClick={() => handleSort('name')}
                     className="hover:bg-transparent"
                   >
-                    {key === 'change' ? 'Relative Risk' : key.charAt(0).toUpperCase() + key.slice(1)}
+                    Name
                     <ArrowUpDown className="ml-2 h-4 w-4" />
                   </Button>
                 </TableHead>
-              ))}
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {sortedData.map((person) => (
-              <TableRow
-                key={person.id}
-                className={`cursor-pointer hover:bg-muted/50 table-cell-fade ${
-                  selectedId === person.id ? 'bg-primary/10' : ''
-                }`}
-                onClick={() => handleSelectPerson(person)}
-              >
-                <TableCell>{person.name}</TableCell>
-                <TableCell>{person.age}</TableCell>
-                <TableCell>{person.gender}</TableCell>
-                <TableCell>{person.location}</TableCell>
-                <TableCell>{person.occupation}</TableCell>
-                <TableCell 
-                  className={`flex items-center gap-2 ${
-                    normalizeValue(person.change) > CHANGE_THRESHOLD ? 'text-red-500' : ''
-                  }`}
-                >
-                  {person.change > 0 ? (
-                    <ArrowUp className="h-4 w-4" />
-                  ) : (
-                    <ArrowDown className="h-4 w-4" />
-                  )}
-                  {`${normalizeValue(person.change).toFixed(2)}x (${person.change >= 0 ? '+' : ''}${(person.change * 0.3).toFixed(2)})`}
-                </TableCell>
               </TableRow>
-            ))}
-          </TableBody>
-        </Table>
-      </ScrollArea>
+            </TableHeader>
+            <TableBody>
+              {sortedData.map((person) => (
+                <TableRow
+                  key={`name-${person.id}`}
+                  className={`cursor-pointer hover:bg-muted/50 table-cell-fade ${
+                    selectedId === person.id ? 'bg-primary/10' : ''
+                  }`}
+                  onClick={() => handleSelectPerson(person)}
+                >
+                  <TableCell>{person.name}</TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </div>
+
+        {/* Scrollable content */}
+        <ScrollArea className="overflow-x-auto">
+          <Table>
+            <TableHeader>
+              <TableRow>
+                {['age', 'gender', 'location', 'occupation', 'change'].map((key) => (
+                  <TableHead key={key}>
+                    <Button
+                      variant="ghost"
+                      onClick={() => handleSort(key as keyof Person)}
+                      className="hover:bg-transparent whitespace-nowrap"
+                    >
+                      {key === 'change' ? 'Relative Risk' : key.charAt(0).toUpperCase() + key.slice(1)}
+                      <ArrowUpDown className="ml-2 h-4 w-4" />
+                    </Button>
+                  </TableHead>
+                ))}
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {sortedData.map((person) => (
+                <TableRow
+                  key={`content-${person.id}`}
+                  className={`cursor-pointer hover:bg-muted/50 table-cell-fade ${
+                    selectedId === person.id ? 'bg-primary/10' : ''
+                  }`}
+                  onClick={() => handleSelectPerson(person)}
+                >
+                  <TableCell>{person.age}</TableCell>
+                  <TableCell>{person.gender}</TableCell>
+                  <TableCell>{person.location}</TableCell>
+                  <TableCell>{person.occupation}</TableCell>
+                  <TableCell 
+                    className={`flex items-center gap-2 ${
+                      normalizeValue(person.change) > CHANGE_THRESHOLD ? 'text-red-500' : ''
+                    }`}
+                  >
+                    {person.change > 0 ? (
+                      <ArrowUp className="h-4 w-4" />
+                    ) : (
+                      <ArrowDown className="h-4 w-4" />
+                    )}
+                    {`${normalizeValue(person.change).toFixed(2)}x (${person.change >= 0 ? '+' : ''}${(person.change * 0.3).toFixed(2)})`}
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </ScrollArea>
+      </div>
     </div>
   );
 };
