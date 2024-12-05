@@ -5,7 +5,7 @@ import { DetailView } from '@/components/DetailView';
 import { FilterCriteria, Person } from '@/types/population';
 import { mockPeople } from '@/data/mockData';
 
-const Index = () => {
+export default function Index() {
   const [selectedPerson, setSelectedPerson] = useState<Person | null>(null);
   const [filteredData, setFilteredData] = useState<Person[]>(mockPeople);
 
@@ -52,6 +52,4 @@ const Index = () => {
       </div>
     </div>
   );
-};
-
-export default Index;
+}
