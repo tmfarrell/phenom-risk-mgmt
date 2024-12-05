@@ -37,7 +37,7 @@
 }
 
 .glass-card {
-  @apply bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg;
+  @apply bg-white/95 backdrop-blur-sm border border-gray-200 rounded-lg shadow-lg;
 }
 
 .table-cell-fade {
@@ -46,4 +46,24 @@
 
 .detail-card {
   @apply p-6 glass-card animate-fade-in;
+}
+
+/* Custom scrollbar for better UX */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #888;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #555;
 }
