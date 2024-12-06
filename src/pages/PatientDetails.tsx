@@ -1,9 +1,9 @@
-import { useParams } from 'react-router-dom';
 import { DetailView } from '@/components/DetailView';
 import { mockPeople } from '@/data/mockData';
 import { Header } from '@/components/Header';
+import { useParams } from 'react-router-dom';
 
-export default function PatientDetails() {
+export const PatientDetails = () => {
   const { id } = useParams();
   const person = mockPeople.find(p => p.id === id) || null;
 
@@ -26,4 +26,4 @@ export default function PatientDetails() {
       </div>
     </div>
   );
-}
+};
