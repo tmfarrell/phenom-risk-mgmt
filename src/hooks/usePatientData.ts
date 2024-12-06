@@ -47,27 +47,19 @@ export const usePatientData = () => {
       // Transform data to match Person interface
       const transformedData: Person[] = patients.map((patient: PatientData) => {
         const userRisks = risks.filter((risk: RiskData) => risk.user_id === patient.user_id);
-        
-        // Calculate average risk change for display
-        const avgRisk = userRisks.length > 0 
-          ? userRisks.reduce((acc: number, curr: RiskData) => acc + (curr.risk || 0), 0) / userRisks.length 
-          : 0;
 
-        // Get the primary condition (first one) for occupation field
-        const primaryCondition = userRisks.length > 0 ? userRisks[0].condition : 'None';
-
-        return {
-          id: patient.user_id.toString(),
+        const patientRisks = {
           name: patient.name || 'Unknown',
           age: patient.age || 0,
           gender: (patient.gender as 'Male' | 'Female' | 'Other') || 'Other',
-          location: patient.location || 'Unknown',
-          occupation: primaryCondition, // Using primary condition as occupation
-          email: '', // Not available in current schema
-          phone: '', // Not available in current schema
-          avatar: '', // Not available in current schema
-          change: avgRisk // Using the average risk as the change value
+          location: patient.location || 'Unknown'
         };
+
+        for (let r of userRisks) {
+          patientRisks[r.condition] = r.risk
+        };
+
+        return patientRisks ; 
       });
 
       console.log('Transformed data:', transformedData);
