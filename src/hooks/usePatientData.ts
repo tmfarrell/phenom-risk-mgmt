@@ -28,24 +28,22 @@ export const usePatientData = () => {
         throw risksError;
       }
 
-      console.log('Fetched data:', { patients, risks });
+      console.log('Raw data:', { patients, risks });
 
       // Transform data to match Person interface
       const transformedData: Person[] = patients.map((patient) => {
-        const patientRisks = risks.find(risk => risk.patient_id === patient.patient_id) || {
-          ED: null,
-          Hospitalization: null,
-          Fall: null,
-          Stroke: null,
-          MI: null,
-          CKD: null,
-          'Mental Health': null
-        };
+        const patientRisks = risks.find(risk => risk.patient_id === patient.patient_id) || {};
         
         // Combine patient data with risk data
         return {
           ...patient,
-          ...patientRisks
+          ED: patientRisks.ED || null,
+          Hospitalization: patientRisks.Hospitalization || null,
+          Fall: patientRisks.Fall || null,
+          Stroke: patientRisks.Stroke || null,
+          MI: patientRisks.MI || null,
+          CKD: patientRisks.CKD || null,
+          'Mental Health': patientRisks['Mental Health'] || null
         };
       });
 
