@@ -8,14 +8,14 @@ export interface Person {
   gender: string | null;
   location: string | null;
   // Risk factors from phenom_risk_abs
-  ED?: number;
-  Hospitalization?: number;
-  Fall?: number;
-  Stroke?: number;
-  MI?: number;
-  CKD?: number;
-  'Mental Health'?: number;
-  [key: string]: string | number | null | undefined; // Allow dynamic risk conditions
+  ED?: number | null;
+  Hospitalization?: number | null;
+  Fall?: number | null;
+  Stroke?: number | null;
+  MI?: number | null;
+  CKD?: number | null;
+  'Mental Health'?: number | null;
+  [key: string]: string | number | null | undefined;
 }
 
 export interface FilterCriteria {

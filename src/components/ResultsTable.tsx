@@ -9,7 +9,7 @@ import {
 } from './ui/table';
 import { ScrollArea } from './ui/scroll-area';
 import { Person } from '../types/population';
-import { ArrowUpDown, ArrowUp, ArrowDown } from 'lucide-react';
+import { ArrowUpDown } from 'lucide-react';
 import { Button } from './ui/button';
 import { Link } from 'react-router-dom';
 
@@ -22,15 +22,7 @@ type SortConfig = {
   direction: 'asc' | 'desc';
 } | null;
 
-const CHANGE_THRESHOLD = 5.0;
-
-const normalizeValue = (value: number): number => {
-  return Math.abs(value) < 1 ? 1 + Math.abs(value) : Math.abs(value);
-};
-
-const isNumber = (value: any): value is number => {
-  return typeof value === 'number' && !isNaN(value);
-};
+const RISK_COLUMNS = ['ED', 'Hospitalization', 'Fall', 'Stroke', 'MI', 'CKD', 'Mental Health'] as const;
 
 export const ResultsTable = ({ data }: ResultsTableProps) => {
   const [sortConfig, setSortConfig] = useState<SortConfig>(null);
@@ -54,100 +46,78 @@ export const ResultsTable = ({ data }: ResultsTableProps) => {
     const aValue = a[key];
     const bValue = b[key];
 
+    if (aValue === null || aValue === undefined) return 1;
+    if (bValue === null || bValue === undefined) return -1;
+
     if (aValue < bValue) return direction === 'asc' ? -1 : 1;
     if (aValue > bValue) return direction === 'asc' ? 1 : -1;
     return 0;
   });
 
   return (
-    <div className="rounded-md border relative">
-      <div className="flex">
-        {/* Frozen first column */}
-        <div className="z-20 bg-background border-r">
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead className="w-[200px]">
+    <div className="rounded-md border">
+      <ScrollArea className="h-[600px]">
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead className="w-[200px] sticky left-0 bg-background">
+                <Button
+                  variant="ghost"
+                  onClick={() => handleSort('name')}
+                  className="hover:bg-transparent"
+                >
+                  Name
+                  <ArrowUpDown className="ml-2 h-4 w-4" />
+                </Button>
+              </TableHead>
+              <TableHead className="w-[100px]">
+                <Button
+                  variant="ghost"
+                  onClick={() => handleSort('mrn')}
+                  className="hover:bg-transparent"
+                >
+                  MRN
+                  <ArrowUpDown className="ml-2 h-4 w-4" />
+                </Button>
+              </TableHead>
+              {RISK_COLUMNS.map((column) => (
+                <TableHead key={column}>
                   <Button
                     variant="ghost"
-                    onClick={() => handleSort('name')}
-                    className="hover:bg-transparent"
+                    onClick={() => handleSort(column as keyof Person)}
+                    className="hover:bg-transparent whitespace-nowrap"
                   >
-                    Name
+                    {column}
                     <ArrowUpDown className="ml-2 h-4 w-4" />
                   </Button>
                 </TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {sortedData.map((person) => (
-                <TableRow
-                  key={`name-${person.name}`}
-                  className="hover:bg-muted/50 table-cell-fade"
-                >
-                  <TableCell>
-                    <Link 
-                      to={`/patient/${person.name}`}
-                      className="text-blue-600 hover:text-blue-800 transition-colors"
-                    >
-                      {person.name}
-                    </Link>
-                  </TableCell>
-                </TableRow>
               ))}
-            </TableBody>
-          </Table>
-        </div>
-
-        {/* Scrollable content */}
-        <ScrollArea className="overflow-x-auto">
-          <Table>
-            <TableHeader>
-              <TableRow>
-                {['age', 'gender', 'location', 'occupation', 'change'].map((key) => (
-                  <TableHead key={key}>
-                    <Button
-                      variant="ghost"
-                      onClick={() => handleSort(key as keyof Person)}
-                      className="hover:bg-transparent whitespace-nowrap"
-                    >
-                      {key === 'change' ? 'Relative Risk' : key.charAt(0).toUpperCase() + key.slice(1)}
-                      <ArrowUpDown className="ml-2 h-4 w-4" />
-                    </Button>
-                  </TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {sortedData.map((person) => (
+              <TableRow key={person.patient_id}>
+                <TableCell className="sticky left-0 bg-background">
+                  <Link 
+                    to={`/patient/${person.name}`}
+                    className="text-blue-600 hover:text-blue-800 transition-colors"
+                  >
+                    {person.name}
+                  </Link>
+                </TableCell>
+                <TableCell>{person.mrn || 'N/A'}</TableCell>
+                {RISK_COLUMNS.map((column) => (
+                  <TableCell key={column}>
+                    {person[column] !== undefined && person[column] !== null
+                      ? Number(person[column]).toFixed(2)
+                      : 'N/A'}
+                  </TableCell>
                 ))}
               </TableRow>
-            </TableHeader>
-            <TableBody>
-              {sortedData.map((person) => (
-                <TableRow
-                  key={`content-${person.name}`}
-                  className="hover:bg-muted/50 table-cell-fade"
-                >
-                  <TableCell>{person.age}</TableCell>
-                  <TableCell>{person.gender}</TableCell>
-                  <TableCell>{person.location}</TableCell>
-                  <TableCell>{person.occupation || 'Not specified'}</TableCell>
-                  <TableCell>
-                    {isNumber(person.change) && (
-                      <div className={`flex items-center gap-2 ${
-                        normalizeValue(person.change) > CHANGE_THRESHOLD ? 'text-red-500' : ''
-                      }`}>
-                        {person.change > 0 ? (
-                          <ArrowUp className="h-4 w-4" />
-                        ) : (
-                          <ArrowDown className="h-4 w-4" />
-                        )}
-                        {`${normalizeValue(person.change).toFixed(2)}x (${person.change >= 0 ? '+' : ''}${(person.change * 0.3).toFixed(2)})`}
-                      </div>
-                    )}
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </ScrollArea>
-      </div>
+            ))}
+          </TableBody>
+        </Table>
+      </ScrollArea>
     </div>
   );
 };
