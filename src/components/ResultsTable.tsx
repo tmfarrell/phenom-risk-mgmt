@@ -11,10 +11,10 @@ import { ScrollArea } from './ui/scroll-area';
 import { Person } from '../types/population';
 import { ArrowUpDown, ArrowUp, ArrowDown } from 'lucide-react';
 import { Button } from './ui/button';
+import { Link } from 'react-router-dom';
 
 interface ResultsTableProps {
   data: Person[];
-  onSelectPerson: (person: Person) => void;
 }
 
 type SortConfig = {
@@ -28,9 +28,8 @@ const normalizeValue = (value: number): number => {
   return Math.abs(value) < 1 ? 1 + Math.abs(value) : Math.abs(value);
 };
 
-export const ResultsTable = ({ data, onSelectPerson }: ResultsTableProps) => {
+export const ResultsTable = ({ data }: ResultsTableProps) => {
   const [sortConfig, setSortConfig] = useState<SortConfig>(null);
-  const [selectedId, setSelectedId] = useState<string | null>(null);
 
   const handleSort = (key: keyof Person) => {
     setSortConfig((current) => {
@@ -42,11 +41,6 @@ export const ResultsTable = ({ data, onSelectPerson }: ResultsTableProps) => {
       }
       return { key, direction: 'asc' };
     });
-  };
-
-  const handleSelectPerson = (person: Person) => {
-    setSelectedId(person.id);
-    onSelectPerson(person);
   };
 
   const sortedData = [...data].sort((a, b) => {
@@ -85,12 +79,16 @@ export const ResultsTable = ({ data, onSelectPerson }: ResultsTableProps) => {
               {sortedData.map((person) => (
                 <TableRow
                   key={`name-${person.id}`}
-                  className={`cursor-pointer hover:bg-muted/50 table-cell-fade ${
-                    selectedId === person.id ? 'bg-primary/10' : ''
-                  }`}
-                  onClick={() => handleSelectPerson(person)}
+                  className="hover:bg-muted/50 table-cell-fade"
                 >
-                  <TableCell>{person.name}</TableCell>
+                  <TableCell>
+                    <Link 
+                      to={`/patient/${person.id}`}
+                      className="text-blue-600 hover:text-blue-800 transition-colors"
+                    >
+                      {person.name}
+                    </Link>
+                  </TableCell>
                 </TableRow>
               ))}
             </TableBody>
@@ -120,10 +118,7 @@ export const ResultsTable = ({ data, onSelectPerson }: ResultsTableProps) => {
               {sortedData.map((person) => (
                 <TableRow
                   key={`content-${person.id}`}
-                  className={`cursor-pointer hover:bg-muted/50 table-cell-fade ${
-                    selectedId === person.id ? 'bg-primary/10' : ''
-                  }`}
-                  onClick={() => handleSelectPerson(person)}
+                  className="hover:bg-muted/50 table-cell-fade"
                 >
                   <TableCell>{person.age}</TableCell>
                   <TableCell>{person.gender}</TableCell>
