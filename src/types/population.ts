@@ -1,14 +1,9 @@
 export interface Person {
-  id: string;
   name: string;
   age: number;
   gender: 'Male' | 'Female' | 'Other';
   location: string;
-  occupation: string;
-  email: string;
-  phone: string;
-  avatar: string;
-  change: number;  // New field for the floating point change
+  [key: string]: string | number; // Allow dynamic risk conditions
 }
 
 export interface FilterCriteria {

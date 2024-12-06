@@ -47,19 +47,20 @@ export const usePatientData = () => {
       // Transform data to match Person interface
       const transformedData: Person[] = patients.map((patient: PatientData) => {
         const userRisks = risks.filter((risk: RiskData) => risk.user_id === patient.user_id);
-
-        const patientRisks = {
+        
+        const patientRisks: Person = {
           name: patient.name || 'Unknown',
           age: patient.age || 0,
           gender: (patient.gender as 'Male' | 'Female' | 'Other') || 'Other',
           location: patient.location || 'Unknown'
         };
 
-        for (let r of userRisks) {
-          patientRisks[r.condition] = r.risk
-        };
+        // Add risk conditions dynamically
+        userRisks.forEach((risk) => {
+          patientRisks[risk.condition] = risk.risk;
+        });
 
-        return patientRisks ; 
+        return patientRisks;
       });
 
       console.log('Transformed data:', transformedData);
