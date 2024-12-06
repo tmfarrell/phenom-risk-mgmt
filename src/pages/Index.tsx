@@ -1,33 +1,12 @@
 import { useState } from 'react';
-import { FilterPanel } from '@/components/FilterPanel';
 import { ResultsTable } from '@/components/ResultsTable';
 import { DetailView } from '@/components/DetailView';
-import { FilterCriteria, Person } from '@/types/population';
+import { Person } from '@/types/population';
 import { mockPeople } from '@/data/mockData';
 
 export default function Index() {
   const [selectedPerson, setSelectedPerson] = useState<Person | null>(null);
   const [filteredData, setFilteredData] = useState<Person[]>(mockPeople);
-
-  const handleFilterChange = (filters: FilterCriteria) => {
-    const filtered = mockPeople.filter((person) => {
-      const ageMatch =
-        person.age >= filters.ageRange[0] && 
-        (filters.ageRange[1] === 100 ? true : person.age <= filters.ageRange[1]);
-      const genderMatch =
-        filters.gender.length === 0 || filters.gender.includes(person.gender);
-      const locationMatch =
-        filters.location.length === 0 ||
-        filters.location.includes(person.location);
-      const occupationMatch =
-        filters.occupation.length === 0 ||
-        filters.occupation.includes(person.occupation);
-
-      return ageMatch && genderMatch && locationMatch && occupationMatch;
-    });
-
-    setFilteredData(filtered);
-  };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-indigo-50 to-slate-50 p-6">
