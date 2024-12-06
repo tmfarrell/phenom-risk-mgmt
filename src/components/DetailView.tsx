@@ -1,6 +1,6 @@
 import { Person } from '../types/population';
 import { Card } from './ui/card';
-import { Avatar, AvatarFallback, AvatarImage } from './ui/avatar';
+import { Avatar, AvatarFallback } from './ui/avatar';
 
 interface DetailViewProps {
   person: Person | null;
@@ -20,12 +20,11 @@ export const DetailView = ({ person }: DetailViewProps) => {
       <Card className="detail-card">
         <div className="flex items-center space-x-4">
           <Avatar className="h-20 w-20">
-            <AvatarImage src={person.avatar || ''} />
-            <AvatarFallback>{person.name[0]}</AvatarFallback>
+            <AvatarFallback>{person.name?.[0] || '?'}</AvatarFallback>
           </Avatar>
           <div>
-            <h2 className="text-2xl font-bold">{person.name}</h2>
-            <p className="text-gray-500">{person.occupation || 'Not specified'}</p>
+            <h2 className="text-2xl font-bold">{person.name || 'Unknown'}</h2>
+            <p className="text-gray-500">Patient ID: {person.patient_id}</p>
           </div>
         </div>
       </Card>
@@ -35,30 +34,36 @@ export const DetailView = ({ person }: DetailViewProps) => {
         <div className="space-y-2">
           <div className="flex justify-between">
             <span className="text-gray-500">Age</span>
-            <span>{person.age}</span>
+            <span>{person.age || 'Not specified'}</span>
           </div>
           <div className="flex justify-between">
             <span className="text-gray-500">Gender</span>
-            <span>{person.gender}</span>
+            <span>{person.gender || 'Not specified'}</span>
           </div>
           <div className="flex justify-between">
             <span className="text-gray-500">Location</span>
-            <span>{person.location}</span>
+            <span>{person.location || 'Not specified'}</span>
+          </div>
+          <div className="flex justify-between">
+            <span className="text-gray-500">MRN</span>
+            <span>{person.mrn || 'Not specified'}</span>
+          </div>
+          <div className="flex justify-between">
+            <span className="text-gray-500">Last Visit</span>
+            <span>{person.last_visit || 'Not specified'}</span>
           </div>
         </div>
       </Card>
 
       <Card className="detail-card">
-        <h3 className="text-lg font-semibold mb-4">Contact Details</h3>
+        <h3 className="text-lg font-semibold mb-4">Risk Factors</h3>
         <div className="space-y-2">
-          <div className="flex justify-between">
-            <span className="text-gray-500">Email</span>
-            <span className="text-sm">{person.email || 'Not available'}</span>
-          </div>
-          <div className="flex justify-between">
-            <span className="text-gray-500">Phone</span>
-            <span>{person.phone || 'Not available'}</span>
-          </div>
+          {['ED', 'Hospitalization', 'Fall', 'Stroke', 'MI', 'CKD', 'Mental Health'].map((risk) => (
+            <div key={risk} className="flex justify-between">
+              <span className="text-gray-500">{risk}</span>
+              <span>{person[risk as keyof Person]?.toFixed(2) || 'Not available'}</span>
+            </div>
+          ))}
         </div>
       </Card>
     </div>
