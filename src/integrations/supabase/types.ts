@@ -18,7 +18,7 @@ export type Database = {
           location: string | null
           mrn: number | null
           name: string | null
-          user_id: number
+          patient_id: number
         }
         Insert: {
           age?: number | null
@@ -28,7 +28,7 @@ export type Database = {
           location?: string | null
           mrn?: number | null
           name?: string | null
-          user_id: number
+          patient_id: number
         }
         Update: {
           age?: number | null
@@ -38,33 +38,48 @@ export type Database = {
           location?: string | null
           mrn?: number | null
           name?: string | null
-          user_id?: number
+          patient_id?: number
         }
         Relationships: []
       }
-      phenom_risk: {
+      phenom_risk_abs: {
         Row: {
-          condition: string
-          risk: number | null
-          user_id: number
+          CKD: number | null
+          ED: number | null
+          Fall: number | null
+          Hospitalization: number | null
+          "Mental Health": number | null
+          MI: number | null
+          patient_id: number
+          Stroke: number | null
         }
         Insert: {
-          condition: string
-          risk?: number | null
-          user_id: number
+          CKD?: number | null
+          ED?: number | null
+          Fall?: number | null
+          Hospitalization?: number | null
+          "Mental Health"?: number | null
+          MI?: number | null
+          patient_id: number
+          Stroke?: number | null
         }
         Update: {
-          condition?: string
-          risk?: number | null
-          user_id?: number
+          CKD?: number | null
+          ED?: number | null
+          Fall?: number | null
+          Hospitalization?: number | null
+          "Mental Health"?: number | null
+          MI?: number | null
+          patient_id?: number
+          Stroke?: number | null
         }
         Relationships: [
           {
-            foreignKeyName: "phenom_risk_user_id_fkey"
-            columns: ["user_id"]
+            foreignKeyName: "phenom_risk_abs_patient_id_fkey"
+            columns: ["patient_id"]
             isOneToOne: false
             referencedRelation: "patient"
-            referencedColumns: ["user_id"]
+            referencedColumns: ["patient_id"]
           },
         ]
       }
