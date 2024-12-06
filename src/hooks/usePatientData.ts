@@ -48,9 +48,13 @@ export const usePatientData = () => {
       const transformedData: Person[] = patients.map((patient: PatientData) => {
         const userRisks = risks.filter((risk: RiskData) => risk.user_id === patient.user_id);
         
-        // Calculate average risk for display in the change column
-        const avgRisk = userRisks.reduce((acc: number, curr: RiskData) => acc + (curr.risk || 0), 0) / 
-                       (userRisks.length || 1);
+        // Calculate average risk change for display
+        const avgRisk = userRisks.length > 0 
+          ? userRisks.reduce((acc: number, curr: RiskData) => acc + (curr.risk || 0), 0) / userRisks.length 
+          : 0;
+
+        // Get the primary condition (first one) for occupation field
+        const primaryCondition = userRisks.length > 0 ? userRisks[0].condition : 'None';
 
         return {
           id: patient.user_id.toString(),
@@ -58,11 +62,11 @@ export const usePatientData = () => {
           age: patient.age || 0,
           gender: (patient.gender as 'Male' | 'Female' | 'Other') || 'Other',
           location: patient.location || 'Unknown',
-          occupation: userRisks.map(r => r.condition).join(', ') || 'None',
+          occupation: primaryCondition, // Using primary condition as occupation
           email: '', // Not available in current schema
           phone: '', // Not available in current schema
           avatar: '', // Not available in current schema
-          change: avgRisk || 0
+          change: avgRisk // Using the average risk as the change value
         };
       });
 
