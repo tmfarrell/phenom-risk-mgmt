@@ -1,6 +1,17 @@
 import React from 'react';
+import { supabase } from '@/integrations/supabase/client';
+import { Button } from './ui/button';
+import { LogOut } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 
 export const Header = ({ title }: { title: string }) => {
+  const navigate = useNavigate();
+
+  const handleLogout = async () => {
+    await supabase.auth.signOut();
+    navigate('/login');
+  };
+
   return (
     <div className="w-full">
       <div className="w-full h-[200px] relative mb-6">
@@ -15,6 +26,14 @@ export const Header = ({ title }: { title: string }) => {
             <p className="text-white mt-2">Medicare Advantage Plan (All)</p>
           )}
         </div>
+        <Button
+          variant="ghost"
+          size="icon"
+          className="absolute top-4 right-4 text-white hover:text-white/80"
+          onClick={handleLogout}
+        >
+          <LogOut className="h-5 w-5" />
+        </Button>
       </div>
     </div>
   );
