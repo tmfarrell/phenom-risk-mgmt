@@ -21,9 +21,11 @@ export interface Person {
   [key: string]: string | number | null | undefined;
 }
 
+/* 
 export interface FilterCriteria {
   ageRange: [number, number];
   gender: string[];
   location: string[];
   occupation: string[];
 }
+*/ 
