@@ -32,29 +32,21 @@ export const usePatientData = () => {
 
       // Transform data to match Person interface
       const transformedData: Person[] = patients.map((patient) => {
-        const patientRisks = risks.find(risk => risk.patient_id === patient.patient_id) || {};
+        const patientRisks = risks.find(risk => risk.patient_id === patient.patient_id) || {
+          ED: null,
+          Hospitalization: null,
+          Fall: null,
+          Stroke: null,
+          MI: null,
+          CKD: null,
+          'Mental Health': null
+        };
         
         // Combine patient data with risk data
-        const personData: Person = {
-          patient_id: patient.patient_id,
-          name: patient.name,
-          mrn: patient.mrn,
-          dob: patient.dob,
-          last_visit: patient.last_visit,
-          age: patient.age,
-          gender: patient.gender,
-          location: patient.location,
-          // Add risk factors
-          ED: patientRisks.ED,
-          Hospitalization: patientRisks.Hospitalization,
-          Fall: patientRisks.Fall,
-          Stroke: patientRisks.Stroke,
-          MI: patientRisks.MI,
-          CKD: patientRisks.CKD,
-          'Mental Health': patientRisks['Mental Health']
+        return {
+          ...patient,
+          ...patientRisks
         };
-
-        return personData;
       });
 
       console.log('Transformed data:', transformedData);

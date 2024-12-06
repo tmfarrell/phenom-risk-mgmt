@@ -15,6 +15,13 @@ export const DetailView = ({ person }: DetailViewProps) => {
     );
   }
 
+  const formatRiskValue = (value: number | string | null | undefined) => {
+    if (typeof value === 'number') {
+      return value.toFixed(2);
+    }
+    return 'Not available';
+  };
+
   return (
     <div className="space-y-4">
       <Card className="detail-card">
@@ -61,7 +68,7 @@ export const DetailView = ({ person }: DetailViewProps) => {
           {['ED', 'Hospitalization', 'Fall', 'Stroke', 'MI', 'CKD', 'Mental Health'].map((risk) => (
             <div key={risk} className="flex justify-between">
               <span className="text-gray-500">{risk}</span>
-              <span>{person[risk as keyof Person]?.toFixed(2) || 'Not available'}</span>
+              <span>{formatRiskValue(person[risk as keyof Person])}</span>
             </div>
           ))}
         </div>
