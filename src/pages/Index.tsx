@@ -35,8 +35,6 @@ export default function Index() {
         <h1 className="text-3xl font-bold mb-6">Population Dashboard</h1>
         
         <div className="flex flex-col space-y-6">
-          <FilterPanel onFilterChange={handleFilterChange} />
-          
           <div className="space-y-6">
             <div className="glass-card p-6">
               <h2 className="text-lg font-semibold mb-4">Results</h2>
