@@ -3,7 +3,12 @@ export interface Person {
   age: number;
   gender: 'Male' | 'Female' | 'Other';
   location: string;
-  [key: string]: string | number; // Allow dynamic risk conditions
+  occupation?: string;
+  email?: string;
+  phone?: string;
+  avatar?: string;
+  change?: number;
+  [key: string]: string | number | undefined; // Allow dynamic risk conditions
 }
 
 export interface FilterCriteria {

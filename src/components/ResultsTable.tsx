@@ -28,6 +28,10 @@ const normalizeValue = (value: number): number => {
   return Math.abs(value) < 1 ? 1 + Math.abs(value) : Math.abs(value);
 };
 
+const isNumber = (value: any): value is number => {
+  return typeof value === 'number' && !isNaN(value);
+};
+
 export const ResultsTable = ({ data }: ResultsTableProps) => {
   const [sortConfig, setSortConfig] = useState<SortConfig>(null);
 
@@ -78,12 +82,12 @@ export const ResultsTable = ({ data }: ResultsTableProps) => {
             <TableBody>
               {sortedData.map((person) => (
                 <TableRow
-                  key={`name-${person.id}`}
+                  key={`name-${person.name}`}
                   className="hover:bg-muted/50 table-cell-fade"
                 >
                   <TableCell>
                     <Link 
-                      to={`/patient/${person.id}`}
+                      to={`/patient/${person.name}`}
                       className="text-blue-600 hover:text-blue-800 transition-colors"
                     >
                       {person.name}
@@ -117,24 +121,26 @@ export const ResultsTable = ({ data }: ResultsTableProps) => {
             <TableBody>
               {sortedData.map((person) => (
                 <TableRow
-                  key={`content-${person.id}`}
+                  key={`content-${person.name}`}
                   className="hover:bg-muted/50 table-cell-fade"
                 >
                   <TableCell>{person.age}</TableCell>
                   <TableCell>{person.gender}</TableCell>
                   <TableCell>{person.location}</TableCell>
-                  <TableCell>{person.occupation}</TableCell>
-                  <TableCell 
-                    className={`flex items-center gap-2 ${
-                      normalizeValue(person.change) > CHANGE_THRESHOLD ? 'text-red-500' : ''
-                    }`}
-                  >
-                    {person.change > 0 ? (
-                      <ArrowUp className="h-4 w-4" />
-                    ) : (
-                      <ArrowDown className="h-4 w-4" />
+                  <TableCell>{person.occupation || 'Not specified'}</TableCell>
+                  <TableCell>
+                    {isNumber(person.change) && (
+                      <div className={`flex items-center gap-2 ${
+                        normalizeValue(person.change) > CHANGE_THRESHOLD ? 'text-red-500' : ''
+                      }`}>
+                        {person.change > 0 ? (
+                          <ArrowUp className="h-4 w-4" />
+                        ) : (
+                          <ArrowDown className="h-4 w-4" />
+                        )}
+                        {`${normalizeValue(person.change).toFixed(2)}x (${person.change >= 0 ? '+' : ''}${(person.change * 0.3).toFixed(2)})`}
+                      </div>
                     )}
-                    {`${normalizeValue(person.change).toFixed(2)}x (${person.change >= 0 ? '+' : ''}${(person.change * 0.3).toFixed(2)})`}
                   </TableCell>
                 </TableRow>
               ))}
