@@ -9,7 +9,7 @@ export default function PatientDetails() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-indigo-50 to-slate-50">
-      <Header title="Patient Details" />
+      <Header title="PhenOM Risk Management Dashboard" />
       <div className="p-6">
         <div className="max-w-[1600px] mx-auto">
           <div className="flex items-center justify-end mb-6">
@@ -20,6 +20,7 @@ export default function PatientDetails() {
               ← Back to Dashboard
             </a>
           </div>
+          <h2 className="text-2xl font-semibold mb-4 text-left">Patient Details</h2>
           <DetailView person={person} />
         </div>
       </div>
