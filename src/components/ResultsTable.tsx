@@ -110,7 +110,7 @@ export const ResultsTable = ({ data }: ResultsTableProps) => {
                 <TableRow key={person.patient_id}>
                   <TableCell className="sticky left-0 bg-background z-20 shadow-[2px_0_5px_-2px_rgba(0,0,0,0.1)]">
                     <Link 
-                      to={`/patient/${person.name}`}
+                      to={`/patient/${person.patient_id}`}
                       className="text-blue-600 hover:text-blue-800 transition-colors"
                     >
                       {person.name}
