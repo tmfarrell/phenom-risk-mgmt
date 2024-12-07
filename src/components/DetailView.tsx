@@ -34,6 +34,10 @@ export const DetailView = ({ person }: DetailViewProps) => {
 
   const riskFactors = ['ED', 'Hospitalization', 'Fall', 'Stroke', 'MI', 'CKD', 'Mental Health'];
 
+  const isHighRisk = (value: number | string | null | undefined) => {
+    return typeof value === 'number' && value > 5;
+  };
+
   return (
     <div className="space-y-4">
       <Card className="detail-card">
@@ -89,8 +93,12 @@ export const DetailView = ({ person }: DetailViewProps) => {
               {riskFactors.map((risk) => (
                 <TableRow key={risk}>
                   <TableCell className="font-medium">{risk}</TableCell>
-                  <TableCell>{formatRiskValue(oneYearRisks?.[risk as keyof Person])}</TableCell>
-                  <TableCell>{formatRiskValue(fiveYearRisks?.[risk as keyof Person])}</TableCell>
+                  <TableCell className={isHighRisk(oneYearRisks?.[risk as keyof Person]) ? 'bg-red-100' : ''}>
+                    {formatRiskValue(oneYearRisks?.[risk as keyof Person])}
+                  </TableCell>
+                  <TableCell className={isHighRisk(fiveYearRisks?.[risk as keyof Person]) ? 'bg-red-100' : ''}>
+                    {formatRiskValue(fiveYearRisks?.[risk as keyof Person])}
+                  </TableCell>
                 </TableRow>
               ))}
             </TableBody>
