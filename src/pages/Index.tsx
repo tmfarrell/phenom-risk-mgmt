@@ -19,11 +19,15 @@ export default function Index() {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedTimeframe, setSelectedTimeframe] = useState<string>('');
 
-  // Get unique timeframes from the data
+  // Get unique timeframes from the data and ensure they are valid numbers
   const timeframes = patientData 
     ? [...new Set(patientData.map(p => p.prediction_timeframe_yrs))]
-      .filter(Boolean)
-      .sort((a, b) => Number(a) - Number(b))
+      .filter((timeframe): timeframe is number => 
+        timeframe !== null && 
+        timeframe !== undefined && 
+        !isNaN(Number(timeframe))
+      )
+      .sort((a, b) => a - b)
     : [];
 
   const filteredData = patientData?.filter((patient: Person) => {
@@ -84,9 +88,12 @@ export default function Index() {
                       <SelectValue placeholder="Select timeframe" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="">All timeframes</SelectItem>
+                      <SelectItem value="all">All timeframes</SelectItem>
                       {timeframes.map((timeframe) => (
-                        <SelectItem key={timeframe} value={String(timeframe)}>
+                        <SelectItem 
+                          key={timeframe} 
+                          value={timeframe.toString()}
+                        >
                           {timeframe} years
                         </SelectItem>
                       ))}
