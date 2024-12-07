@@ -21,7 +21,7 @@ export default function Index() {
 
   // Get unique timeframes from the data and ensure they are valid numbers
   const timeframes = patientData 
-    ? [...new Set(patientData.map(p => p.prediction_timeframe_yrs))]
+    ? [...new Set([5, ...patientData.map(p => p.prediction_timeframe_yrs)])]
       .filter((timeframe): timeframe is number => 
         timeframe !== null && 
         timeframe !== undefined && 
@@ -38,9 +38,9 @@ export default function Index() {
     const searchMatches = nameMatch || mrnMatch;
 
     // Then filter by selected timeframe
-    const timeframeMatches = selectedTimeframe 
-      ? patient.prediction_timeframe_yrs === Number(selectedTimeframe)
-      : true;
+    const timeframeMatches = selectedTimeframe === 'all' 
+      ? true 
+      : patient.prediction_timeframe_yrs === Number(selectedTimeframe);
 
     return searchMatches && timeframeMatches;
   });
