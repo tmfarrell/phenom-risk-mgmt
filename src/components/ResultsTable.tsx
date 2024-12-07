@@ -19,12 +19,11 @@ import {
   getFilteredRowModel,
   ColumnFiltersState,
   getPaginationRowModel,
-  VisibilityState,
 } from '@tanstack/react-table';
 import { useState } from 'react';
 import { Button } from './ui/button';
+import { ArrowUpDown } from 'lucide-react';
 import { RISK_COLUMNS, isHighRisk } from './table/tableConstants';
-import { ColumnHeader } from './table/ColumnHeader';
 
 interface ResultsTableProps {
   data: Person[];
@@ -33,12 +32,20 @@ interface ResultsTableProps {
 export const ResultsTable = ({ data }: ResultsTableProps) => {
   const [sorting, setSorting] = useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
-  const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({});
 
   const columns: ColumnDef<Person>[] = [
     {
       accessorKey: 'name',
-      header: ({ column }) => <ColumnHeader column={column} title="Name" />,
+      header: ({ column }) => (
+        <Button
+          variant="ghost"
+          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+          className="hover:bg-transparent"
+        >
+          Name
+          <ArrowUpDown className="ml-2 h-4 w-4" />
+        </Button>
+      ),
       cell: ({ row }) => (
         <Link
           to={`/patient/${row.original.patient_id}`}
@@ -51,19 +58,44 @@ export const ResultsTable = ({ data }: ResultsTableProps) => {
     },
     {
       accessorKey: 'mrn',
-      header: ({ column }) => <ColumnHeader column={column} title="MRN" />,
+      header: ({ column }) => (
+        <Button
+          variant="ghost"
+          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+          className="hover:bg-transparent"
+        >
+          MRN
+          <ArrowUpDown className="ml-2 h-4 w-4" />
+        </Button>
+      ),
       cell: ({ row }) => row.getValue('mrn') || 'N/A',
       enableColumnFilter: true,
     },
     {
       accessorKey: 'last_visit',
-      header: ({ column }) => <ColumnHeader column={column} title="Last Visit" />,
+      header: ({ column }) => (
+        <Button
+          variant="ghost"
+          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+          className="hover:bg-transparent whitespace-nowrap"
+        >
+          Last Visit
+          <ArrowUpDown className="ml-2 h-4 w-4" />
+        </Button>
+      ),
       cell: ({ row }) => row.getValue('last_visit') || 'N/A',
     },
     ...RISK_COLUMNS.map((column): ColumnDef<Person> => ({
       accessorKey: column,
       header: ({ column: tableColumn }) => (
-        <ColumnHeader column={tableColumn} title={column} />
+        <Button
+          variant="ghost"
+          onClick={() => tableColumn.toggleSorting(tableColumn.getIsSorted() === "asc")}
+          className="hover:bg-transparent whitespace-nowrap"
+        >
+          {column}
+          <ArrowUpDown className="ml-2 h-4 w-4" />
+        </Button>
       ),
       cell: ({ row }) => {
         const value = row.getValue(column);
@@ -88,11 +120,9 @@ export const ResultsTable = ({ data }: ResultsTableProps) => {
     onColumnFiltersChange: setColumnFilters,
     getFilteredRowModel: getFilteredRowModel(),
     getPaginationRowModel: getPaginationRowModel(),
-    onColumnVisibilityChange: setColumnVisibility,
     state: {
       sorting,
       columnFilters,
-      columnVisibility,
     },
     initialState: {
       pagination: {
