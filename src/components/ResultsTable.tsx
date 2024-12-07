@@ -134,7 +134,7 @@ export const ResultsTable = ({ data }: ResultsTableProps) => {
   return (
     <div className="rounded-md border">
       <ScrollArea className="h-[600px] overflow-x-auto">
-        <div className="min-w-[1200px]">
+        <div className="w-full min-w-[1200px]">
           <Table>
             <TableHeader>
               <TableRow className="bg-blue-50">
