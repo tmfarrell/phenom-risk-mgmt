@@ -81,7 +81,7 @@ export const TableControls = ({
               aria-expanded={open}
               className="w-48 justify-between"
             >
-              Select columns
+              Risk factors
               <Badge variant="secondary" className="ml-2">
                 {currentSelectedColumns.length}
               </Badge>
