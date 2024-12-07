@@ -15,6 +15,7 @@ import {
   CommandGroup,
   CommandInput,
   CommandItem,
+  CommandList,
 } from '../ui/command';
 import {
   Popover,
@@ -88,30 +89,32 @@ export const TableControls = ({
           </PopoverTrigger>
           <PopoverContent className="w-48 p-0">
             <Command>
-              <CommandInput placeholder="Search columns..." className="h-9" />
-              <CommandEmpty>No column found.</CommandEmpty>
-              <CommandGroup>
-                {RISK_COLUMNS.map((column) => (
-                  <CommandItem
-                    key={column}
-                    value={column}
-                    onSelect={() => {
-                      const newSelection = currentSelectedColumns.includes(column)
-                        ? currentSelectedColumns.filter((c) => c !== column)
-                        : [...currentSelectedColumns, column];
-                      onRiskColumnsChange(newSelection);
-                    }}
-                  >
-                    <Check
-                      className={cn(
-                        "mr-2 h-4 w-4",
-                        currentSelectedColumns.includes(column) ? "opacity-100" : "opacity-0"
-                      )}
-                    />
-                    {column}
-                  </CommandItem>
-                ))}
-              </CommandGroup>
+              <CommandInput placeholder="Search columns..." />
+              <CommandList>
+                <CommandEmpty>No column found.</CommandEmpty>
+                <CommandGroup>
+                  {RISK_COLUMNS.map((column) => (
+                    <CommandItem
+                      key={column}
+                      value={column}
+                      onSelect={() => {
+                        const newSelection = currentSelectedColumns.includes(column)
+                          ? currentSelectedColumns.filter((c) => c !== column)
+                          : [...currentSelectedColumns, column];
+                        onRiskColumnsChange(newSelection);
+                      }}
+                    >
+                      <Check
+                        className={cn(
+                          "mr-2 h-4 w-4",
+                          currentSelectedColumns.includes(column) ? "opacity-100" : "opacity-0"
+                        )}
+                      />
+                      {column}
+                    </CommandItem>
+                  ))}
+                </CommandGroup>
+              </CommandList>
             </Command>
           </PopoverContent>
         </Popover>
