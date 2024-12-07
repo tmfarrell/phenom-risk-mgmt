@@ -108,7 +108,7 @@ export const TableControls = ({
                 className="w-48 justify-between"
                 id="risk-factors"
               >
-                Risk factors
+                Select conditions
                 <Badge variant="secondary" className="ml-2">
                   {currentSelectedColumns.length}
                 </Badge>
@@ -116,7 +116,7 @@ export const TableControls = ({
             </PopoverTrigger>
             <PopoverContent className="w-48 p-0">
               <Command>
-                <CommandInput placeholder="Search columns..." />
+                <CommandInput placeholder="Search conditions..." />
                 <CommandList>
                   <CommandEmpty>No column found.</CommandEmpty>
                   <CommandGroup>
@@ -148,15 +148,19 @@ export const TableControls = ({
         </div>
       </div>
 
-      <div className="relative max-w-md">
-        <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500 h-4 w-4" />
-        <Input
-          type="text"
-          placeholder="Search by name or MRN"
-          value={searchQuery}
-          onChange={(e) => onSearchChange(e.target.value)}
-          className="pl-9"
-        />
+      <div className="flex flex-col gap-2">
+        <Label htmlFor="search" className="text-center text-muted-foreground">Search</Label>
+        <div className="relative">
+          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500 h-4 w-4" />
+          <Input
+            id="search"
+            type="text"
+            placeholder="Patient name or MRN"
+            value={searchQuery}
+            onChange={(e) => onSearchChange(e.target.value)}
+            className="pl-9"
+          />
+        </div>
       </div>
     </div>
   );
