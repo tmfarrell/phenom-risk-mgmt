@@ -65,8 +65,8 @@ export const ResultsTable = ({ data }: ResultsTableProps) => {
         <div className="overflow-x-auto">
           <Table>
             <TableHeader>
-              <TableRow>
-                <TableHead className="w-[200px] sticky left-0 bg-background z-20 shadow-[2px_0_5px_-2px_rgba(0,0,0,0.1)]">
+              <TableRow className="bg-blue-50">
+                <TableHead className="w-[200px] sticky left-0 bg-blue-50 z-20 shadow-[2px_0_5px_-2px_rgba(0,0,0,0.1)]">
                   <Button
                     variant="ghost"
                     onClick={() => handleSort('name')}
