@@ -60,7 +60,7 @@ export const TableControls = ({
     <div className="flex justify-between items-center mb-6">
       <div className="flex gap-8">
         <div className="flex flex-col gap-2">
-          <Label htmlFor="risk-type" className="text-left text-muted-foreground">Risk Type</Label>
+          <Label htmlFor="risk-type" className="text-center text-muted-foreground">Risk Type</Label>
           <Select
             value={selectedRiskType}
             onValueChange={(value: 'relative' | 'absolute') => onRiskTypeChange(value)}
@@ -76,7 +76,7 @@ export const TableControls = ({
         </div>
 
         <div className="flex flex-col gap-2">
-          <Label htmlFor="risk-timeframe" className="text-left text-muted-foreground">Risk Timeframe</Label>
+          <Label htmlFor="risk-timeframe" className="text-center text-muted-foreground">Risk Timeframe</Label>
           <Select
             value={selectedTimeframe}
             onValueChange={onTimeframeChange}
@@ -98,7 +98,7 @@ export const TableControls = ({
         </div>
 
         <div className="flex flex-col gap-2">
-          <Label htmlFor="risk-factors" className="text-left text-muted-foreground">Risk Factors</Label>
+          <Label htmlFor="risk-factors" className="text-center text-muted-foreground">Risk Factors</Label>
           <Popover open={open} onOpenChange={setOpen}>
             <PopoverTrigger asChild>
               <Button
