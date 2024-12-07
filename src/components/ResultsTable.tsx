@@ -103,7 +103,7 @@ export const ResultsTable = ({ data, visibleRiskColumns }: ResultsTableProps) =>
     cell: ({ row }) => {
       const value = row.getValue(column);
       return (
-        <div className={isHighRisk(value as number) ? 'bg-red-100' : ''}>
+        <div className={`${isHighRisk(value as number) ? 'bg-red-100' : ''} whitespace-nowrap px-2`}>
           {value !== undefined && value !== null
             ? Number(value).toFixed(2)
             : 'N/A'}
@@ -136,52 +136,54 @@ export const ResultsTable = ({ data, visibleRiskColumns }: ResultsTableProps) =>
   });
 
   return (
-    <div className="rounded-md border">
-      <ScrollArea className="h-[600px] overflow-x-auto">
-        <div className="w-full min-w-[1200px]">
-          <Table>
-            <TableHeader>
-              <TableRow className="bg-blue-50">
-                {table.getHeaderGroups().map((headerGroup) => (
-                  headerGroup.headers.map((header, index) => (
-                    <TableHead
-                      key={header.id}
-                      className={index === 0 ? 'sticky left-0 bg-blue-50 z-20 shadow-[2px_0_5px_-2px_rgba(0,0,0,0.1)]' : ''}
-                    >
-                      {header.isPlaceholder
-                        ? null
-                        : flexRender(
-                            header.column.columnDef.header,
-                            header.getContext()
-                          )}
-                    </TableHead>
-                  ))
-                ))}
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {table.getRowModel().rows?.length ? (
-                table.getRowModel().rows.map((row) => (
-                  <TableRow key={row.id}>
-                    {row.getVisibleCells().map((cell, index) => (
-                      <TableCell
-                        key={cell.id}
-                        className={index === 0 ? 'sticky left-0 bg-background z-20 shadow-[2px_0_5px_-2px_rgba(0,0,0,0.1)]' : ''}
+    <div className="w-full rounded-md border">
+      <ScrollArea className="h-[600px]" type="always">
+        <div className="min-w-full inline-block align-middle">
+          <div className="overflow-x-auto">
+            <Table>
+              <TableHeader>
+                <TableRow className="bg-blue-50">
+                  {table.getHeaderGroups().map((headerGroup) => (
+                    headerGroup.headers.map((header, index) => (
+                      <TableHead
+                        key={header.id}
+                        className={index === 0 ? 'sticky left-0 bg-blue-50 z-20 shadow-[2px_0_5px_-2px_rgba(0,0,0,0.1)]' : ''}
                       >
-                        {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                      </TableCell>
-                    ))}
-                  </TableRow>
-                ))
-              ) : (
-                <TableRow>
-                  <TableCell colSpan={columns.length} className="h-24 text-center">
-                    No results.
-                  </TableCell>
+                        {header.isPlaceholder
+                          ? null
+                          : flexRender(
+                              header.column.columnDef.header,
+                              header.getContext()
+                            )}
+                      </TableHead>
+                    ))
+                  ))}
                 </TableRow>
-              )}
-            </TableBody>
-          </Table>
+              </TableHeader>
+              <TableBody>
+                {table.getRowModel().rows?.length ? (
+                  table.getRowModel().rows.map((row) => (
+                    <TableRow key={row.id}>
+                      {row.getVisibleCells().map((cell, index) => (
+                        <TableCell
+                          key={cell.id}
+                          className={index === 0 ? 'sticky left-0 bg-background z-20 shadow-[2px_0_5px_-2px_rgba(0,0,0,0.1)]' : ''}
+                        >
+                          {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                        </TableCell>
+                      ))}
+                    </TableRow>
+                  ))
+                ) : (
+                  <TableRow>
+                    <TableCell colSpan={columns.length} className="h-24 text-center">
+                      No results.
+                    </TableCell>
+                  </TableRow>
+                )}
+              </TableBody>
+            </Table>
+          </div>
         </div>
       </ScrollArea>
       <div className="flex items-center justify-between space-x-2 p-4">
