@@ -18,7 +18,7 @@ export const usePatientData = () => {
         throw patientsError;
       }
 
-      // Fetch risk data - Updated table name from phenom_risk_abs to phenom_risk_rel
+      // Fetch risk data
       const { data: risks, error: risksError } = await supabase
         .from('phenom_risk_rel')
         .select('*');
@@ -31,32 +31,38 @@ export const usePatientData = () => {
       console.log('Raw data:', { patients, risks });
 
       // Transform data to match Person interface
-      const transformedData: Person[] = patients.map((patient) => {
-        const patientRisks = risks.find(risk => risk.patient_id === patient.patient_id) || {
-          ED: null,
-          Hospitalization: null,
-          Fall: null,
-          Stroke: null,
-          MI: null,
-          CKD: null,
-          'Mental Health': null,
-          recorded_date: null,
-          prediction_timeframe_yrs: null
-        };
+      const transformedData: Person[] = patients.flatMap((patient) => {
+        const patientRisks = risks.filter(risk => risk.patient_id === patient.patient_id);
         
-        // Combine patient data with risk data
-        return {
+        // If no risks found for patient, return single entry with null values
+        if (patientRisks.length === 0) {
+          return [{
+            ...patient,
+            ED: null,
+            Hospitalization: null,
+            Fall: null,
+            Stroke: null,
+            MI: null,
+            CKD: null,
+            'Mental Health': null,
+            recorded_date: null,
+            prediction_timeframe_yrs: null
+          }];
+        }
+        
+        // Return an entry for each risk timeframe
+        return patientRisks.map(risk => ({
           ...patient,
-          ED: patientRisks.ED,
-          Hospitalization: patientRisks.Hospitalization,
-          Fall: patientRisks.Fall,
-          Stroke: patientRisks.Stroke,
-          MI: patientRisks.MI,
-          CKD: patientRisks.CKD,
-          'Mental Health': patientRisks['Mental Health'],
-          recorded_date: patientRisks.recorded_date,
-          prediction_timeframe_yrs: patientRisks.prediction_timeframe_yrs
-        };
+          ED: risk.ED,
+          Hospitalization: risk.Hospitalization,
+          Fall: risk.Fall,
+          Stroke: risk.Stroke,
+          MI: risk.MI,
+          CKD: risk.CKD,
+          'Mental Health': risk['Mental Health'],
+          recorded_date: risk.recorded_date,
+          prediction_timeframe_yrs: risk.prediction_timeframe_yrs
+        }));
       });
 
       console.log('Transformed data:', transformedData);
