@@ -2,22 +2,22 @@ import { ResultsTable } from '@/components/ResultsTable';
 import { Header } from '@/components/Header';
 import { usePatientData } from '@/hooks/usePatientData';
 import { Skeleton } from '@/components/ui/skeleton';
-import { Input } from '@/components/ui/input';
-import { Search } from 'lucide-react';
 import { useState } from 'react';
 import { Person } from '@/types/population';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+import { TableControls } from '@/components/table/TableControls';
+import { RISK_COLUMNS } from '@/components/table/tableConstants';
 
 export default function Index() {
   const { data: patientData, isLoading, error } = usePatientData();
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedTimeframe, setSelectedTimeframe] = useState<string>('1');
+  const [selectedRiskColumns, setSelectedRiskColumns] = useState<string[]>([
+    'ED',
+    'Hospitalization',
+    'Fall',
+    'Stroke',
+    'MI',
+  ]);
 
   // Get unique timeframes from the data and ensure they are valid numbers
   const timeframes = [1, 5];
@@ -58,38 +58,15 @@ export default function Index() {
         <div className="max-w-[1600px] mx-auto">
           <div className="flex flex-col space-y-6">
             <div className="glass-card p-6">
-              <div className="flex justify-between items-center mb-6">
-                <div className="w-48">
-                  <Select
-                    value={selectedTimeframe}
-                    onValueChange={setSelectedTimeframe}
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select timeframe" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {timeframes.map((timeframe) => (
-                        <SelectItem 
-                          key={timeframe} 
-                          value={timeframe.toString()}
-                        >
-                          {timeframe} years
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div className="relative max-w-md">
-                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500 h-4 w-4" />
-                  <Input
-                    type="text"
-                    placeholder="Search by name or MRN"
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                    className="pl-9"
-                  />
-                </div>
-              </div>
+              <TableControls
+                searchQuery={searchQuery}
+                onSearchChange={setSearchQuery}
+                selectedTimeframe={selectedTimeframe}
+                onTimeframeChange={setSelectedTimeframe}
+                selectedRiskColumns={selectedRiskColumns}
+                onRiskColumnsChange={setSelectedRiskColumns}
+                timeframes={timeframes}
+              />
               {isLoading ? (
                 <div className="space-y-3">
                   <Skeleton className="h-[40px] w-full" />
@@ -98,6 +75,7 @@ export default function Index() {
               ) : (
                 <ResultsTable
                   data={filteredData || []}
+                  visibleRiskColumns={selectedRiskColumns}
                 />
               )}
             </div>

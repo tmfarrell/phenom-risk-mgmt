@@ -27,13 +27,14 @@ import { RISK_COLUMNS, isHighRisk } from './table/tableConstants';
 
 interface ResultsTableProps {
   data: Person[];
+  visibleRiskColumns: string[];
 }
 
-export const ResultsTable = ({ data }: ResultsTableProps) => {
+export const ResultsTable = ({ data, visibleRiskColumns }: ResultsTableProps) => {
   const [sorting, setSorting] = useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
 
-  const columns: ColumnDef<Person>[] = [
+  const baseColumns: ColumnDef<Person>[] = [
     {
       accessorKey: 'name',
       header: ({ column }) => (
@@ -85,31 +86,34 @@ export const ResultsTable = ({ data }: ResultsTableProps) => {
       ),
       cell: ({ row }) => row.getValue('last_visit') || 'N/A',
     },
-    ...RISK_COLUMNS.map((column): ColumnDef<Person> => ({
-      accessorKey: column,
-      header: ({ column: tableColumn }) => (
-        <Button
-          variant="ghost"
-          onClick={() => tableColumn.toggleSorting(tableColumn.getIsSorted() === "asc")}
-          className="hover:bg-transparent whitespace-nowrap"
-        >
-          {column}
-          <ArrowUpDown className="ml-2 h-4 w-4" />
-        </Button>
-      ),
-      cell: ({ row }) => {
-        const value = row.getValue(column);
-        return (
-          <div className={isHighRisk(value as number) ? 'bg-red-100' : ''}>
-            {value !== undefined && value !== null
-              ? Number(value).toFixed(2)
-              : 'N/A'}
-          </div>
-        );
-      },
-      enableColumnFilter: true,
-    })),
   ];
+
+  const riskColumns: ColumnDef<Person>[] = visibleRiskColumns.map((column): ColumnDef<Person> => ({
+    accessorKey: column,
+    header: ({ column: tableColumn }) => (
+      <Button
+        variant="ghost"
+        onClick={() => tableColumn.toggleSorting(tableColumn.getIsSorted() === "asc")}
+        className="hover:bg-transparent whitespace-nowrap"
+      >
+        {column}
+        <ArrowUpDown className="ml-2 h-4 w-4" />
+      </Button>
+    ),
+    cell: ({ row }) => {
+      const value = row.getValue(column);
+      return (
+        <div className={isHighRisk(value as number) ? 'bg-red-100' : ''}>
+          {value !== undefined && value !== null
+            ? Number(value).toFixed(2)
+            : 'N/A'}
+        </div>
+      );
+    },
+    enableColumnFilter: true,
+  }));
+
+  const columns = [...baseColumns, ...riskColumns];
 
   const table = useReactTable({
     data,
