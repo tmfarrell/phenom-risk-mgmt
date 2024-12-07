@@ -26,6 +26,7 @@ import { cn } from '@/lib/utils';
 import { Button } from '../ui/button';
 import { useState } from 'react';
 import { Check } from 'lucide-react';
+import { Label } from '../ui/label';
 
 interface TableControlsProps {
   searchQuery: string;
@@ -57,38 +58,44 @@ export const TableControls = ({
 
   return (
     <div className="flex justify-between items-center mb-6">
-      <div className="flex gap-4">
-        <Select
-          value={selectedRiskType}
-          onValueChange={(value: 'relative' | 'absolute') => onRiskTypeChange(value)}
-        >
-          <SelectTrigger className="w-48">
-            <SelectValue placeholder="Select risk type" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="relative">Relative</SelectItem>
-            <SelectItem value="absolute">Absolute</SelectItem>
-          </SelectContent>
-        </Select>
+      <div className="flex gap-8">
+        <div className="flex flex-col gap-2">
+          <Label htmlFor="risk-type">Risk Type</Label>
+          <Select
+            value={selectedRiskType}
+            onValueChange={(value: 'relative' | 'absolute') => onRiskTypeChange(value)}
+          >
+            <SelectTrigger id="risk-type" className="w-48">
+              <SelectValue placeholder="Select risk type" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="relative">Relative</SelectItem>
+              <SelectItem value="absolute">Absolute</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
 
-        <Select
-          value={selectedTimeframe}
-          onValueChange={onTimeframeChange}
-        >
-          <SelectTrigger className="w-48">
-            <SelectValue placeholder="Select timeframe" />
-          </SelectTrigger>
-          <SelectContent>
-            {timeframes.map((timeframe) => (
-              <SelectItem 
-                key={timeframe} 
-                value={timeframe.toString()}
-              >
-                {timeframe} years
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
+        <div className="flex flex-col gap-2">
+          <Label htmlFor="risk-timeframe">Risk Timeframe</Label>
+          <Select
+            value={selectedTimeframe}
+            onValueChange={onTimeframeChange}
+          >
+            <SelectTrigger id="risk-timeframe" className="w-48">
+              <SelectValue placeholder="Select timeframe" />
+            </SelectTrigger>
+            <SelectContent>
+              {timeframes.map((timeframe) => (
+                <SelectItem 
+                  key={timeframe} 
+                  value={timeframe.toString()}
+                >
+                  {timeframe} years
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
 
         <Popover open={open} onOpenChange={setOpen}>
           <PopoverTrigger asChild>
@@ -96,7 +103,7 @@ export const TableControls = ({
               variant="outline"
               role="combobox"
               aria-expanded={open}
-              className="w-48 justify-between"
+              className="w-48 justify-between mt-8"
             >
               Risk factors
               <Badge variant="secondary" className="ml-2">
