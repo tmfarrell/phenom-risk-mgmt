@@ -73,14 +73,30 @@ export const useTableColumns = (visibleRiskColumns: string[]) => {
       </Button>
     ),
     cell: ({ row }) => {
-      const value = row.getValue(column);
-      return (
-        <div className={`${isHighRisk(value as number) ? 'bg-red-100' : ''} whitespace-nowrap px-2`}>
-          {value !== undefined && value !== null
-            ? Number(value).toFixed(2)
-            : 'N/A'}
-        </div>
-      );
+      const value = row.getValue(column) as number;
+      const riskType = row.original.risk_type;
+
+      if (value === undefined || value === null) {
+        return 'N/A';
+      }
+
+      // Format based on risk type
+      if (riskType === 'absolute') {
+        const roundedValue = Math.round(value);
+        const isHighAbsoluteRisk = roundedValue > 50;
+        return (
+          <div className={`${isHighAbsoluteRisk ? 'bg-red-100' : ''} whitespace-nowrap px-2`}>
+            {`${roundedValue}%`}
+          </div>
+        );
+      } else {
+        // For relative risk, keep the existing formatting
+        return (
+          <div className={`${isHighRisk(value) ? 'bg-red-100' : ''} whitespace-nowrap px-2`}>
+            {value.toFixed(2)}
+          </div>
+        );
+      }
     },
     enableColumnFilter: true,
   }));
