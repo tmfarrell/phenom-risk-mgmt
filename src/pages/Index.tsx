@@ -11,7 +11,7 @@ export default function Index() {
   const { data: patientData, isLoading, error } = usePatientData();
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedTimeframe, setSelectedTimeframe] = useState<string>('1');
-  // Ensure initial state is an array with default values
+  const [selectedRiskType, setSelectedRiskType] = useState<'relative' | 'absolute'>('relative');
   const [selectedRiskColumns, setSelectedRiskColumns] = useState<string[]>([
     'ED',
     'Hospitalization',
@@ -30,10 +30,11 @@ export default function Index() {
     const mrnMatch = patient.mrn?.toString().includes(searchQuery);
     const searchMatches = nameMatch || mrnMatch;
 
-    // Then filter by selected timeframe
+    // Then filter by selected timeframe and risk type
     const timeframeMatches = patient.prediction_timeframe_yrs === Number(selectedTimeframe);
+    const riskTypeMatches = patient.risk_type === selectedRiskType;
 
-    return searchMatches && timeframeMatches;
+    return searchMatches && timeframeMatches && riskTypeMatches;
   });
 
   if (error) {
@@ -67,6 +68,8 @@ export default function Index() {
                 selectedRiskColumns={selectedRiskColumns}
                 onRiskColumnsChange={setSelectedRiskColumns}
                 timeframes={timeframes}
+                selectedRiskType={selectedRiskType}
+                onRiskTypeChange={setSelectedRiskType}
               />
               {isLoading ? (
                 <div className="space-y-3">

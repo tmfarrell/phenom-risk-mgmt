@@ -35,6 +35,8 @@ interface TableControlsProps {
   selectedRiskColumns: string[];
   onRiskColumnsChange: (value: string[]) => void;
   timeframes: number[];
+  selectedRiskType: 'relative' | 'absolute';
+  onRiskTypeChange: (value: 'relative' | 'absolute') => void;
 }
 
 export const TableControls = ({
@@ -45,6 +47,8 @@ export const TableControls = ({
   selectedRiskColumns = [],
   onRiskColumnsChange,
   timeframes,
+  selectedRiskType,
+  onRiskTypeChange,
 }: TableControlsProps) => {
   const [open, setOpen] = useState(false);
   
@@ -54,6 +58,19 @@ export const TableControls = ({
   return (
     <div className="flex justify-between items-center mb-6">
       <div className="flex gap-4">
+        <Select
+          value={selectedRiskType}
+          onValueChange={(value: 'relative' | 'absolute') => onRiskTypeChange(value)}
+        >
+          <SelectTrigger className="w-48">
+            <SelectValue placeholder="Select risk type" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="relative">Relative</SelectItem>
+            <SelectItem value="absolute">Absolute</SelectItem>
+          </SelectContent>
+        </Select>
+
         <Select
           value={selectedTimeframe}
           onValueChange={onTimeframeChange}
