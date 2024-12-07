@@ -60,7 +60,7 @@ export const TableControls = ({
     <div className="flex justify-between items-center mb-6">
       <div className="flex gap-8">
         <div className="flex flex-col gap-2">
-          <Label htmlFor="risk-type" className="text-left">Risk Type</Label>
+          <Label htmlFor="risk-type" className="text-left text-muted-foreground">Risk Type</Label>
           <Select
             value={selectedRiskType}
             onValueChange={(value: 'relative' | 'absolute') => onRiskTypeChange(value)}
@@ -76,7 +76,7 @@ export const TableControls = ({
         </div>
 
         <div className="flex flex-col gap-2">
-          <Label htmlFor="risk-timeframe" className="text-left">Risk Timeframe</Label>
+          <Label htmlFor="risk-timeframe" className="text-left text-muted-foreground">Risk Timeframe</Label>
           <Select
             value={selectedTimeframe}
             onValueChange={onTimeframeChange}
@@ -97,51 +97,55 @@ export const TableControls = ({
           </Select>
         </div>
 
-        <Popover open={open} onOpenChange={setOpen}>
-          <PopoverTrigger asChild>
-            <Button
-              variant="outline"
-              role="combobox"
-              aria-expanded={open}
-              className="w-48 justify-between mt-8"
-            >
-              Risk factors
-              <Badge variant="secondary" className="ml-2">
-                {currentSelectedColumns.length}
-              </Badge>
-            </Button>
-          </PopoverTrigger>
-          <PopoverContent className="w-48 p-0">
-            <Command>
-              <CommandInput placeholder="Search columns..." />
-              <CommandList>
-                <CommandEmpty>No column found.</CommandEmpty>
-                <CommandGroup>
-                  {RISK_COLUMNS.map((column) => (
-                    <CommandItem
-                      key={column}
-                      value={column}
-                      onSelect={() => {
-                        const newSelection = currentSelectedColumns.includes(column)
-                          ? currentSelectedColumns.filter((c) => c !== column)
-                          : [...currentSelectedColumns, column];
-                        onRiskColumnsChange(newSelection);
-                      }}
-                    >
-                      <Check
-                        className={cn(
-                          "mr-2 h-4 w-4",
-                          currentSelectedColumns.includes(column) ? "opacity-100" : "opacity-0"
-                        )}
-                      />
-                      {column}
-                    </CommandItem>
-                  ))}
-                </CommandGroup>
-              </CommandList>
-            </Command>
-          </PopoverContent>
-        </Popover>
+        <div className="flex flex-col gap-2">
+          <Label htmlFor="risk-factors" className="text-left text-muted-foreground">Risk Factors</Label>
+          <Popover open={open} onOpenChange={setOpen}>
+            <PopoverTrigger asChild>
+              <Button
+                variant="outline"
+                role="combobox"
+                aria-expanded={open}
+                className="w-48 justify-between"
+                id="risk-factors"
+              >
+                Risk factors
+                <Badge variant="secondary" className="ml-2">
+                  {currentSelectedColumns.length}
+                </Badge>
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent className="w-48 p-0">
+              <Command>
+                <CommandInput placeholder="Search columns..." />
+                <CommandList>
+                  <CommandEmpty>No column found.</CommandEmpty>
+                  <CommandGroup>
+                    {RISK_COLUMNS.map((column) => (
+                      <CommandItem
+                        key={column}
+                        value={column}
+                        onSelect={() => {
+                          const newSelection = currentSelectedColumns.includes(column)
+                            ? currentSelectedColumns.filter((c) => c !== column)
+                            : [...currentSelectedColumns, column];
+                          onRiskColumnsChange(newSelection);
+                        }}
+                      >
+                        <Check
+                          className={cn(
+                            "mr-2 h-4 w-4",
+                            currentSelectedColumns.includes(column) ? "opacity-100" : "opacity-0"
+                          )}
+                        />
+                        {column}
+                      </CommandItem>
+                    ))}
+                  </CommandGroup>
+                </CommandList>
+              </Command>
+            </PopoverContent>
+          </Popover>
+        </div>
       </div>
 
       <div className="relative max-w-md">
