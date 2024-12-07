@@ -60,7 +60,7 @@ export const TableControls = ({
     <div className="flex justify-between items-center mb-6">
       <div className="flex gap-8">
         <div className="flex flex-col gap-2">
-          <Label htmlFor="risk-type">Risk Type</Label>
+          <Label htmlFor="risk-type" className="text-left">Risk Type</Label>
           <Select
             value={selectedRiskType}
             onValueChange={(value: 'relative' | 'absolute') => onRiskTypeChange(value)}
@@ -76,7 +76,7 @@ export const TableControls = ({
         </div>
 
         <div className="flex flex-col gap-2">
-          <Label htmlFor="risk-timeframe">Risk Timeframe</Label>
+          <Label htmlFor="risk-timeframe" className="text-left">Risk Timeframe</Label>
           <Select
             value={selectedTimeframe}
             onValueChange={onTimeframeChange}
