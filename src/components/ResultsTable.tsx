@@ -54,9 +54,9 @@ export const ResultsTable = ({ data }: ResultsTableProps) => {
     return 0;
   });
 
-  const getRiskScoreClass = (value: number | null | undefined) => {
-    if (value === null || value === undefined) return '';
-    return value > 5 ? 'text-red-600 font-semibold' : '';
+  const isHighRisk = (value: number | null | undefined) => {
+    if (value === null || value === undefined) return false;
+    return value > 5;
   };
 
   return (
@@ -126,7 +126,7 @@ export const ResultsTable = ({ data }: ResultsTableProps) => {
                   {RISK_COLUMNS.map((column) => (
                     <TableCell 
                       key={column}
-                      className={getRiskScoreClass(person[column])}
+                      className={isHighRisk(person[column]) ? 'bg-red-100' : ''}
                     >
                       {person[column] !== undefined && person[column] !== null
                         ? Number(person[column]).toFixed(2)
