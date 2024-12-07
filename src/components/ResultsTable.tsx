@@ -54,6 +54,11 @@ export const ResultsTable = ({ data }: ResultsTableProps) => {
     return 0;
   });
 
+  const getRiskScoreClass = (value: number | null | undefined) => {
+    if (value === null || value === undefined) return '';
+    return value > 5 ? 'text-red-600 font-semibold' : '';
+  };
+
   return (
     <div className="rounded-md border">
       <ScrollArea className="h-[600px]">
@@ -119,7 +124,10 @@ export const ResultsTable = ({ data }: ResultsTableProps) => {
                   <TableCell>{person.mrn || 'N/A'}</TableCell>
                   <TableCell>{person.last_visit || 'N/A'}</TableCell>
                   {RISK_COLUMNS.map((column) => (
-                    <TableCell key={column}>
+                    <TableCell 
+                      key={column}
+                      className={getRiskScoreClass(person[column])}
+                    >
                       {person[column] !== undefined && person[column] !== null
                         ? Number(person[column]).toFixed(2)
                         : 'N/A'}
