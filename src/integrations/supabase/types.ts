@@ -42,7 +42,7 @@ export type Database = {
         }
         Relationships: []
       }
-      phenom_risk_abs: {
+      phenom_risk_rel: {
         Row: {
           CKD: number | null
           ED: number | null
@@ -51,6 +51,9 @@ export type Database = {
           "Mental Health": number | null
           MI: number | null
           patient_id: number
+          prediction_timeframe_yrs: number | null
+          recorded_date: string | null
+          risk_abs_id: number
           Stroke: number | null
         }
         Insert: {
@@ -61,6 +64,9 @@ export type Database = {
           "Mental Health"?: number | null
           MI?: number | null
           patient_id: number
+          prediction_timeframe_yrs?: number | null
+          recorded_date?: string | null
+          risk_abs_id?: number
           Stroke?: number | null
         }
         Update: {
@@ -71,6 +77,9 @@ export type Database = {
           "Mental Health"?: number | null
           MI?: number | null
           patient_id?: number
+          prediction_timeframe_yrs?: number | null
+          recorded_date?: string | null
+          risk_abs_id?: number
           Stroke?: number | null
         }
         Relationships: [

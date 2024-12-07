@@ -7,7 +7,9 @@ export interface Person {
   age: number | null;
   gender: string | null;
   location: string | null;
-  // Risk factors from phenom_risk_abs
+  recorded_date?: string | null;
+  prediction_timeframe_yrs?: number | null;
+  // Risk factors from phenom_risk_rel
   ED?: number | null;
   Hospitalization?: number | null;
   Fall?: number | null;
