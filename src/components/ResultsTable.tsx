@@ -62,7 +62,7 @@ export const ResultsTable = ({ data }: ResultsTableProps) => {
   return (
     <div className="rounded-md border">
       <ScrollArea className="h-[600px]">
-        <div className="overflow-x-auto">
+        <div className="min-w-full w-max">
           <Table>
             <TableHeader>
               <TableRow className="bg-blue-50">
