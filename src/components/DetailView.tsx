@@ -3,12 +3,16 @@ import { Card } from './ui/card';
 import { Avatar, AvatarFallback } from './ui/avatar';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from './ui/table';
 import { usePatientData } from '@/hooks/usePatientData';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select';
+import { useState } from 'react';
 
 interface DetailViewProps {
   person: Person | null;
 }
 
 export const DetailView = ({ person }: DetailViewProps) => {
+  const [selectedRiskType, setSelectedRiskType] = useState<'relative' | 'absolute'>('relative');
+
   if (!person) {
     return (
       <Card className="p-6 text-center text-gray-500">
@@ -17,8 +21,11 @@ export const DetailView = ({ person }: DetailViewProps) => {
     );
   }
 
-  const formatRiskValue = (value: number | string | null | undefined) => {
+  const formatRiskValue = (value: number | string | null | undefined, riskType: 'relative' | 'absolute') => {
     if (typeof value === 'number') {
+      if (riskType === 'absolute') {
+        return `${Math.round(value)}%`;
+      }
       return value.toFixed(2);
     }
     return 'Not available';
@@ -26,7 +33,10 @@ export const DetailView = ({ person }: DetailViewProps) => {
 
   // Get all risk predictions for this patient
   const { data: patientData } = usePatientData();
-  const patientRisks = patientData?.filter(p => p.patient_id === person.patient_id) || [];
+  const patientRisks = patientData?.filter(p => 
+    p.patient_id === person.patient_id && 
+    p.risk_type === selectedRiskType
+  ) || [];
   
   // Get predictions for each timeframe
   const oneYearRisks = patientRisks.find(p => p.prediction_timeframe_yrs === 1);
@@ -34,8 +44,9 @@ export const DetailView = ({ person }: DetailViewProps) => {
 
   const riskFactors = ['ED', 'Hospitalization', 'Fall', 'Stroke', 'MI', 'CKD', 'Mental Health'];
 
-  const isHighRisk = (value: number | string | null | undefined) => {
-    return typeof value === 'number' && value > 5;
+  const isHighRisk = (value: number | string | null | undefined, riskType: 'relative' | 'absolute') => {
+    if (typeof value !== 'number') return false;
+    return riskType === 'absolute' ? value > 50 : value > 5;
   };
 
   return (
@@ -79,7 +90,21 @@ export const DetailView = ({ person }: DetailViewProps) => {
       </Card>
 
       <Card className="detail-card">
-        <h3 className="text-lg font-semibold mb-4">Risk Factors</h3>
+        <div className="flex justify-between items-center mb-4">
+          <h3 className="text-lg font-semibold">Risk Factors</h3>
+          <Select
+            value={selectedRiskType}
+            onValueChange={(value: 'relative' | 'absolute') => setSelectedRiskType(value)}
+          >
+            <SelectTrigger className="w-48">
+              <SelectValue placeholder="Select risk type" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="relative">Relative</SelectItem>
+              <SelectItem value="absolute">Absolute</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
         <div className="overflow-x-auto">
           <Table>
             <TableHeader>
@@ -93,11 +118,11 @@ export const DetailView = ({ person }: DetailViewProps) => {
               {riskFactors.map((risk) => (
                 <TableRow key={risk}>
                   <TableCell className="font-medium">{risk}</TableCell>
-                  <TableCell className={isHighRisk(oneYearRisks?.[risk as keyof Person]) ? 'bg-red-100' : ''}>
-                    {formatRiskValue(oneYearRisks?.[risk as keyof Person])}
+                  <TableCell className={isHighRisk(oneYearRisks?.[risk as keyof Person], selectedRiskType) ? 'bg-red-100' : ''}>
+                    {formatRiskValue(oneYearRisks?.[risk as keyof Person], selectedRiskType)}
                   </TableCell>
-                  <TableCell className={isHighRisk(fiveYearRisks?.[risk as keyof Person]) ? 'bg-red-100' : ''}>
-                    {formatRiskValue(fiveYearRisks?.[risk as keyof Person])}
+                  <TableCell className={isHighRisk(fiveYearRisks?.[risk as keyof Person], selectedRiskType) ? 'bg-red-100' : ''}>
+                    {formatRiskValue(fiveYearRisks?.[risk as keyof Person], selectedRiskType)}
                   </TableCell>
                 </TableRow>
               ))}
