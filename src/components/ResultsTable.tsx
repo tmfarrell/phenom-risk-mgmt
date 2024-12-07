@@ -80,6 +80,16 @@ export const ResultsTable = ({ data }: ResultsTableProps) => {
                   <ArrowUpDown className="ml-2 h-4 w-4" />
                 </Button>
               </TableHead>
+              <TableHead className="w-[150px]">
+                <Button
+                  variant="ghost"
+                  onClick={() => handleSort('last_visit')}
+                  className="hover:bg-transparent whitespace-nowrap"
+                >
+                  Last Visit
+                  <ArrowUpDown className="ml-2 h-4 w-4" />
+                </Button>
+              </TableHead>
               {RISK_COLUMNS.map((column) => (
                 <TableHead key={column}>
                   <Button
@@ -106,6 +116,7 @@ export const ResultsTable = ({ data }: ResultsTableProps) => {
                   </Link>
                 </TableCell>
                 <TableCell>{person.mrn || 'N/A'}</TableCell>
+                <TableCell>{person.last_visit || 'N/A'}</TableCell>
                 {RISK_COLUMNS.map((column) => (
                   <TableCell key={column}>
                     {person[column] !== undefined && person[column] !== null
