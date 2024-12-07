@@ -3,6 +3,7 @@ import { Header } from '@/components/Header';
 import { usePatientData } from '@/hooks/usePatientData';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Input } from '@/components/ui/input';
+import { Search } from 'lucide-react';
 import { useState } from 'react';
 import { Person } from '@/types/population';
 
@@ -41,13 +42,16 @@ export default function Index() {
           <div className="flex flex-col space-y-6">
             <div className="glass-card p-6">
               <div className="flex justify-end mb-6">
-                <Input
-                  type="text"
-                  placeholder="Search by patient name or MRN..."
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  className="max-w-md"
-                />
+                <div className="relative max-w-md">
+                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500 h-4 w-4" />
+                  <Input
+                    type="text"
+                    placeholder="Search by patient name or MRN..."
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    className="pl-9"
+                  />
+                </div>
               </div>
               {isLoading ? (
                 <div className="space-y-3">
