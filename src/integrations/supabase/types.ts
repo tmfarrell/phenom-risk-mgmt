@@ -42,7 +42,7 @@ export type Database = {
         }
         Relationships: []
       }
-      phenom_risk_rel: {
+      phenom_risk: {
         Row: {
           CKD: number | null
           ED: number | null
@@ -54,6 +54,7 @@ export type Database = {
           prediction_timeframe_yrs: number | null
           recorded_date: string | null
           risk_abs_id: number
+          risk_type: Database["public"]["Enums"]["risk_type"]
           Stroke: number | null
         }
         Insert: {
@@ -67,6 +68,7 @@ export type Database = {
           prediction_timeframe_yrs?: number | null
           recorded_date?: string | null
           risk_abs_id?: number
+          risk_type?: Database["public"]["Enums"]["risk_type"]
           Stroke?: number | null
         }
         Update: {
@@ -80,6 +82,7 @@ export type Database = {
           prediction_timeframe_yrs?: number | null
           recorded_date?: string | null
           risk_abs_id?: number
+          risk_type?: Database["public"]["Enums"]["risk_type"]
           Stroke?: number | null
         }
         Relationships: [
@@ -100,7 +103,7 @@ export type Database = {
       [_ in never]: never
     }
     Enums: {
-      [_ in never]: never
+      risk_type: "relative" | "absolute"
     }
     CompositeTypes: {
       [_ in never]: never
