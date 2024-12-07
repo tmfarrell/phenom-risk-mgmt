@@ -41,13 +41,14 @@ export const TableControls = ({
   onSearchChange,
   selectedTimeframe,
   onTimeframeChange,
-  selectedRiskColumns = [], // Provide default empty array
+  selectedRiskColumns = [],
   onRiskColumnsChange,
   timeframes,
 }: TableControlsProps) => {
   const [open, setOpen] = useState(false);
-
-  console.log('TableControls render:', { selectedRiskColumns }); // Debug log
+  
+  // Ensure we always have an array to work with
+  const currentSelectedColumns = Array.isArray(selectedRiskColumns) ? selectedRiskColumns : [];
 
   return (
     <div className="flex justify-between items-center mb-6">
@@ -81,7 +82,7 @@ export const TableControls = ({
             >
               Select columns
               <Badge variant="secondary" className="ml-2">
-                {(selectedRiskColumns || []).length}
+                {currentSelectedColumns.length}
               </Badge>
             </Button>
           </PopoverTrigger>
@@ -93,17 +94,18 @@ export const TableControls = ({
                 {RISK_COLUMNS.map((column) => (
                   <CommandItem
                     key={column}
+                    value={column}
                     onSelect={() => {
-                      const newSelection = selectedRiskColumns.includes(column)
-                        ? selectedRiskColumns.filter((c) => c !== column)
-                        : [...selectedRiskColumns, column];
+                      const newSelection = currentSelectedColumns.includes(column)
+                        ? currentSelectedColumns.filter((c) => c !== column)
+                        : [...currentSelectedColumns, column];
                       onRiskColumnsChange(newSelection);
                     }}
                   >
                     <Check
                       className={cn(
                         "mr-2 h-4 w-4",
-                        selectedRiskColumns.includes(column) ? "opacity-100" : "opacity-0"
+                        currentSelectedColumns.includes(column) ? "opacity-100" : "opacity-0"
                       )}
                     />
                     {column}
