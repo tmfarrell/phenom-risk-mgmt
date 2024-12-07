@@ -4,7 +4,7 @@ import { usePatientData } from '@/hooks/usePatientData';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Input } from '@/components/ui/input';
 import { Search } from 'lucide-react';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Person } from '@/types/population';
 import {
   Select,
@@ -17,18 +17,10 @@ import {
 export default function Index() {
   const { data: patientData, isLoading, error } = usePatientData();
   const [searchQuery, setSearchQuery] = useState('');
-  const [selectedTimeframe, setSelectedTimeframe] = useState<string>('');
+  const [selectedTimeframe, setSelectedTimeframe] = useState<string>('1');
 
   // Get unique timeframes from the data and ensure they are valid numbers
-  const timeframes = patientData 
-    ? [...new Set([5, ...patientData.map(p => p.prediction_timeframe_yrs)])]
-      .filter((timeframe): timeframe is number => 
-        timeframe !== null && 
-        timeframe !== undefined && 
-        !isNaN(Number(timeframe))
-      )
-      .sort((a, b) => a - b)
-    : [];
+  const timeframes = [1, 5];
 
   const filteredData = patientData?.filter((patient: Person) => {
     // First filter by search query
@@ -38,9 +30,7 @@ export default function Index() {
     const searchMatches = nameMatch || mrnMatch;
 
     // Then filter by selected timeframe
-    const timeframeMatches = selectedTimeframe === 'all' 
-      ? true 
-      : patient.prediction_timeframe_yrs === Number(selectedTimeframe);
+    const timeframeMatches = patient.prediction_timeframe_yrs === Number(selectedTimeframe);
 
     return searchMatches && timeframeMatches;
   });
@@ -88,7 +78,6 @@ export default function Index() {
                       <SelectValue placeholder="Select timeframe" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="all">All timeframes</SelectItem>
                       {timeframes.map((timeframe) => (
                         <SelectItem 
                           key={timeframe} 
