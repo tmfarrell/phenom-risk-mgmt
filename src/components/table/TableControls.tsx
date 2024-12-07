@@ -41,11 +41,13 @@ export const TableControls = ({
   onSearchChange,
   selectedTimeframe,
   onTimeframeChange,
-  selectedRiskColumns,
+  selectedRiskColumns = [], // Provide default empty array
   onRiskColumnsChange,
   timeframes,
 }: TableControlsProps) => {
   const [open, setOpen] = useState(false);
+
+  console.log('TableControls render:', { selectedRiskColumns }); // Debug log
 
   return (
     <div className="flex justify-between items-center mb-6">
@@ -79,7 +81,7 @@ export const TableControls = ({
             >
               Select columns
               <Badge variant="secondary" className="ml-2">
-                {selectedRiskColumns.length}
+                {(selectedRiskColumns || []).length}
               </Badge>
             </Button>
           </PopoverTrigger>

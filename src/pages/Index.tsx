@@ -11,6 +11,7 @@ export default function Index() {
   const { data: patientData, isLoading, error } = usePatientData();
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedTimeframe, setSelectedTimeframe] = useState<string>('1');
+  // Ensure initial state is an array with default values
   const [selectedRiskColumns, setSelectedRiskColumns] = useState<string[]>([
     'ED',
     'Hospitalization',
