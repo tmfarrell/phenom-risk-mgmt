@@ -18,9 +18,9 @@ export const usePatientData = () => {
         throw patientsError;
       }
 
-      // Fetch risk data
+      // Fetch risk data - Updated table name from phenom_risk_abs to phenom_risk_rel
       const { data: risks, error: risksError } = await supabase
-        .from('phenom_risk_abs')
+        .from('phenom_risk_rel')
         .select('*');
 
       if (risksError) {
@@ -39,7 +39,9 @@ export const usePatientData = () => {
           Stroke: null,
           MI: null,
           CKD: null,
-          'Mental Health': null
+          'Mental Health': null,
+          recorded_date: null,
+          prediction_timeframe_yrs: null
         };
         
         // Combine patient data with risk data
@@ -51,7 +53,9 @@ export const usePatientData = () => {
           Stroke: patientRisks.Stroke,
           MI: patientRisks.MI,
           CKD: patientRisks.CKD,
-          'Mental Health': patientRisks['Mental Health']
+          'Mental Health': patientRisks['Mental Health'],
+          recorded_date: patientRisks.recorded_date,
+          prediction_timeframe_yrs: patientRisks.prediction_timeframe_yrs
         };
       });
 
