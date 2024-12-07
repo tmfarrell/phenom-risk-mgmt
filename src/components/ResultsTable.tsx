@@ -61,8 +61,8 @@ export const ResultsTable = ({ data }: ResultsTableProps) => {
 
   return (
     <div className="rounded-md border">
-      <ScrollArea className="h-[600px]">
-        <div className="min-w-full w-max">
+      <ScrollArea className="h-[600px] overflow-x-auto">
+        <div className="min-w-[1200px]">
           <Table>
             <TableHeader>
               <TableRow className="bg-blue-50">
@@ -97,7 +97,7 @@ export const ResultsTable = ({ data }: ResultsTableProps) => {
                   </Button>
                 </TableHead>
                 {RISK_COLUMNS.map((column) => (
-                  <TableHead key={column}>
+                  <TableHead key={column} className="w-[150px]">
                     <Button
                       variant="ghost"
                       onClick={() => handleSort(column as keyof Person)}
