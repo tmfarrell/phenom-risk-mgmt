@@ -24,7 +24,6 @@ import { useState } from 'react';
 import { Button } from './ui/button';
 import { ArrowUpDown } from 'lucide-react';
 import { RISK_COLUMNS, isHighRisk } from './table/tableConstants';
-import { TableFilters } from './table/TableFilters';
 
 interface ResultsTableProps {
   data: Person[];
@@ -134,7 +133,6 @@ export const ResultsTable = ({ data }: ResultsTableProps) => {
 
   return (
     <div className="rounded-md border">
-      <TableFilters table={table} />
       <ScrollArea className="h-[600px] overflow-x-auto">
         <div className="min-w-[1200px]">
           <Table>
