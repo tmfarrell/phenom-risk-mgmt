@@ -2,9 +2,20 @@ import { ResultsTable } from '@/components/ResultsTable';
 import { Header } from '@/components/Header';
 import { usePatientData } from '@/hooks/usePatientData';
 import { Skeleton } from '@/components/ui/skeleton';
+import { Input } from '@/components/ui/input';
+import { useState } from 'react';
+import { Person } from '@/types/population';
 
 export default function Index() {
   const { data: patientData, isLoading, error } = usePatientData();
+  const [searchQuery, setSearchQuery] = useState('');
+
+  const filteredData = patientData?.filter((patient: Person) => {
+    const searchLower = searchQuery.toLowerCase();
+    const nameMatch = patient.name?.toLowerCase().includes(searchLower);
+    const mrnMatch = patient.mrn?.toString().includes(searchQuery);
+    return nameMatch || mrnMatch;
+  });
 
   if (error) {
     console.error('Error loading patient data:', error);
@@ -29,6 +40,15 @@ export default function Index() {
         <div className="max-w-[1600px] mx-auto">
           <div className="flex flex-col space-y-6">
             <div className="glass-card p-6">
+              <div className="mb-6">
+                <Input
+                  type="text"
+                  placeholder="Search by patient name or MRN..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="max-w-md"
+                />
+              </div>
               <h2 className="text-lg font-semibold mb-4">Results</h2>
               {isLoading ? (
                 <div className="space-y-3">
@@ -37,7 +57,7 @@ export default function Index() {
                 </div>
               ) : (
                 <ResultsTable
-                  data={patientData || []}
+                  data={filteredData || []}
                 />
               )}
             </div>
