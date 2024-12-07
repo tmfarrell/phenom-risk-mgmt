@@ -2,6 +2,7 @@ import { Person } from '../types/population';
 import { Card } from './ui/card';
 import { Avatar, AvatarFallback } from './ui/avatar';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from './ui/table';
+import { usePatientData } from '@/hooks/usePatientData';
 
 interface DetailViewProps {
   person: Person | null;
