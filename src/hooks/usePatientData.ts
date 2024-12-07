@@ -32,18 +32,26 @@ export const usePatientData = () => {
 
       // Transform data to match Person interface
       const transformedData: Person[] = patients.map((patient) => {
-        const patientRisks = risks.find(risk => risk.patient_id === patient.patient_id) || {};
+        const patientRisks = risks.find(risk => risk.patient_id === patient.patient_id) || {
+          ED: null,
+          Hospitalization: null,
+          Fall: null,
+          Stroke: null,
+          MI: null,
+          CKD: null,
+          'Mental Health': null
+        };
         
         // Combine patient data with risk data
         return {
           ...patient,
-          ED: patientRisks.ED || null,
-          Hospitalization: patientRisks.Hospitalization || null,
-          Fall: patientRisks.Fall || null,
-          Stroke: patientRisks.Stroke || null,
-          MI: patientRisks.MI || null,
-          CKD: patientRisks.CKD || null,
-          'Mental Health': patientRisks['Mental Health'] || null
+          ED: patientRisks.ED,
+          Hospitalization: patientRisks.Hospitalization,
+          Fall: patientRisks.Fall,
+          Stroke: patientRisks.Stroke,
+          MI: patientRisks.MI,
+          CKD: patientRisks.CKD,
+          'Mental Health': patientRisks['Mental Health']
         };
       });
 

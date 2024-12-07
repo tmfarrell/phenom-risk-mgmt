@@ -57,77 +57,79 @@ export const ResultsTable = ({ data }: ResultsTableProps) => {
   return (
     <div className="rounded-md border">
       <ScrollArea className="h-[600px]">
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead className="w-[200px] sticky left-0 bg-background">
-                <Button
-                  variant="ghost"
-                  onClick={() => handleSort('name')}
-                  className="hover:bg-transparent"
-                >
-                  Name
-                  <ArrowUpDown className="ml-2 h-4 w-4" />
-                </Button>
-              </TableHead>
-              <TableHead className="w-[100px]">
-                <Button
-                  variant="ghost"
-                  onClick={() => handleSort('mrn')}
-                  className="hover:bg-transparent"
-                >
-                  MRN
-                  <ArrowUpDown className="ml-2 h-4 w-4" />
-                </Button>
-              </TableHead>
-              <TableHead className="w-[150px]">
-                <Button
-                  variant="ghost"
-                  onClick={() => handleSort('last_visit')}
-                  className="hover:bg-transparent whitespace-nowrap"
-                >
-                  Last Visit
-                  <ArrowUpDown className="ml-2 h-4 w-4" />
-                </Button>
-              </TableHead>
-              {RISK_COLUMNS.map((column) => (
-                <TableHead key={column}>
+        <div className="overflow-x-auto">
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead className="w-[200px] sticky left-0 bg-background z-20 shadow-[2px_0_5px_-2px_rgba(0,0,0,0.1)]">
                   <Button
                     variant="ghost"
-                    onClick={() => handleSort(column as keyof Person)}
-                    className="hover:bg-transparent whitespace-nowrap"
+                    onClick={() => handleSort('name')}
+                    className="hover:bg-transparent"
                   >
-                    {column}
+                    Name
                     <ArrowUpDown className="ml-2 h-4 w-4" />
                   </Button>
                 </TableHead>
-              ))}
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {sortedData.map((person) => (
-              <TableRow key={person.patient_id}>
-                <TableCell className="sticky left-0 bg-background">
-                  <Link 
-                    to={`/patient/${person.name}`}
-                    className="text-blue-600 hover:text-blue-800 transition-colors"
+                <TableHead className="w-[100px]">
+                  <Button
+                    variant="ghost"
+                    onClick={() => handleSort('mrn')}
+                    className="hover:bg-transparent"
                   >
-                    {person.name}
-                  </Link>
-                </TableCell>
-                <TableCell>{person.mrn || 'N/A'}</TableCell>
-                <TableCell>{person.last_visit || 'N/A'}</TableCell>
+                    MRN
+                    <ArrowUpDown className="ml-2 h-4 w-4" />
+                  </Button>
+                </TableHead>
+                <TableHead className="w-[150px]">
+                  <Button
+                    variant="ghost"
+                    onClick={() => handleSort('last_visit')}
+                    className="hover:bg-transparent whitespace-nowrap"
+                  >
+                    Last Visit
+                    <ArrowUpDown className="ml-2 h-4 w-4" />
+                  </Button>
+                </TableHead>
                 {RISK_COLUMNS.map((column) => (
-                  <TableCell key={column}>
-                    {person[column] !== undefined && person[column] !== null
-                      ? Number(person[column]).toFixed(2)
-                      : 'N/A'}
-                  </TableCell>
+                  <TableHead key={column}>
+                    <Button
+                      variant="ghost"
+                      onClick={() => handleSort(column as keyof Person)}
+                      className="hover:bg-transparent whitespace-nowrap"
+                    >
+                      {column}
+                      <ArrowUpDown className="ml-2 h-4 w-4" />
+                    </Button>
+                  </TableHead>
                 ))}
               </TableRow>
-            ))}
-          </TableBody>
-        </Table>
+            </TableHeader>
+            <TableBody>
+              {sortedData.map((person) => (
+                <TableRow key={person.patient_id}>
+                  <TableCell className="sticky left-0 bg-background z-20 shadow-[2px_0_5px_-2px_rgba(0,0,0,0.1)]">
+                    <Link 
+                      to={`/patient/${person.name}`}
+                      className="text-blue-600 hover:text-blue-800 transition-colors"
+                    >
+                      {person.name}
+                    </Link>
+                  </TableCell>
+                  <TableCell>{person.mrn || 'N/A'}</TableCell>
+                  <TableCell>{person.last_visit || 'N/A'}</TableCell>
+                  {RISK_COLUMNS.map((column) => (
+                    <TableCell key={column}>
+                      {person[column] !== undefined && person[column] !== null
+                        ? Number(person[column]).toFixed(2)
+                        : 'N/A'}
+                    </TableCell>
+                  ))}
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </div>
       </ScrollArea>
     </div>
   );
