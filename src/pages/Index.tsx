@@ -40,7 +40,7 @@ export default function Index() {
         <div className="max-w-[1600px] mx-auto">
           <div className="flex flex-col space-y-6">
             <div className="glass-card p-6">
-              <div className="mb-6">
+              <div className="flex justify-end mb-6">
                 <Input
                   type="text"
                   placeholder="Search by patient name or MRN..."
@@ -49,7 +49,6 @@ export default function Index() {
                   className="max-w-md"
                 />
               </div>
-              <h2 className="text-lg font-semibold mb-4">Results</h2>
               {isLoading ? (
                 <div className="space-y-3">
                   <Skeleton className="h-[40px] w-full" />
