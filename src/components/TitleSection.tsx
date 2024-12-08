@@ -13,7 +13,7 @@ export const TitleSection: React.FC<TitleSectionProps> = ({ title }) => {
       <div 
         className="absolute inset-0 opacity-10"
         style={{ 
-          backgroundImage: 'url(/lovable-uploads/b1f3f269-8c2a-47d4-a798-45bcf74087c9.png)',
+          backgroundImage: 'url(./lovable-uploads/b1f3f269-8c2a-47d4-a798-45bcf74087c9.png)',
           backgroundSize: 'cover',
           backgroundPosition: 'center'
         }}
