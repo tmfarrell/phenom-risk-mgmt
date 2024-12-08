@@ -16,20 +16,20 @@ export const Header = ({ title }: { title: string }) => {
     <div className="w-full">
       <div className="w-full h-[200px] relative mb-6">
         <img 
-          src="/lovable-uploads/b7fec014-bcbf-423b-9bea-34e92acb1a28.png" 
-          alt="OM1 Logo" 
-          className="absolute top-4 left-4 h-8"
+          src="/lovable-uploads/b1f3f269-8c2a-47d4-a798-45bcf74087c9.png" 
+          alt="Header wave pattern" 
+          className="w-full h-full object-cover"
         />
-        <div className="absolute inset-0 flex flex-col items-center justify-center bg-gray-100">
-          <h1 className="text-3xl font-bold text-gray-900">{title}</h1>
+        <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/20">
+          <h1 className="text-3xl font-bold text-white">{title}</h1>
           {title === "PhenOM Risk Management Dashboard" && (
-            <p className="text-gray-600 mt-2">Medicare Advantage Plan (All)</p>
+            <p className="text-white mt-2">Medicare Advantage Plan (All)</p>
           )}
         </div>
         <Button
           variant="ghost"
           size="icon"
-          className="absolute top-4 right-4 text-gray-600 hover:text-gray-900"
+          className="absolute top-4 right-4 text-white hover:text-white/80"
           onClick={handleLogout}
         >
           <LogOut className="h-5 w-5" />
