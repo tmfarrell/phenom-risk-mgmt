@@ -1,30 +1,12 @@
 import React from 'react';
-import { supabase } from '@/integrations/supabase/client';
-import { Button } from './ui/button';
-import { LogOut } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
 
-export const Header = () => {
-  const navigate = useNavigate();
-
-  const handleLogout = async () => {
-    await supabase.auth.signOut();
-    navigate('/login');
-  };
-
+export const TitleSection = ({ title }: { title: string }) => {
   return (
-    <div className="w-full bg-gray-100 px-6 py-3 flex justify-between items-center">
-      <div>
-        {/* Logo placeholder - you can add your logo here */}
+    <div className="relative bg-gradient-to-r from-indigo-500 to-purple-600 text-white py-12 px-6">
+      <div className="max-w-[1600px] mx-auto">
+        <h1 className="text-3xl font-bold">{title}</h1>
       </div>
-      <Button
-        variant="ghost"
-        size="icon"
-        className="text-gray-600 hover:text-gray-800"
-        onClick={handleLogout}
-      >
-        <LogOut className="h-5 w-5" />
-      </Button>
+      <div className="absolute inset-0 bg-[url('/wave-pattern.svg')] opacity-10" />
     </div>
   );
 };
