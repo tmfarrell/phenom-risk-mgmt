@@ -6,7 +6,10 @@ export const TitleSection = ({ title }: { title: string }) => {
       <div className="max-w-[1600px] mx-auto">
         <h1 className="text-3xl font-bold">{title}</h1>
       </div>
-      <div className="absolute inset-0 bg-[url('/wave-pattern.svg')] opacity-10" />
+      <div 
+        className="absolute inset-0 bg-[url('/wave-pattern.svg')] opacity-10"
+        style={{ backgroundSize: '100px 20px' }}
+      />
     </div>
   );
 };
