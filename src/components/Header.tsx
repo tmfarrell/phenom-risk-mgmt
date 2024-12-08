@@ -14,8 +14,12 @@ export const Header = () => {
 
   return (
     <div className="w-full bg-gray-100 px-6 py-3 flex justify-between items-center">
-      <div>
-        {/* Logo placeholder - you can add your logo here */}
+      <div className="flex items-center">
+        <img 
+          src="/lovable-uploads/ea083c57-2c98-4f52-9b12-3aab9125c621.png" 
+          alt="OM1 Logo" 
+          className="h-8"
+        />
       </div>
       <Button
         variant="ghost"
