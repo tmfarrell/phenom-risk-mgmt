@@ -1,5 +1,6 @@
 import { ResultsTable } from '@/components/ResultsTable';
 import { Header } from '@/components/Header';
+import { TitleSection } from '@/components/TitleSection';
 import { usePatientData } from '@/hooks/usePatientData';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useState } from 'react';
@@ -55,7 +56,8 @@ export default function Index() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-indigo-50 to-slate-50">
-      <Header title="PhenOM Risk Management Dashboard" />
+      <Header />
+      <TitleSection title="PhenOM Risk Management Dashboard" />
       <div className="p-6">
         <div className="max-w-[1600px] mx-auto">
           <div className="flex flex-col space-y-6">
