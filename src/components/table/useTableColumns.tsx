@@ -35,6 +35,20 @@ export const useTableColumns = (visibleRiskColumns: string[]) => {
       enableColumnFilter: true,
     },
     {
+      accessorKey: 'dob',
+      header: ({ column }) => (
+        <Button
+          variant="ghost"
+          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+          className="hover:bg-transparent whitespace-nowrap"
+        >
+          Date of Birth
+          <ArrowUpDown className="ml-2 h-4 w-4" />
+        </Button>
+      ),
+      cell: ({ row }) => row.getValue('dob') || 'N/A',
+    },
+    {
       accessorKey: 'last_visit',
       header: ({ column }) => (
         <Button
