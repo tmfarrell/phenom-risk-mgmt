@@ -64,8 +64,9 @@ export const TableControls = ({
               <TooltipTrigger asChild>
                 <HelpCircle className="h-4 w-4 text-muted-foreground" />
               </TooltipTrigger>
-              <TooltipContent>
-                <p>Patient risk compared to the average risk in their cohort over a time period</p>
+              <TooltipContent className="max-w-[300px] space-y-2">
+                <p>Relative risk is risk compared to the average in the cohort over the time period.</p>
+                <p>Absolute risk is the chances that event will occur in the time period.</p>
               </TooltipContent>
             </Tooltip>
           </div>
@@ -172,20 +173,20 @@ export const TableControls = ({
             </PopoverContent>
           </Popover>
         </div>
-      </div>
 
-      <div className="flex flex-col gap-2">
-        <Label htmlFor="search" className="text-center text-muted-foreground">Search</Label>
-        <div className="relative">
-          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500 h-4 w-4" />
-          <Input
-            id="search"
-            type="text"
-            placeholder="Patient name or MRN"
-            value={searchQuery}
-            onChange={(e) => onSearchChange(e.target.value)}
-            className="pl-9"
-          />
+        <div className="flex flex-col gap-2">
+          <Label htmlFor="search" className="text-center text-muted-foreground">Search</Label>
+          <div className="relative">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500 h-4 w-4" />
+            <Input
+              id="search"
+              type="text"
+              placeholder="Patient name or MRN"
+              value={searchQuery}
+              onChange={(e) => onSearchChange(e.target.value)}
+              className="pl-9"
+            />
+          </div>
         </div>
       </div>
     </div>
