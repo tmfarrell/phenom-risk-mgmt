@@ -1,14 +1,5 @@
-import { Search } from 'lucide-react';
+import { Search, Check, HelpCircle } from 'lucide-react';
 import { Input } from '../ui/input';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '../ui/select';
-import { RISK_COLUMNS } from './tableConstants';
-import { Badge } from '../ui/badge';
 import {
   Command,
   CommandEmpty,
@@ -25,9 +16,15 @@ import {
 import { cn } from '@/lib/utils';
 import { Button } from '../ui/button';
 import { useState } from 'react';
-import { Check } from 'lucide-react';
 import { Label } from '../ui/label';
 import { ToggleGroup, ToggleGroupItem } from '../ui/toggle-group';
+import { Badge } from '../ui/badge';
+import { RISK_COLUMNS } from './tableConstants';
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from '../ui/tooltip';
 
 interface TableControlsProps {
   searchQuery: string;
@@ -61,7 +58,17 @@ export const TableControls = ({
     <div className="flex justify-between items-center mb-6">
       <div className="flex gap-8">
         <div className="flex flex-col gap-2">
-          <Label htmlFor="risk-type" className="text-center text-muted-foreground">Risk Type</Label>
+          <div className="flex items-center gap-1 justify-center">
+            <Label htmlFor="risk-type" className="text-center text-muted-foreground">Risk Type</Label>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <HelpCircle className="h-4 w-4 text-muted-foreground" />
+              </TooltipTrigger>
+              <TooltipContent>
+                <p>Patient risk compared to the average risk in their cohort over a time period</p>
+              </TooltipContent>
+            </Tooltip>
+          </div>
           <ToggleGroup 
             type="single" 
             value={selectedRiskType}
