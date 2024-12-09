@@ -65,26 +65,26 @@ export const DetailView = ({ person }: DetailViewProps) => {
 
       <Card className="detail-card">
         <h3 className="text-lg font-semibold mb-4">Personal Information</h3>
-        <div className="space-y-2">
-          <div className="flex justify-between">
-            <span className="text-gray-500">Age</span>
-            <span>{person.age || 'Not specified'}</span>
+        <div className="grid grid-cols-5 gap-4">
+          <div className="text-center">
+            <span className="text-gray-500 block mb-2">Age</span>
+            <span className="font-medium">{person.age || 'Not specified'}</span>
           </div>
-          <div className="flex justify-between">
-            <span className="text-gray-500">Gender</span>
-            <span>{person.gender || 'Not specified'}</span>
+          <div className="text-center">
+            <span className="text-gray-500 block mb-2">Gender</span>
+            <span className="font-medium">{person.gender || 'Not specified'}</span>
           </div>
-          <div className="flex justify-between">
-            <span className="text-gray-500">Location</span>
-            <span>{person.location || 'Not specified'}</span>
+          <div className="text-center">
+            <span className="text-gray-500 block mb-2">Location</span>
+            <span className="font-medium">{person.location || 'Not specified'}</span>
           </div>
-          <div className="flex justify-between">
-            <span className="text-gray-500">MRN</span>
-            <span>{person.mrn || 'Not specified'}</span>
+          <div className="text-center">
+            <span className="text-gray-500 block mb-2">MRN</span>
+            <span className="font-medium">{person.mrn || 'Not specified'}</span>
           </div>
-          <div className="flex justify-between">
-            <span className="text-gray-500">Last Visit</span>
-            <span>{person.last_visit || 'Not specified'}</span>
+          <div className="text-center">
+            <span className="text-gray-500 block mb-2">Last Visit</span>
+            <span className="font-medium">{person.last_visit || 'Not specified'}</span>
           </div>
         </div>
       </Card>
