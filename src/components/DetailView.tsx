@@ -51,8 +51,8 @@ export const DetailView = ({ person }: DetailViewProps) => {
 
   return (
     <div className="space-y-4">
-      <Card className="detail-card">
-        <div className="flex items-center space-x-4">
+      <Card className="detail-card p-6">
+        <div className="flex items-center space-x-4 mb-6 pb-6 border-b">
           <Avatar className="h-20 w-20">
             <AvatarFallback>{person.name?.[0] || '?'}</AvatarFallback>
           </Avatar>
@@ -61,10 +61,6 @@ export const DetailView = ({ person }: DetailViewProps) => {
             <p className="text-gray-500">Patient ID: {person.patient_id}</p>
           </div>
         </div>
-      </Card>
-
-      <Card className="detail-card">
-        <h3 className="text-lg font-semibold mb-4">Personal Information</h3>
         <div className="grid grid-cols-5 gap-4">
           <div className="text-center">
             <span className="text-gray-500 block mb-2">Age</span>
