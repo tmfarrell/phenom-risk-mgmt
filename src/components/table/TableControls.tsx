@@ -93,24 +93,27 @@ export const TableControls = ({
 
         <div className="flex flex-col gap-2">
           <Label htmlFor="risk-timeframe" className="text-center text-muted-foreground">Risk Timeframe</Label>
-          <Select
+          <ToggleGroup 
+            type="single" 
             value={selectedTimeframe}
-            onValueChange={onTimeframeChange}
+            onValueChange={(value) => {
+              if (value) onTimeframeChange(value);
+            }}
+            className="flex gap-2"
           >
-            <SelectTrigger id="risk-timeframe" className="w-48">
-              <SelectValue placeholder="Select timeframe" />
-            </SelectTrigger>
-            <SelectContent>
-              {timeframes.map((timeframe) => (
-                <SelectItem 
-                  key={timeframe} 
-                  value={timeframe.toString()}
-                >
-                  {timeframe} years
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+            {timeframes.map((timeframe) => (
+              <ToggleGroupItem 
+                key={timeframe}
+                value={timeframe.toString()}
+                className={cn(
+                  "px-4 py-2 rounded-md whitespace-nowrap",
+                  selectedTimeframe === timeframe.toString() ? "bg-blue-100 hover:bg-blue-200" : "hover:bg-gray-100"
+                )}
+              >
+                {timeframe} year{timeframe > 1 ? 's' : ''}
+              </ToggleGroupItem>
+            ))}
+          </ToggleGroup>
         </div>
 
         <div className="flex flex-col gap-2">
