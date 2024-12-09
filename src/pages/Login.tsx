@@ -10,12 +10,27 @@ export const Login = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    // Check if user is already logged in
-    supabase.auth.onAuthStateChange((event, session) => {
+    // Check current auth session on mount
+    const checkSession = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (session) {
+        navigate('/');
+      }
+    };
+    
+    checkSession();
+
+    // Subscribe to auth changes
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      console.log('Auth state changed:', event, session);
       if (session) {
         navigate('/');
       }
     });
+
+    return () => {
+      subscription.unsubscribe();
+    };
   }, [navigate]);
 
   return (
