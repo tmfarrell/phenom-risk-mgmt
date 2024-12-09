@@ -62,10 +62,14 @@ export const DetailView = ({ person }: DetailViewProps) => {
             <p className="text-gray-500">Patient ID: {person.patient_id}</p>
           </div>
         </div>
-        <div className="grid grid-cols-5 gap-4">
+        <div className="grid grid-cols-6 gap-4">
           <div className="text-center">
             <span className="text-gray-500 block mb-2">Age</span>
             <span className="font-medium">{person.age || 'Not specified'}</span>
+          </div>
+          <div className="text-center">
+            <span className="text-gray-500 block mb-2">Date of Birth</span>
+            <span className="font-medium">{person.dob || 'Not specified'}</span>
           </div>
           <div className="text-center">
             <span className="text-gray-500 block mb-2">Gender</span>
