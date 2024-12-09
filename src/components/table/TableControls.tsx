@@ -27,6 +27,7 @@ import { Button } from '../ui/button';
 import { useState } from 'react';
 import { Check } from 'lucide-react';
 import { Label } from '../ui/label';
+import { ToggleGroup, ToggleGroupItem } from '../ui/toggle-group';
 
 interface TableControlsProps {
   searchQuery: string;
@@ -61,18 +62,33 @@ export const TableControls = ({
       <div className="flex gap-8">
         <div className="flex flex-col gap-2">
           <Label htmlFor="risk-type" className="text-center text-muted-foreground">Risk Type</Label>
-          <Select
+          <ToggleGroup 
+            type="single" 
             value={selectedRiskType}
-            onValueChange={(value: 'relative' | 'absolute') => onRiskTypeChange(value)}
+            onValueChange={(value) => {
+              if (value) onRiskTypeChange(value as 'relative' | 'absolute');
+            }}
+            className="flex gap-2"
           >
-            <SelectTrigger id="risk-type" className="w-48">
-              <SelectValue placeholder="Select risk type" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="relative">Relative</SelectItem>
-              <SelectItem value="absolute">Absolute</SelectItem>
-            </SelectContent>
-          </Select>
+            <ToggleGroupItem 
+              value="relative" 
+              className={cn(
+                "px-4 py-2 rounded-md",
+                selectedRiskType === 'relative' ? "bg-blue-100 hover:bg-blue-200" : "hover:bg-gray-100"
+              )}
+            >
+              Relative
+            </ToggleGroupItem>
+            <ToggleGroupItem 
+              value="absolute"
+              className={cn(
+                "px-4 py-2 rounded-md",
+                selectedRiskType === 'absolute' ? "bg-blue-100 hover:bg-blue-200" : "hover:bg-gray-100"
+              )}
+            >
+              Absolute
+            </ToggleGroupItem>
+          </ToggleGroup>
         </div>
 
         <div className="flex flex-col gap-2">
