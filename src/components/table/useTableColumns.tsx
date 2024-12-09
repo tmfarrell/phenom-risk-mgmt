@@ -20,28 +20,18 @@ export const useTableColumns = (visibleRiskColumns: string[]) => {
         </Button>
       ),
       cell: ({ row }) => (
-        <Link
-          to={`/patient/${row.original.patient_id}`}
-          className="text-blue-600 hover:text-blue-800 transition-colors"
-        >
-          {row.getValue('name')}
-        </Link>
+        <div>
+          <Link
+            to={`/patient/${row.original.patient_id}`}
+            className="text-blue-600 hover:text-blue-800 transition-colors"
+          >
+            {row.getValue('name')}
+          </Link>
+          <div className="text-sm text-gray-500">
+            MRN: {row.original.mrn || 'N/A'}
+          </div>
+        </div>
       ),
-      enableColumnFilter: true,
-    },
-    {
-      accessorKey: 'mrn',
-      header: ({ column }) => (
-        <Button
-          variant="ghost"
-          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-          className="hover:bg-transparent"
-        >
-          MRN
-          <ArrowUpDown className="ml-2 h-4 w-4" />
-        </Button>
-      ),
-      cell: ({ row }) => row.getValue('mrn') || 'N/A',
       enableColumnFilter: true,
     },
     {
