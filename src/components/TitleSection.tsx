@@ -4,7 +4,7 @@ interface TitleSectionProps {
   title: string;
 }
 
-export const TitleSection = ({ title }: TitleSectionProps) => {
+export const TitleSection: React.FC<TitleSectionProps> = ({ title }) => {
   return (
     <div 
       className="relative bg-gradient-to-r from-indigo-500 to-purple-600 text-white py-12 px-6"
@@ -16,6 +16,7 @@ export const TitleSection = ({ title }: TitleSectionProps) => {
     >
       <div className="max-w-[1600px] mx-auto">
         <h1 className="text-3xl font-bold">{title}</h1>
+        <p className="text-sm mt-2 opacity-90">Medicare Advantage Plan (All)</p>
       </div>
     </div>
   );
