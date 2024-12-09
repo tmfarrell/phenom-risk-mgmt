@@ -100,7 +100,7 @@ export const TableControls = ({
         </div>
 
         <div className="flex flex-col gap-2">
-          <Label htmlFor="risk-timeframe" className="text-center text-muted-foreground">Risk Timeframe</Label>
+          <Label htmlFor="risk-timeframe" className="text-center text-muted-foreground">Risk Time Period</Label>
           <ToggleGroup 
             type="single" 
             value={selectedTimeframe}
