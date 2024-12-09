@@ -3,8 +3,9 @@ import { Card } from './ui/card';
 import { Avatar, AvatarFallback } from './ui/avatar';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from './ui/table';
 import { usePatientData } from '@/hooks/usePatientData';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select';
+import { ToggleGroup, ToggleGroupItem } from './ui/toggle-group';
 import { useState } from 'react';
+import { cn } from '@/lib/utils';
 
 interface DetailViewProps {
   person: Person | null;
@@ -88,18 +89,33 @@ export const DetailView = ({ person }: DetailViewProps) => {
       <Card className="detail-card">
         <div className="flex justify-between items-center mb-4">
           <h3 className="text-lg font-semibold">Risk Factors</h3>
-          <Select
+          <ToggleGroup 
+            type="single" 
             value={selectedRiskType}
-            onValueChange={(value: 'relative' | 'absolute') => setSelectedRiskType(value)}
+            onValueChange={(value) => {
+              if (value) setSelectedRiskType(value as 'relative' | 'absolute');
+            }}
+            className="flex gap-2"
           >
-            <SelectTrigger className="w-48">
-              <SelectValue placeholder="Select risk type" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="relative">Relative</SelectItem>
-              <SelectItem value="absolute">Absolute</SelectItem>
-            </SelectContent>
-          </Select>
+            <ToggleGroupItem 
+              value="relative" 
+              className={cn(
+                "px-4 py-2 rounded-md",
+                selectedRiskType === 'relative' ? "bg-blue-100 hover:bg-blue-200" : "hover:bg-gray-100"
+              )}
+            >
+              Relative
+            </ToggleGroupItem>
+            <ToggleGroupItem 
+              value="absolute"
+              className={cn(
+                "px-4 py-2 rounded-md",
+                selectedRiskType === 'absolute' ? "bg-blue-100 hover:bg-blue-200" : "hover:bg-gray-100"
+              )}
+            >
+              Absolute
+            </ToggleGroupItem>
+          </ToggleGroup>
         </div>
         <div className="overflow-x-auto">
           <Table>
