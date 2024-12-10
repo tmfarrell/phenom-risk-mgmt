@@ -17,6 +17,7 @@ import { TableBody } from './table/TableBody';
 import { TablePagination } from './table/TablePagination';
 import { useTableColumns } from './table/useTableColumns';
 import { TableControls } from './table/TableControls';
+import { useNavigate } from 'react-router-dom';
 
 interface ResultsTableProps {
   data: Person[];
@@ -24,6 +25,7 @@ interface ResultsTableProps {
 }
 
 export const ResultsTable = ({ data, visibleRiskColumns }: ResultsTableProps) => {
+  const navigate = useNavigate();
   const [sorting, setSorting] = useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
   const [rowSelection, setRowSelection] = useState<RowSelectionState>({});
@@ -57,7 +59,8 @@ export const ResultsTable = ({ data, visibleRiskColumns }: ResultsTableProps) =>
 
   const handleViewPanel = () => {
     console.log('Selected rows:', rowSelection);
-    // TODO: Implement panel view logic
+    const selectedPatients = data.filter((_, index) => rowSelection[index]);
+    navigate('/panel', { state: { selectedPatients } });
   };
 
   return (
