@@ -9,7 +9,7 @@ import { cn } from '@/lib/utils';
 import { useState } from 'react';
 import { usePatientData } from '@/hooks/usePatientData';
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from '@/components/ui/chart';
-import { BoxPlot } from 'recharts';
+import { ComposedChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend } from 'recharts';
 
 export default function Panel() {
   const location = useLocation();
@@ -28,9 +28,11 @@ export default function Panel() {
   const calculateBoxPlotData = () => {
     const riskFactors = ['ED', 'Hospitalization', 'Fall', 'Stroke', 'MI', 'CKD', 'Mental Health'];
     const timeframes = [1, 5];
-    const boxPlotData: any[] = [];
+    const chartData: any[] = [];
 
     riskFactors.forEach(factor => {
+      const dataPoint: any = { factor };
+      
       timeframes.forEach(timeframe => {
         const values = selectedPatientsData
           .filter(patient => 
@@ -48,22 +50,19 @@ export default function Panel() {
           const median = values[Math.floor(values.length * 0.5)];
           const q3 = values[Math.floor(values.length * 0.75)];
 
-          boxPlotData.push({
-            factor,
-            timeframe: `${timeframe}yr`,
-            min,
-            q1,
-            median,
-            q3,
-            max,
-            color: timeframe === 1 ? '#60A5FA' : '#3B82F6'
-          });
+          dataPoint[`${timeframe}yr_min`] = min;
+          dataPoint[`${timeframe}yr_q1`] = q1;
+          dataPoint[`${timeframe}yr_median`] = median;
+          dataPoint[`${timeframe}yr_q3`] = q3;
+          dataPoint[`${timeframe}yr_max`] = max;
         }
       });
+
+      chartData.push(dataPoint);
     });
 
-    console.log('Box plot data:', boxPlotData);
-    return boxPlotData;
+    console.log('Chart data:', chartData);
+    return chartData;
   };
 
   const handlePatientClick = (patientId: number) => {
@@ -75,7 +74,7 @@ export default function Panel() {
     });
   };
 
-  const boxPlotData = calculateBoxPlotData();
+  const chartData = calculateBoxPlotData();
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-indigo-50 to-slate-50">
@@ -147,10 +146,8 @@ export default function Panel() {
                           },
                         }}
                       >
-                        <BoxPlot
-                          width={800}
-                          height={400}
-                          data={boxPlotData}
+                        <ComposedChart
+                          data={chartData}
                           margin={{
                             top: 20,
                             right: 20,
@@ -158,28 +155,45 @@ export default function Panel() {
                             left: 60,
                           }}
                         >
-                          <ChartTooltip
-                            content={({ active, payload }) => {
+                          <CartesianGrid strokeDasharray="3 3" />
+                          <XAxis dataKey="factor" angle={-45} textAnchor="end" height={60} />
+                          <YAxis />
+                          <Tooltip
+                            content={({ active, payload, label }) => {
                               if (!active || !payload?.length) return null;
-                              const data = payload[0].payload;
                               return (
-                                <ChartTooltipContent
-                                  className="space-y-1"
-                                  content={
-                                    <div>
-                                      <p className="font-medium">{data.factor} ({data.timeframe})</p>
-                                      <p>Min: {data.min.toFixed(2)}</p>
-                                      <p>Q1: {data.q1.toFixed(2)}</p>
-                                      <p>Median: {data.median.toFixed(2)}</p>
-                                      <p>Q3: {data.q3.toFixed(2)}</p>
-                                      <p>Max: {data.max.toFixed(2)}</p>
+                                <div className="bg-white p-3 border rounded shadow-lg">
+                                  <p className="font-semibold">{label}</p>
+                                  {[1, 5].map(timeframe => (
+                                    <div key={timeframe} className="mt-2">
+                                      <p className="font-medium">{timeframe} Year:</p>
+                                      <p>Min: {payload[0].payload[`${timeframe}yr_min`]?.toFixed(2)}</p>
+                                      <p>Q1: {payload[0].payload[`${timeframe}yr_q1`]?.toFixed(2)}</p>
+                                      <p>Median: {payload[0].payload[`${timeframe}yr_median`]?.toFixed(2)}</p>
+                                      <p>Q3: {payload[0].payload[`${timeframe}yr_q3`]?.toFixed(2)}</p>
+                                      <p>Max: {payload[0].payload[`${timeframe}yr_max`]?.toFixed(2)}</p>
                                     </div>
-                                  }
-                                />
+                                  ))}
+                                </div>
                               );
                             }}
                           />
-                        </BoxPlot>
+                          <Legend />
+                          {/* 1 Year Bars */}
+                          <Bar
+                            dataKey="1yr_median"
+                            fill="#60A5FA"
+                            name="1 Year Risk"
+                            barSize={20}
+                          />
+                          {/* 5 Year Bars */}
+                          <Bar
+                            dataKey="5yr_median"
+                            fill="#3B82F6"
+                            name="5 Year Risk"
+                            barSize={20}
+                          />
+                        </ComposedChart>
                       </ChartContainer>
                     </div>
                   </div>
