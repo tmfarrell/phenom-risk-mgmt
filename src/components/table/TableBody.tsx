@@ -9,7 +9,7 @@ interface TableBodyProps {
 
 export const TableBody = ({ table, columns }: TableBodyProps) => {
   return (
-    <UITableBody>
+    <UITableBody className="table-auto w-max">
       {table.getRowModel().rows?.length ? (
         table.getRowModel().rows.map((row) => (
           <TableRow key={row.id}>
