@@ -55,6 +55,8 @@ export const ResultsTable = ({
         pageSize: 8,
       },
     },
+    // This ensures the table maintains its state when selections change
+    autoResetPageIndex: false,
   });
 
   useEffect(() => {
