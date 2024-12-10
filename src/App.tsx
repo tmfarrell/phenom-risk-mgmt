@@ -5,7 +5,6 @@ import { Session } from '@supabase/supabase-js';
 import { Login } from './pages/Login';
 import Index from './pages/Index';
 import { PatientDetails } from './pages/PatientDetails';
-import { PanelView } from './pages/PanelView';
 import './App.css';
 
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
@@ -62,14 +61,6 @@ function App() {
           element={
             <ProtectedRoute>
               <PatientDetails />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/panel"
-          element={
-            <ProtectedRoute>
-              <PanelView />
             </ProtectedRoute>
           }
         />

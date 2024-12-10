@@ -6,18 +6,7 @@ import { Link } from 'react-router-dom';
 import { isHighRisk } from './tableConstants';
 import { Checkbox } from '../ui/checkbox';
 
-const formatDate = (dateString: string | null | undefined) => {
-  if (!dateString) return 'N/A';
-  try {
-    const date = new Date(dateString);
-    return date.toISOString().split('T')[0]; // Returns YYYY-MM-DD format
-  } catch (e) {
-    console.error('Error formatting date:', e);
-    return 'N/A';
-  }
-};
-
-export const useTableColumns = (visibleRiskColumns: string[], riskType: 'relative' | 'absolute') => {
+export const useTableColumns = (visibleRiskColumns: string[]) => {
   const baseColumns: ColumnDef<Person>[] = [
     {
       id: 'select',
@@ -77,7 +66,7 @@ export const useTableColumns = (visibleRiskColumns: string[], riskType: 'relativ
           <ArrowUpDown className="ml-2 h-4 w-4" />
         </Button>
       ),
-      cell: ({ row }) => formatDate(row.getValue('dob')),
+      cell: ({ row }) => row.getValue('dob') || 'N/A',
     },
     {
       accessorKey: 'last_visit',
@@ -91,7 +80,7 @@ export const useTableColumns = (visibleRiskColumns: string[], riskType: 'relativ
           <ArrowUpDown className="ml-2 h-4 w-4" />
         </Button>
       ),
-      cell: ({ row }) => formatDate(row.getValue('last_visit')),
+      cell: ({ row }) => row.getValue('last_visit') || 'N/A',
     },
   ];
 
@@ -109,6 +98,7 @@ export const useTableColumns = (visibleRiskColumns: string[], riskType: 'relativ
     ),
     cell: ({ row }) => {
       const value = row.getValue(column) as number;
+      const riskType = row.original.risk_type;
 
       if (value === undefined || value === null) {
         return 'N/A';

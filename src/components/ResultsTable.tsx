@@ -11,13 +11,11 @@ import {
   getPaginationRowModel,
   RowSelectionState,
 } from '@tanstack/react-table';
-import { useState, useMemo } from 'react';
+import { useState } from 'react';
 import { TableHeader } from './table/TableHeader';
 import { TableBody } from './table/TableBody';
 import { TablePagination } from './table/TablePagination';
 import { useTableColumns } from './table/useTableColumns';
-import { TableControls } from './table/TableControls';
-import { useNavigate } from 'react-router-dom';
 
 interface ResultsTableProps {
   data: Person[];
@@ -25,32 +23,14 @@ interface ResultsTableProps {
 }
 
 export const ResultsTable = ({ data, visibleRiskColumns }: ResultsTableProps) => {
-  const navigate = useNavigate();
   const [sorting, setSorting] = useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
   const [rowSelection, setRowSelection] = useState<RowSelectionState>({});
-  const [searchQuery, setSearchQuery] = useState('');
-  const [selectedTimeframe, setSelectedTimeframe] = useState<string>('1');
-  const [selectedRiskType, setSelectedRiskType] = useState<'relative' | 'absolute'>('relative');
 
-  const columns = useTableColumns(visibleRiskColumns, selectedRiskType);
-
-  // Memoize filtered data to prevent unnecessary recalculations
-  const filteredData = useMemo(() => {
-    if (!data) return [];
-    
-    return data.filter(person => {
-      if (!searchQuery) return true;
-      const searchLower = searchQuery.toLowerCase();
-      return (
-        person.name?.toLowerCase().includes(searchLower) ||
-        person.mrn?.toString().includes(searchQuery)
-      );
-    }).filter(person => person.risk_type === selectedRiskType);
-  }, [data, searchQuery, selectedRiskType]); // Added selectedRiskType as dependency
+  const columns = useTableColumns(visibleRiskColumns);
 
   const table = useReactTable({
-    data: filteredData,
+    data,
     columns,
     getCoreRowModel: getCoreRowModel(),
     onSortingChange: setSorting,
@@ -72,33 +52,8 @@ export const ResultsTable = ({ data, visibleRiskColumns }: ResultsTableProps) =>
     },
   });
 
-  const selectedRowCount = Object.keys(rowSelection).length;
-
-  const handleViewPanel = () => {
-    const selectedPatients = filteredData.filter((_, index) => rowSelection[index]);
-    navigate('/panel', { state: { selectedPatients } });
-  };
-
-  const handleRiskColumnsChange = (newColumns: string[]) => {
-    console.log('Risk columns changed:', newColumns);
-    // This would typically be handled by the parent component
-  };
-
   return (
-    <div className="w-full">
-      <TableControls
-        searchQuery={searchQuery}
-        onSearchChange={setSearchQuery}
-        selectedTimeframe={selectedTimeframe}
-        onTimeframeChange={setSelectedTimeframe}
-        selectedRiskColumns={visibleRiskColumns}
-        onRiskColumnsChange={handleRiskColumnsChange}
-        timeframes={[1, 5]}
-        selectedRiskType={selectedRiskType}
-        onRiskTypeChange={setSelectedRiskType}
-        selectedRowCount={selectedRowCount}
-        onViewPanel={handleViewPanel}
-      />
+    <div className="w-full rounded-md border">
       <ScrollArea className="h-[600px]" type="always">
         <div className="relative">
           <Table>

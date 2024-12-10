@@ -32,17 +32,6 @@ export const DetailView = ({ person }: DetailViewProps) => {
     return 'Not available';
   };
 
-  const formatDate = (dateString: string | null | undefined) => {
-    if (!dateString) return 'Not specified';
-    try {
-      const date = new Date(dateString);
-      return date.toISOString().split('T')[0]; // Returns YYYY-MM-DD format
-    } catch (e) {
-      console.error('Error formatting date:', e);
-      return dateString;
-    }
-  };
-
   // Get all risk predictions for this patient
   const { data: patientData } = usePatientData();
   const patientRisks = patientData?.filter(p => 
@@ -80,7 +69,7 @@ export const DetailView = ({ person }: DetailViewProps) => {
           </div>
           <div className="text-center">
             <span className="text-gray-500 block mb-2">Date of Birth</span>
-            <span className="font-medium">{formatDate(person.dob)}</span>
+            <span className="font-medium">{person.dob || 'Not specified'}</span>
           </div>
           <div className="text-center">
             <span className="text-gray-500 block mb-2">Gender</span>
@@ -96,7 +85,7 @@ export const DetailView = ({ person }: DetailViewProps) => {
           </div>
           <div className="text-center">
             <span className="text-gray-500 block mb-2">Last Visit</span>
-            <span className="font-medium">{formatDate(person.last_visit)}</span>
+            <span className="font-medium">{person.last_visit || 'Not specified'}</span>
           </div>
         </div>
       </Card>

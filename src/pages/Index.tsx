@@ -5,6 +5,8 @@ import { usePatientData } from '@/hooks/usePatientData';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useState } from 'react';
 import { Person } from '@/types/population';
+import { TableControls } from '@/components/table/TableControls';
+import { RISK_COLUMNS } from '@/components/table/tableConstants';
 
 export default function Index() {
   const { data: patientData, isLoading, error } = usePatientData();
@@ -60,6 +62,17 @@ export default function Index() {
         <div className="max-w-[1600px] mx-auto">
           <div className="flex flex-col space-y-6">
             <div className="glass-card p-6">
+              <TableControls
+                searchQuery={searchQuery}
+                onSearchChange={setSearchQuery}
+                selectedTimeframe={selectedTimeframe}
+                onTimeframeChange={setSelectedTimeframe}
+                selectedRiskColumns={selectedRiskColumns}
+                onRiskColumnsChange={setSelectedRiskColumns}
+                timeframes={timeframes}
+                selectedRiskType={selectedRiskType}
+                onRiskTypeChange={setSelectedRiskType}
+              />
               {isLoading ? (
                 <div className="space-y-3">
                   <Skeleton className="h-[40px] w-full" />
