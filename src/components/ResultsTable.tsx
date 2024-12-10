@@ -34,17 +34,6 @@ export const ResultsTable = ({
 
   const columns = useTableColumns(visibleRiskColumns);
 
-  // Only reset selection if selected rows are no longer in the filtered data
-  useEffect(() => {
-    const selectedIds = Object.keys(rowSelection);
-    const currentIds = data.map((row, index) => index.toString());
-    const hasInvalidSelection = selectedIds.some(id => !currentIds.includes(id));
-    
-    if (hasInvalidSelection) {
-      setRowSelection({});
-    }
-  }, [data, rowSelection]);
-
   const table = useReactTable({
     data,
     columns,
@@ -66,6 +55,7 @@ export const ResultsTable = ({
         pageSize: 8,
       },
     },
+    getRowId: (row) => row.patient_id.toString(),
     // This ensures the table maintains its state when selections change
     autoResetPageIndex: false,
   });
