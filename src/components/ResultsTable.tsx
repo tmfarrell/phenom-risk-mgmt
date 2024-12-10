@@ -36,14 +36,16 @@ export const ResultsTable = ({ data, visibleRiskColumns }: ResultsTableProps) =>
   const columns = useTableColumns(visibleRiskColumns);
 
   // Filter data based on search query
-  const filteredData = data.filter(person => {
+  const filteredData = data?.filter(person => {
     if (!searchQuery) return true;
     const searchLower = searchQuery.toLowerCase();
     return (
       person.name?.toLowerCase().includes(searchLower) ||
       person.mrn?.toString().includes(searchQuery)
     );
-  });
+  }) || [];
+
+  console.log('Filtered data:', filteredData);
 
   const table = useReactTable({
     data: filteredData,
