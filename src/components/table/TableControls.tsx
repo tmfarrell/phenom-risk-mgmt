@@ -56,7 +56,7 @@ export const TableControls = ({
 
   return (
     <div className="flex justify-between items-center mb-6">
-      <div className="flex gap-8">
+      <div className="grid grid-cols-3 gap-8 flex-1 mr-8">
         <div className="flex flex-col gap-2">
           <div className="flex items-center gap-1 justify-center">
             <Label htmlFor="risk-type" className="text-center text-muted-foreground">Risk Type</Label>
