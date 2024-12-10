@@ -67,7 +67,7 @@ export const ResultsTable = ({ data, visibleRiskColumns }: ResultsTableProps) =>
   };
 
   return (
-    <div className="w-full rounded-md border">
+    <div className="w-full rounded-md">
       <TableControls
         searchQuery={searchQuery}
         onSearchChange={setSearchQuery}
