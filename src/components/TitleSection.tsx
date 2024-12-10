@@ -15,7 +15,7 @@ export const TitleSection: React.FC<TitleSectionProps> = ({ title }) => {
         }}
     >
       <div className="max-w-[1600px] mx-auto">
-        <h1 className="text-3xl font-bold">{title}</h1>
+        <h1 className="text-3xl font-bold">PhenOM Risk Management Report</h1>
         <p className="text-sm mt-2 opacity-90">Medicare Advantage Plan (All)</p>
       </div>
     </div>
