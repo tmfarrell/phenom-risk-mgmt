@@ -11,7 +11,7 @@ import {
   getPaginationRowModel,
   RowSelectionState,
 } from '@tanstack/react-table';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { TableHeader } from './table/TableHeader';
 import { TableBody } from './table/TableBody';
 import { TablePagination } from './table/TablePagination';
@@ -20,9 +20,14 @@ import { useTableColumns } from './table/useTableColumns';
 interface ResultsTableProps {
   data: Person[];
   visibleRiskColumns: string[];
+  onSelectionChange?: (selectedPatients: Person[]) => void;
 }
 
-export const ResultsTable = ({ data, visibleRiskColumns }: ResultsTableProps) => {
+export const ResultsTable = ({ 
+  data, 
+  visibleRiskColumns,
+  onSelectionChange 
+}: ResultsTableProps) => {
   const [sorting, setSorting] = useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
   const [rowSelection, setRowSelection] = useState<RowSelectionState>({});
@@ -51,6 +56,14 @@ export const ResultsTable = ({ data, visibleRiskColumns }: ResultsTableProps) =>
       },
     },
   });
+
+  useEffect(() => {
+    if (onSelectionChange) {
+      const selectedRows = table.getSelectedRowModel().rows;
+      const selectedPatients = selectedRows.map(row => row.original);
+      onSelectionChange(selectedPatients);
+    }
+  }, [rowSelection, onSelectionChange, table]);
 
   return (
     <div className="w-full rounded-md border">
