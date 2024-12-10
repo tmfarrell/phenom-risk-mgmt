@@ -4,19 +4,28 @@ import { Card } from '@/components/ui/card';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Header } from '@/components/Header';
 import { TitleSection } from '@/components/TitleSection';
+import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
+import { Label } from '@/components/ui/label';
+import { cn } from '@/lib/utils';
+import { useState } from 'react';
 
 export default function Panel() {
   const location = useLocation();
   const navigate = useNavigate();
   const selectedPatients = location.state?.selectedPatients as Person[] || [];
+  const [selectedRiskType, setSelectedRiskType] = useState<'relative' | 'absolute'>('relative');
 
-  // Calculate average risks across selected patients
-  const calculateAverageRisks = () => {
+  // Calculate average risks across selected patients for a specific timeframe
+  const calculateAverageRisks = (timeframe: number) => {
     const riskFactors = ['ED', 'Hospitalization', 'Fall', 'Stroke', 'MI', 'CKD', 'Mental Health'];
     const averages: { [key: string]: number } = {};
 
     riskFactors.forEach(factor => {
       const validValues = selectedPatients
+        .filter(patient => 
+          patient.prediction_timeframe_yrs === timeframe && 
+          patient.risk_type === selectedRiskType
+        )
         .map(patient => patient[factor as keyof Person])
         .filter((value): value is number => typeof value === 'number');
 
@@ -28,13 +37,14 @@ export default function Panel() {
     return averages;
   };
 
-  const averageRisks = calculateAverageRisks();
+  const oneYearRisks = calculateAverageRisks(1);
+  const fiveYearRisks = calculateAverageRisks(5);
 
   const handlePatientClick = (patientId: number) => {
     navigate(`/patient/${patientId}`, {
       state: { 
         from: 'panel',
-        selectedPatients // Preserve the selected patients state
+        selectedPatients
       }
     });
   };
@@ -65,19 +75,78 @@ export default function Panel() {
             <ScrollArea className="h-[500px]">
               <div className="space-y-6">
                 <Card className="p-4 glass-card">
-                  <h2 className="text-xl font-semibold mb-4">Average Risk Factors</h2>
-                  <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-                    {Object.entries(averageRisks).map(([factor, value]) => (
-                      <div
-                        key={factor}
-                        className="p-4 rounded-lg bg-white/50 backdrop-blur-sm border border-gray-100 shadow-sm transition-all hover:shadow-md"
-                      >
-                        <h3 className="text-gray-600 text-sm mb-1">{factor}</h3>
-                        <p className="text-2xl font-bold text-blue-600">
-                          {value.toFixed(2)}
-                        </p>
+                  <div className="flex flex-col gap-4">
+                    <div className="flex items-center justify-between">
+                      <h2 className="text-xl font-semibold">Average Risk Factors</h2>
+                      <div className="flex flex-col gap-2">
+                        <Label className="text-center text-muted-foreground">Risk Type</Label>
+                        <ToggleGroup 
+                          type="single" 
+                          value={selectedRiskType}
+                          onValueChange={(value) => {
+                            if (value) setSelectedRiskType(value as 'relative' | 'absolute');
+                          }}
+                          className="flex gap-2"
+                        >
+                          <ToggleGroupItem 
+                            value="relative" 
+                            className={cn(
+                              "px-4 py-2 rounded-md",
+                              selectedRiskType === 'relative' ? "bg-blue-100 hover:bg-blue-200" : "hover:bg-gray-100"
+                            )}
+                          >
+                            Relative
+                          </ToggleGroupItem>
+                          <ToggleGroupItem 
+                            value="absolute"
+                            className={cn(
+                              "px-4 py-2 rounded-md",
+                              selectedRiskType === 'absolute' ? "bg-blue-100 hover:bg-blue-200" : "hover:bg-gray-100"
+                            )}
+                          >
+                            Absolute
+                          </ToggleGroupItem>
+                        </ToggleGroup>
                       </div>
-                    ))}
+                    </div>
+
+                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                      {/* 1 Year Risks */}
+                      <div className="space-y-4">
+                        <h3 className="text-lg font-semibold text-gray-700">1 Year Risks</h3>
+                        <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                          {Object.entries(oneYearRisks).map(([factor, value]) => (
+                            <div
+                              key={factor}
+                              className="p-4 rounded-lg bg-white/50 backdrop-blur-sm border border-gray-100 shadow-sm transition-all hover:shadow-md"
+                            >
+                              <h3 className="text-gray-600 text-sm mb-1">{factor}</h3>
+                              <p className="text-2xl font-bold text-blue-600">
+                                {value.toFixed(2)}
+                              </p>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+
+                      {/* 5 Year Risks */}
+                      <div className="space-y-4">
+                        <h3 className="text-lg font-semibold text-gray-700">5 Year Risks</h3>
+                        <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                          {Object.entries(fiveYearRisks).map(([factor, value]) => (
+                            <div
+                              key={factor}
+                              className="p-4 rounded-lg bg-white/50 backdrop-blur-sm border border-gray-100 shadow-sm transition-all hover:shadow-md"
+                            >
+                              <h3 className="text-gray-600 text-sm mb-1">{factor}</h3>
+                              <p className="text-2xl font-bold text-blue-600">
+                                {value.toFixed(2)}
+                              </p>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    </div>
                   </div>
                 </Card>
 
