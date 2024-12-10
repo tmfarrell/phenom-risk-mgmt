@@ -8,8 +8,8 @@ import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
 import { cn } from '@/lib/utils';
 import { useState } from 'react';
 import { usePatientData } from '@/hooks/usePatientData';
-import { ChartContainer, ChartTooltip, ChartTooltipContent } from '@/components/ui/chart';
-import { ComposedChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend } from 'recharts';
+import { RiskFactorsChart } from '@/components/panel/RiskFactorsChart';
+import { PatientList } from '@/components/panel/PatientList';
 
 export default function Panel() {
   const location = useLocation();
@@ -18,7 +18,6 @@ export default function Panel() {
   const { data: allPatientData } = usePatientData();
   const [selectedRiskType, setSelectedRiskType] = useState<'relative' | 'absolute'>('relative');
 
-  // Filter all patient data to only include selected patients and their risks
   const selectedPatientsData = allPatientData?.filter(patient => 
     selectedPatientIds.includes(patient.patient_id)
   ) || [];
@@ -91,12 +90,14 @@ export default function Panel() {
             </a>
           </div>
 
-          <div className="detail-card">
-            <h1 className="text-2xl font-bold mb-6">Panel Overview</h1>
-            <div className="mb-4">
-              <p className="text-gray-600">
-                Selected Patients: {selectedPatientIds.length}
-              </p>
+          <div className="space-y-6">
+            <div>
+              <h1 className="text-2xl font-bold mb-6">Panel Overview</h1>
+              <div className="mb-4">
+                <p className="text-gray-600">
+                  Selected Patients: {selectedPatientIds.length}
+                </p>
+              </div>
             </div>
 
             <ScrollArea className="h-[500px]">
@@ -134,90 +135,17 @@ export default function Panel() {
                       </ToggleGroup>
                     </div>
 
-                    <div className="h-[400px] w-full">
-                      <ChartContainer
-                        className="h-full"
-                        config={{
-                          primary: {
-                            theme: {
-                              light: "hsl(var(--primary))",
-                              dark: "hsl(var(--primary))",
-                            },
-                          },
-                        }}
-                      >
-                        <ComposedChart
-                          data={chartData}
-                          margin={{
-                            top: 20,
-                            right: 20,
-                            bottom: 60,
-                            left: 60,
-                          }}
-                        >
-                          <CartesianGrid strokeDasharray="3 3" />
-                          <XAxis dataKey="factor" angle={-45} textAnchor="end" height={60} />
-                          <YAxis />
-                          <Tooltip
-                            content={({ active, payload, label }) => {
-                              if (!active || !payload?.length) return null;
-                              return (
-                                <div className="bg-white p-3 border rounded shadow-lg">
-                                  <p className="font-semibold">{label}</p>
-                                  {[1, 5].map(timeframe => (
-                                    <div key={timeframe} className="mt-2">
-                                      <p className="font-medium">{timeframe} Year:</p>
-                                      <p>Min: {payload[0].payload[`${timeframe}yr_min`]?.toFixed(2)}</p>
-                                      <p>Q1: {payload[0].payload[`${timeframe}yr_q1`]?.toFixed(2)}</p>
-                                      <p>Median: {payload[0].payload[`${timeframe}yr_median`]?.toFixed(2)}</p>
-                                      <p>Q3: {payload[0].payload[`${timeframe}yr_q3`]?.toFixed(2)}</p>
-                                      <p>Max: {payload[0].payload[`${timeframe}yr_max`]?.toFixed(2)}</p>
-                                    </div>
-                                  ))}
-                                </div>
-                              );
-                            }}
-                          />
-                          <Legend />
-                          {/* 1 Year Bars */}
-                          <Bar
-                            dataKey="1yr_median"
-                            fill="#60A5FA"
-                            name="1 Year Risk"
-                            barSize={20}
-                          />
-                          {/* 5 Year Bars */}
-                          <Bar
-                            dataKey="5yr_median"
-                            fill="#3B82F6"
-                            name="5 Year Risk"
-                            barSize={20}
-                          />
-                        </ComposedChart>
-                      </ChartContainer>
-                    </div>
+                    <RiskFactorsChart 
+                      chartData={chartData}
+                      selectedRiskType={selectedRiskType}
+                    />
                   </div>
                 </Card>
 
-                <Card className="p-4 glass-card">
-                  <h2 className="text-xl font-semibold mb-4">Selected Patients</h2>
-                  <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
-                    {Array.from(new Set(selectedPatientsData.map(p => p.patient_id))).map((patientId) => {
-                      const patient = selectedPatientsData.find(p => p.patient_id === patientId);
-                      if (!patient) return null;
-                      return (
-                        <div
-                          key={patientId}
-                          onClick={() => handlePatientClick(patientId)}
-                          className="p-3 rounded-lg bg-white/50 backdrop-blur-sm border border-gray-100 shadow-sm transition-all hover:shadow-md cursor-pointer hover:bg-white/70"
-                        >
-                          <p className="font-semibold text-sm truncate">{patient.name}</p>
-                          <p className="text-gray-500 text-xs">ID: {patientId}</p>
-                        </div>
-                      );
-                    })}
-                  </div>
-                </Card>
+                <PatientList 
+                  selectedPatientsData={selectedPatientsData}
+                  onPatientClick={handlePatientClick}
+                />
               </div>
             </ScrollArea>
           </div>
