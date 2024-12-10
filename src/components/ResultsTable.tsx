@@ -11,7 +11,7 @@ import {
   getPaginationRowModel,
   RowSelectionState,
 } from '@tanstack/react-table';
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { TableHeader } from './table/TableHeader';
 import { TableBody } from './table/TableBody';
 import { TablePagination } from './table/TablePagination';
@@ -35,17 +35,19 @@ export const ResultsTable = ({ data, visibleRiskColumns }: ResultsTableProps) =>
 
   const columns = useTableColumns(visibleRiskColumns);
 
-  // Filter data based on search query
-  const filteredData = data?.filter(person => {
-    if (!searchQuery) return true;
-    const searchLower = searchQuery.toLowerCase();
-    return (
-      person.name?.toLowerCase().includes(searchLower) ||
-      person.mrn?.toString().includes(searchQuery)
-    );
-  }) || [];
-
-  console.log('Filtered data:', filteredData);
+  // Memoize filtered data to prevent unnecessary recalculations
+  const filteredData = useMemo(() => {
+    if (!data) return [];
+    
+    return data.filter(person => {
+      if (!searchQuery) return true;
+      const searchLower = searchQuery.toLowerCase();
+      return (
+        person.name?.toLowerCase().includes(searchLower) ||
+        person.mrn?.toString().includes(searchQuery)
+      );
+    });
+  }, [data, searchQuery]); // Only recalculate when data or searchQuery changes
 
   const table = useReactTable({
     data: filteredData,
@@ -73,7 +75,6 @@ export const ResultsTable = ({ data, visibleRiskColumns }: ResultsTableProps) =>
   const selectedRowCount = Object.keys(rowSelection).length;
 
   const handleViewPanel = () => {
-    console.log('Selected rows:', rowSelection);
     const selectedPatients = filteredData.filter((_, index) => rowSelection[index]);
     navigate('/panel', { state: { selectedPatients } });
   };
