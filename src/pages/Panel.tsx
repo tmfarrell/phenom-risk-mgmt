@@ -8,6 +8,8 @@ import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
 import { cn } from '@/lib/utils';
 import { useState } from 'react';
 import { usePatientData } from '@/hooks/usePatientData';
+import { ChartContainer, ChartTooltip, ChartTooltipContent } from '@/components/ui/chart';
+import { BoxPlot } from 'recharts';
 
 export default function Panel() {
   const location = useLocation();
@@ -23,33 +25,46 @@ export default function Panel() {
 
   console.log('Selected patients data:', selectedPatientsData);
 
-  const calculateAverageRisks = (timeframe: number) => {
+  const calculateBoxPlotData = () => {
     const riskFactors = ['ED', 'Hospitalization', 'Fall', 'Stroke', 'MI', 'CKD', 'Mental Health'];
-    const averages: { [key: string]: number } = {};
+    const timeframes = [1, 5];
+    const boxPlotData: any[] = [];
 
     riskFactors.forEach(factor => {
-      const validValues = selectedPatientsData
-        .filter(patient => 
-          patient.prediction_timeframe_yrs === timeframe && 
-          patient.risk_type === selectedRiskType &&
-          patient[factor as keyof Person] !== null
-        )
-        .map(patient => patient[factor as keyof Person])
-        .filter((value): value is number => typeof value === 'number');
+      timeframes.forEach(timeframe => {
+        const values = selectedPatientsData
+          .filter(patient => 
+            patient.prediction_timeframe_yrs === timeframe && 
+            patient.risk_type === selectedRiskType &&
+            patient[factor as keyof Person] !== null
+          )
+          .map(patient => patient[factor as keyof Person] as number)
+          .sort((a, b) => a - b);
 
-      if (validValues.length > 0) {
-        averages[factor] = validValues.reduce((sum, value) => sum + value, 0) / validValues.length;
-      } else {
-        averages[factor] = 0; // Default to 0 if no valid values
-      }
+        if (values.length > 0) {
+          const min = Math.min(...values);
+          const max = Math.max(...values);
+          const q1 = values[Math.floor(values.length * 0.25)];
+          const median = values[Math.floor(values.length * 0.5)];
+          const q3 = values[Math.floor(values.length * 0.75)];
+
+          boxPlotData.push({
+            factor,
+            timeframe: `${timeframe}yr`,
+            min,
+            q1,
+            median,
+            q3,
+            max,
+            color: timeframe === 1 ? '#60A5FA' : '#3B82F6'
+          });
+        }
+      });
     });
 
-    console.log(`Average risks for ${timeframe} year(s):`, averages);
-    return averages;
+    console.log('Box plot data:', boxPlotData);
+    return boxPlotData;
   };
-
-  const oneYearRisks = calculateAverageRisks(1);
-  const fiveYearRisks = calculateAverageRisks(5);
 
   const handlePatientClick = (patientId: number) => {
     navigate(`/patient/${patientId}`, {
@@ -59,6 +74,8 @@ export default function Panel() {
       }
     });
   };
+
+  const boxPlotData = calculateBoxPlotData();
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-indigo-50 to-slate-50">
@@ -88,7 +105,7 @@ export default function Panel() {
                 <Card className="p-4 glass-card">
                   <div className="flex flex-col gap-4">
                     <div className="flex items-center justify-between">
-                      <h2 className="text-xl font-semibold">Average Risk Factors</h2>
+                      <h2 className="text-xl font-semibold">Risk Factors Summary</h2>
                       <ToggleGroup 
                         type="single" 
                         value={selectedRiskType}
@@ -118,42 +135,52 @@ export default function Panel() {
                       </ToggleGroup>
                     </div>
 
-                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                      {/* 1 Year Risks */}
-                      <div className="space-y-4">
-                        <h3 className="text-lg font-semibold text-gray-700">1 Year Risks</h3>
-                        <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-                          {Object.entries(oneYearRisks).map(([factor, value]) => (
-                            <div
-                              key={factor}
-                              className="p-4 rounded-lg bg-white/50 backdrop-blur-sm border border-gray-100 shadow-sm transition-all hover:shadow-md"
-                            >
-                              <h3 className="text-gray-600 text-sm mb-1">{factor}</h3>
-                              <p className="text-2xl font-bold text-blue-600">
-                                {value.toFixed(2)}
-                              </p>
-                            </div>
-                          ))}
-                        </div>
-                      </div>
-
-                      {/* 5 Year Risks */}
-                      <div className="space-y-4">
-                        <h3 className="text-lg font-semibold text-gray-700">5 Year Risks</h3>
-                        <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-                          {Object.entries(fiveYearRisks).map(([factor, value]) => (
-                            <div
-                              key={factor}
-                              className="p-4 rounded-lg bg-white/50 backdrop-blur-sm border border-gray-100 shadow-sm transition-all hover:shadow-md"
-                            >
-                              <h3 className="text-gray-600 text-sm mb-1">{factor}</h3>
-                              <p className="text-2xl font-bold text-blue-600">
-                                {value.toFixed(2)}
-                              </p>
-                            </div>
-                          ))}
-                        </div>
-                      </div>
+                    <div className="h-[400px] w-full">
+                      <ChartContainer
+                        className="h-full"
+                        config={{
+                          primary: {
+                            theme: {
+                              light: "hsl(var(--primary))",
+                              dark: "hsl(var(--primary))",
+                            },
+                          },
+                        }}
+                      >
+                        <BoxPlot
+                          width={800}
+                          height={400}
+                          data={boxPlotData}
+                          margin={{
+                            top: 20,
+                            right: 20,
+                            bottom: 60,
+                            left: 60,
+                          }}
+                        >
+                          <ChartTooltip
+                            content={({ active, payload }) => {
+                              if (!active || !payload?.length) return null;
+                              const data = payload[0].payload;
+                              return (
+                                <ChartTooltipContent
+                                  className="space-y-1"
+                                  content={
+                                    <div>
+                                      <p className="font-medium">{data.factor} ({data.timeframe})</p>
+                                      <p>Min: {data.min.toFixed(2)}</p>
+                                      <p>Q1: {data.q1.toFixed(2)}</p>
+                                      <p>Median: {data.median.toFixed(2)}</p>
+                                      <p>Q3: {data.q3.toFixed(2)}</p>
+                                      <p>Max: {data.max.toFixed(2)}</p>
+                                    </div>
+                                  }
+                                />
+                              );
+                            }}
+                          />
+                        </BoxPlot>
+                      </ChartContainer>
                     </div>
                   </div>
                 </Card>
