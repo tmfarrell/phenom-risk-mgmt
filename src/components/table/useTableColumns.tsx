@@ -4,9 +4,29 @@ import { Button } from '../ui/button';
 import { ArrowUpDown } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { isHighRisk } from './tableConstants';
+import { Checkbox } from '../ui/checkbox';
 
 export const useTableColumns = (visibleRiskColumns: string[]) => {
   const baseColumns: ColumnDef<Person>[] = [
+    {
+      id: 'select',
+      header: ({ table }) => (
+        <Checkbox
+          checked={table.getIsAllPageRowsSelected()}
+          onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
+          aria-label="Select all"
+        />
+      ),
+      cell: ({ row }) => (
+        <Checkbox
+          checked={row.getIsSelected()}
+          onCheckedChange={(value) => row.toggleSelected(!!value)}
+          aria-label="Select row"
+        />
+      ),
+      enableSorting: false,
+      enableColumnFilter: false,
+    },
     {
       accessorKey: 'name',
       header: ({ column }) => (

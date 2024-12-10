@@ -9,6 +9,7 @@ import {
   getFilteredRowModel,
   ColumnFiltersState,
   getPaginationRowModel,
+  RowSelectionState,
 } from '@tanstack/react-table';
 import { useState } from 'react';
 import { TableHeader } from './table/TableHeader';
@@ -24,6 +25,7 @@ interface ResultsTableProps {
 export const ResultsTable = ({ data, visibleRiskColumns }: ResultsTableProps) => {
   const [sorting, setSorting] = useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
+  const [rowSelection, setRowSelection] = useState<RowSelectionState>({});
 
   const columns = useTableColumns(visibleRiskColumns);
 
@@ -36,9 +38,12 @@ export const ResultsTable = ({ data, visibleRiskColumns }: ResultsTableProps) =>
     onColumnFiltersChange: setColumnFilters,
     getFilteredRowModel: getFilteredRowModel(),
     getPaginationRowModel: getPaginationRowModel(),
+    onRowSelectionChange: setRowSelection,
+    enableRowSelection: true,
     state: {
       sorting,
       columnFilters,
+      rowSelection,
     },
     initialState: {
       pagination: {
