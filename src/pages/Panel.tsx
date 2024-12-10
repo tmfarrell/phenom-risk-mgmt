@@ -44,7 +44,7 @@ export default function Panel() {
             </a>
           </div>
 
-          <Card className="p-6">
+          <div className="detail-card">
             <h1 className="text-2xl font-bold mb-6">Panel Overview</h1>
             <div className="mb-4">
               <p className="text-gray-600">
@@ -54,16 +54,16 @@ export default function Panel() {
 
             <ScrollArea className="h-[500px]">
               <div className="space-y-6">
-                <Card className="p-4">
+                <Card className="p-4 glass-card">
                   <h2 className="text-xl font-semibold mb-4">Average Risk Factors</h2>
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                  <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
                     {Object.entries(averageRisks).map(([factor, value]) => (
                       <div
                         key={factor}
-                        className="p-4 rounded-lg bg-white shadow"
+                        className="p-4 rounded-lg bg-white/50 backdrop-blur-sm border border-gray-100 shadow-sm transition-all hover:shadow-md"
                       >
-                        <h3 className="text-gray-600 mb-2">{factor}</h3>
-                        <p className="text-2xl font-bold">
+                        <h3 className="text-gray-600 text-sm mb-1">{factor}</h3>
+                        <p className="text-2xl font-bold text-blue-600">
                           {value.toFixed(2)}
                         </p>
                       </div>
@@ -71,23 +71,23 @@ export default function Panel() {
                   </div>
                 </Card>
 
-                <Card className="p-4">
+                <Card className="p-4 glass-card">
                   <h2 className="text-xl font-semibold mb-4">Selected Patients</h2>
-                  <div className="space-y-4">
+                  <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
                     {selectedPatients.map((patient) => (
                       <div
                         key={patient.patient_id}
-                        className="p-4 rounded-lg bg-white shadow"
+                        className="p-3 rounded-lg bg-white/50 backdrop-blur-sm border border-gray-100 shadow-sm transition-all hover:shadow-md"
                       >
-                        <p className="font-semibold">{patient.name}</p>
-                        <p className="text-gray-600">ID: {patient.patient_id}</p>
+                        <p className="font-semibold text-sm truncate">{patient.name}</p>
+                        <p className="text-gray-500 text-xs">ID: {patient.patient_id}</p>
                       </div>
                     ))}
                   </div>
                 </Card>
               </div>
             </ScrollArea>
-          </Card>
+          </div>
         </div>
       </div>
     </div>
