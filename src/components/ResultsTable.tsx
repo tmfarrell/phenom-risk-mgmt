@@ -29,6 +29,9 @@ export const ResultsTable = ({ data, visibleRiskColumns }: ResultsTableProps) =>
   const [sorting, setSorting] = useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
   const [rowSelection, setRowSelection] = useState<RowSelectionState>({});
+  const [searchQuery, setSearchQuery] = useState('');
+  const [selectedTimeframe, setSelectedTimeframe] = useState<string>('1');
+  const [selectedRiskType, setSelectedRiskType] = useState<'relative' | 'absolute'>('relative');
 
   const columns = useTableColumns(visibleRiskColumns);
 
@@ -65,6 +68,19 @@ export const ResultsTable = ({ data, visibleRiskColumns }: ResultsTableProps) =>
 
   return (
     <div className="w-full rounded-md border">
+      <TableControls
+        searchQuery={searchQuery}
+        onSearchChange={setSearchQuery}
+        selectedTimeframe={selectedTimeframe}
+        onTimeframeChange={setSelectedTimeframe}
+        selectedRiskColumns={visibleRiskColumns}
+        onRiskColumnsChange={() => {}}
+        timeframes={[1, 5]}
+        selectedRiskType={selectedRiskType}
+        onRiskTypeChange={setSelectedRiskType}
+        selectedRowCount={selectedRowCount}
+        onViewPanel={handleViewPanel}
+      />
       <ScrollArea className="h-[600px]" type="always">
         <div className="relative">
           <Table>
