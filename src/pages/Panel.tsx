@@ -7,31 +7,44 @@ import { TitleSection } from '@/components/TitleSection';
 import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
 import { cn } from '@/lib/utils';
 import { useState } from 'react';
+import { usePatientData } from '@/hooks/usePatientData';
 
 export default function Panel() {
   const location = useLocation();
   const navigate = useNavigate();
-  const selectedPatients = location.state?.selectedPatients as Person[] || [];
+  const selectedPatientIds = (location.state?.selectedPatients as Person[] || []).map(p => p.patient_id);
+  const { data: allPatientData } = usePatientData();
   const [selectedRiskType, setSelectedRiskType] = useState<'relative' | 'absolute'>('relative');
+
+  // Filter all patient data to only include selected patients and their risks
+  const selectedPatientsData = allPatientData?.filter(patient => 
+    selectedPatientIds.includes(patient.patient_id)
+  ) || [];
+
+  console.log('Selected patients data:', selectedPatientsData);
 
   const calculateAverageRisks = (timeframe: number) => {
     const riskFactors = ['ED', 'Hospitalization', 'Fall', 'Stroke', 'MI', 'CKD', 'Mental Health'];
     const averages: { [key: string]: number } = {};
 
     riskFactors.forEach(factor => {
-      const validValues = selectedPatients
+      const validValues = selectedPatientsData
         .filter(patient => 
           patient.prediction_timeframe_yrs === timeframe && 
-          patient.risk_type === selectedRiskType
+          patient.risk_type === selectedRiskType &&
+          patient[factor as keyof Person] !== null
         )
         .map(patient => patient[factor as keyof Person])
         .filter((value): value is number => typeof value === 'number');
 
       if (validValues.length > 0) {
         averages[factor] = validValues.reduce((sum, value) => sum + value, 0) / validValues.length;
+      } else {
+        averages[factor] = 0; // Default to 0 if no valid values
       }
     });
 
+    console.log(`Average risks for ${timeframe} year(s):`, averages);
     return averages;
   };
 
@@ -42,7 +55,7 @@ export default function Panel() {
     navigate(`/patient/${patientId}`, {
       state: { 
         from: 'panel',
-        selectedPatients
+        selectedPatients: selectedPatientsData.filter(p => p.patient_id === patientId)
       }
     });
   };
@@ -66,7 +79,7 @@ export default function Panel() {
             <h1 className="text-2xl font-bold mb-6">Panel Overview</h1>
             <div className="mb-4">
               <p className="text-gray-600">
-                Selected Patients: {selectedPatients.length}
+                Selected Patients: {selectedPatientIds.length}
               </p>
             </div>
 
@@ -148,16 +161,20 @@ export default function Panel() {
                 <Card className="p-4 glass-card">
                   <h2 className="text-xl font-semibold mb-4">Selected Patients</h2>
                   <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
-                    {selectedPatients.map((patient) => (
-                      <div
-                        key={patient.patient_id}
-                        onClick={() => handlePatientClick(patient.patient_id)}
-                        className="p-3 rounded-lg bg-white/50 backdrop-blur-sm border border-gray-100 shadow-sm transition-all hover:shadow-md cursor-pointer hover:bg-white/70"
-                      >
-                        <p className="font-semibold text-sm truncate">{patient.name}</p>
-                        <p className="text-gray-500 text-xs">ID: {patient.patient_id}</p>
-                      </div>
-                    ))}
+                    {Array.from(new Set(selectedPatientsData.map(p => p.patient_id))).map((patientId) => {
+                      const patient = selectedPatientsData.find(p => p.patient_id === patientId);
+                      if (!patient) return null;
+                      return (
+                        <div
+                          key={patientId}
+                          onClick={() => handlePatientClick(patientId)}
+                          className="p-3 rounded-lg bg-white/50 backdrop-blur-sm border border-gray-100 shadow-sm transition-all hover:shadow-md cursor-pointer hover:bg-white/70"
+                        >
+                          <p className="font-semibold text-sm truncate">{patient.name}</p>
+                          <p className="text-gray-500 text-xs">ID: {patientId}</p>
+                        </div>
+                      );
+                    })}
                   </div>
                 </Card>
               </div>
