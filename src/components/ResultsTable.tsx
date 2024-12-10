@@ -49,14 +49,12 @@ export const ResultsTable = ({ data, visibleRiskColumns }: ResultsTableProps) =>
 
   return (
     <div className="w-full rounded-md border">
-      <ScrollArea className="h-[600px]" type="always">
-        <div className="min-w-full inline-block align-middle">
-          <div className="overflow-x-auto">
-            <Table>
-              <TableHeader table={table} />
-              <TableBody table={table} columns={columns} />
-            </Table>
-          </div>
+      <ScrollArea className="h-[600px] overflow-x-auto" type="always">
+        <div className="min-w-max">
+          <Table>
+            <TableHeader table={table} />
+            <TableBody table={table} columns={columns} />
+          </Table>
         </div>
       </ScrollArea>
       <TablePagination table={table} />

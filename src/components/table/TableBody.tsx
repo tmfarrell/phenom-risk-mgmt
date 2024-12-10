@@ -16,7 +16,7 @@ export const TableBody = ({ table, columns }: TableBodyProps) => {
             {row.getVisibleCells().map((cell, index) => (
               <TableCell
                 key={cell.id}
-                className={index === 0 ? 'sticky left-0 bg-background z-20 shadow-[2px_0_5px_-2px_rgba(0,0,0,0.1)]' : ''}
+                className={`${index === 0 ? 'sticky left-0 bg-background z-20 shadow-[2px_0_5px_-2px_rgba(0,0,0,0.1)]' : ''} whitespace-nowrap`}
               >
                 {flexRender(cell.column.columnDef.cell, cell.getContext())}
               </TableCell>
