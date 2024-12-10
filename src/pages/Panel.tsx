@@ -2,15 +2,11 @@ import { useLocation } from 'react-router-dom';
 import { Person } from '@/types/population';
 import { Card } from '@/components/ui/card';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { Button } from '@/components/ui/button';
-import { ArrowLeft } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
 import { Header } from '@/components/Header';
 import { TitleSection } from '@/components/TitleSection';
 
 export default function Panel() {
   const location = useLocation();
-  const navigate = useNavigate();
   const selectedPatients = location.state?.selectedPatients as Person[] || [];
 
   // Calculate average risks across selected patients
@@ -39,14 +35,14 @@ export default function Panel() {
       <TitleSection title="PhenOM Risk Management Dashboard" />
       <div className="p-6">
         <div className="max-w-[1600px] mx-auto">
-          <Button
-            variant="ghost"
-            className="mb-4"
-            onClick={() => navigate('/')}
-          >
-            <ArrowLeft className="mr-2 h-4 w-4" />
-            Back to Dashboard
-          </Button>
+          <div className="flex items-center justify-end mb-6">
+            <a 
+              href="/"
+              className="text-blue-600 hover:text-blue-800 transition-colors"
+            >
+              ← Back to Dashboard
+            </a>
+          </div>
 
           <Card className="p-6">
             <h1 className="text-2xl font-bold mb-6">Panel Overview</h1>
