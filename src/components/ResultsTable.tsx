@@ -16,6 +16,7 @@ import { TableHeader } from './table/TableHeader';
 import { TableBody } from './table/TableBody';
 import { TablePagination } from './table/TablePagination';
 import { useTableColumns } from './table/useTableColumns';
+import { TableControls } from './table/TableControls';
 
 interface ResultsTableProps {
   data: Person[];
@@ -51,6 +52,13 @@ export const ResultsTable = ({ data, visibleRiskColumns }: ResultsTableProps) =>
       },
     },
   });
+
+  const selectedRowCount = Object.keys(rowSelection).length;
+
+  const handleViewPanel = () => {
+    console.log('Selected rows:', rowSelection);
+    // TODO: Implement panel view logic
+  };
 
   return (
     <div className="w-full rounded-md border">

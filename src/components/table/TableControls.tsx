@@ -36,6 +36,8 @@ interface TableControlsProps {
   timeframes: number[];
   selectedRiskType: 'relative' | 'absolute';
   onRiskTypeChange: (value: 'relative' | 'absolute') => void;
+  selectedRowCount?: number;
+  onViewPanel?: () => void;
 }
 
 export const TableControls = ({
@@ -48,6 +50,8 @@ export const TableControls = ({
   timeframes,
   selectedRiskType,
   onRiskTypeChange,
+  selectedRowCount = 0,
+  onViewPanel,
 }: TableControlsProps) => {
   const [open, setOpen] = useState(false);
   
@@ -175,18 +179,31 @@ export const TableControls = ({
         </div>
       </div>
 
-      <div className="flex flex-col gap-2">
-        <Label htmlFor="search" className="text-center text-muted-foreground">Search (Name or MRN)</Label>
-        <div className="relative">
-          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500 h-4 w-4" />
-          <Input
-            id="search"
-            type="text"
-            value={searchQuery}
-            onChange={(e) => onSearchChange(e.target.value)}
-            className="pl-9"
-          />
+      <div className="flex items-end gap-4">
+        <div className="flex flex-col gap-2">
+          <Label htmlFor="search" className="text-center text-muted-foreground">Search (Name or MRN)</Label>
+          <div className="relative">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500 h-4 w-4" />
+            <Input
+              id="search"
+              type="text"
+              value={searchQuery}
+              onChange={(e) => onSearchChange(e.target.value)}
+              className="pl-9"
+            />
+          </div>
         </div>
+        <Button
+          variant="default"
+          className={cn(
+            "bg-blue-500 hover:bg-blue-600 text-white",
+            selectedRowCount > 0 && "bg-blue-600 hover:bg-blue-700"
+          )}
+          onClick={onViewPanel}
+          disabled={selectedRowCount === 0}
+        >
+          View Panel ({selectedRowCount})
+        </Button>
       </div>
     </div>
   );
