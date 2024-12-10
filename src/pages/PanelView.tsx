@@ -1,7 +1,8 @@
-import { useLocation } from 'react-router-dom';
+import { useLocation, Link } from 'react-router-dom';
 import { Header } from '@/components/Header';
 import { TitleSection } from '@/components/TitleSection';
 import { Person } from '@/types/population';
+import { Button } from '@/components/ui/button';
 
 export const PanelView = () => {
   const location = useLocation();
@@ -35,6 +36,13 @@ export const PanelView = () => {
       <TitleSection title="Panel View" />
       <div className="p-6">
         <div className="max-w-[1600px] mx-auto">
+          <div className="mb-4">
+            <Link to="/">
+              <Button variant="outline">
+                Return to Dashboard
+              </Button>
+            </Link>
+          </div>
           <div className="glass-card p-6">
             <h2 className="text-xl font-semibold mb-4">
               Panel Summary ({selectedPatients.length} patients)
