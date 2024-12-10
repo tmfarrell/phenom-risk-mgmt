@@ -50,7 +50,7 @@ export const ResultsTable = ({ data, visibleRiskColumns }: ResultsTableProps) =>
   return (
     <div className="w-full rounded-md border">
       <ScrollArea className="h-[600px] overflow-x-auto" type="always">
-        <div className="min-w-max">
+        <div className="min-w-max relative">
           <Table>
             <TableHeader table={table} />
             <TableBody table={table} columns={columns} />

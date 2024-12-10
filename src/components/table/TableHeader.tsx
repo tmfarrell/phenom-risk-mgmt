@@ -8,13 +8,13 @@ interface TableHeaderProps {
 
 export const TableHeader = ({ table }: TableHeaderProps) => {
   return (
-    <UITableHeader>
+    <UITableHeader className="sticky top-0">
       <TableRow className="bg-blue-50">
         {table.getHeaderGroups().map((headerGroup) => (
           headerGroup.headers.map((header, index) => (
             <TableHead
               key={header.id}
-              className={index === 0 ? 'sticky left-0 bg-blue-50 z-20 shadow-[2px_0_5px_-2px_rgba(0,0,0,0.1)]' : ''}
+              className={`${index === 0 ? 'sticky left-0 bg-blue-50 z-20 shadow-[2px_0_5px_-2px_rgba(0,0,0,0.1)]' : ''}`}
             >
               {header.isPlaceholder
                 ? null
