@@ -1,4 +1,4 @@
-import { useLocation } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { Person } from '@/types/population';
 import { Card } from '@/components/ui/card';
 import { ScrollArea } from '@/components/ui/scroll-area';
@@ -7,6 +7,7 @@ import { TitleSection } from '@/components/TitleSection';
 
 export default function Panel() {
   const location = useLocation();
+  const navigate = useNavigate();
   const selectedPatients = location.state?.selectedPatients as Person[] || [];
 
   // Calculate average risks across selected patients
@@ -28,6 +29,10 @@ export default function Panel() {
   };
 
   const averageRisks = calculateAverageRisks();
+
+  const handlePatientClick = (patientId: number) => {
+    navigate(`/patient/${patientId}`);
+  };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-indigo-50 to-slate-50">
@@ -77,7 +82,8 @@ export default function Panel() {
                     {selectedPatients.map((patient) => (
                       <div
                         key={patient.patient_id}
-                        className="p-3 rounded-lg bg-white/50 backdrop-blur-sm border border-gray-100 shadow-sm transition-all hover:shadow-md"
+                        onClick={() => handlePatientClick(patient.patient_id)}
+                        className="p-3 rounded-lg bg-white/50 backdrop-blur-sm border border-gray-100 shadow-sm transition-all hover:shadow-md cursor-pointer hover:bg-white/70"
                       >
                         <p className="font-semibold text-sm truncate">{patient.name}</p>
                         <p className="text-gray-500 text-xs">ID: {patient.patient_id}</p>
