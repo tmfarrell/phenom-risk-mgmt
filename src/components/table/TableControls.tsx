@@ -135,7 +135,7 @@ export const TableControls = ({
                 className="w-48 justify-between"
                 id="risk-factors"
               >
-                Select conditions
+                Select factors
                 <Badge variant="secondary" className="ml-2">
                   {currentSelectedColumns.length}
                 </Badge>
