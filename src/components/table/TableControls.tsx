@@ -173,20 +173,19 @@ export const TableControls = ({
             </PopoverContent>
           </Popover>
         </div>
+      </div>
 
-        <div className="flex flex-col gap-2">
-          <Label htmlFor="search" className="text-center text-muted-foreground">Search</Label>
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500 h-4 w-4" />
-            <Input
-              id="search"
-              type="text"
-              placeholder="Patient name or MRN"
-              value={searchQuery}
-              onChange={(e) => onSearchChange(e.target.value)}
-              className="pl-9"
-            />
-          </div>
+      <div className="flex flex-col gap-2">
+        <Label htmlFor="search" className="text-center text-muted-foreground">Search (Name or MRN)</Label>
+        <div className="relative">
+          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500 h-4 w-4" />
+          <Input
+            id="search"
+            type="text"
+            value={searchQuery}
+            onChange={(e) => onSearchChange(e.target.value)}
+            className="pl-9"
+          />
         </div>
       </div>
     </div>
