@@ -34,6 +34,11 @@ export const ResultsTable = ({
 
   const columns = useTableColumns(visibleRiskColumns);
 
+  // Reset row selection when data changes (e.g., due to search/filtering)
+  useEffect(() => {
+    setRowSelection({});
+  }, [data]);
+
   const table = useReactTable({
     data,
     columns,
