@@ -31,7 +31,12 @@ export default function Panel() {
   const averageRisks = calculateAverageRisks();
 
   const handlePatientClick = (patientId: number) => {
-    navigate(`/patient/${patientId}`);
+    navigate(`/patient/${patientId}`, {
+      state: { 
+        from: 'panel',
+        selectedPatients // Preserve the selected patients state
+      }
+    });
   };
 
   return (

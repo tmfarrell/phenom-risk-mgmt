@@ -1,19 +1,32 @@
 import { DetailView } from '@/components/DetailView';
 import { Header } from '@/components/Header';
 import { TitleSection } from '@/components/TitleSection';
-import { useParams } from 'react-router-dom';
+import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import { usePatientData } from '@/hooks/usePatientData';
 
 export const PatientDetails = () => {
   const { id } = useParams();
   const { data: patients, isLoading, error } = usePatientData();
+  const navigate = useNavigate();
+  const location = useLocation();
   
   console.log('PatientDetails - ID:', id);
   console.log('PatientDetails - All Patients:', patients);
+  console.log('PatientDetails - Location:', location);
   
   const person = patients?.find(p => p.patient_id === Number(id)) || null;
   
   console.log('PatientDetails - Selected Person:', person);
+
+  const handleBack = () => {
+    // If we came from the panel page, go back there
+    if (location.state?.from === 'panel') {
+      navigate('/panel', { state: location.state });
+    } else {
+      // Otherwise, go back to the main dashboard
+      navigate('/');
+    }
+  };
 
   if (isLoading) {
     return (
@@ -50,12 +63,12 @@ export const PatientDetails = () => {
       <div className="p-6">
         <div className="max-w-[1600px] mx-auto">
           <div className="flex items-center justify-end mb-6">
-            <a 
-              href="/"
+            <button 
+              onClick={handleBack}
               className="text-blue-600 hover:text-blue-800 transition-colors"
             >
               ← Back to Dashboard
-            </a>
+            </button>
           </div>
           <h2 className="text-2xl font-semibold mb-4 text-left">Patient Details</h2>
           <DetailView person={person} />
