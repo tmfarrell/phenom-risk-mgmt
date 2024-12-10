@@ -17,7 +17,7 @@ const formatDate = (dateString: string | null | undefined) => {
   }
 };
 
-export const useTableColumns = (visibleRiskColumns: string[]) => {
+export const useTableColumns = (visibleRiskColumns: string[], riskType: 'relative' | 'absolute') => {
   const baseColumns: ColumnDef<Person>[] = [
     {
       id: 'select',
@@ -109,7 +109,6 @@ export const useTableColumns = (visibleRiskColumns: string[]) => {
     ),
     cell: ({ row }) => {
       const value = row.getValue(column) as number;
-      const riskType = row.original.risk_type;
 
       if (value === undefined || value === null) {
         return 'N/A';

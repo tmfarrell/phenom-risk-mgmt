@@ -33,7 +33,7 @@ export const ResultsTable = ({ data, visibleRiskColumns }: ResultsTableProps) =>
   const [selectedTimeframe, setSelectedTimeframe] = useState<string>('1');
   const [selectedRiskType, setSelectedRiskType] = useState<'relative' | 'absolute'>('relative');
 
-  const columns = useTableColumns(visibleRiskColumns);
+  const columns = useTableColumns(visibleRiskColumns, selectedRiskType);
 
   // Memoize filtered data to prevent unnecessary recalculations
   const filteredData = useMemo(() => {
@@ -46,8 +46,8 @@ export const ResultsTable = ({ data, visibleRiskColumns }: ResultsTableProps) =>
         person.name?.toLowerCase().includes(searchLower) ||
         person.mrn?.toString().includes(searchQuery)
       );
-    });
-  }, [data, searchQuery]); // Only recalculate when data or searchQuery changes
+    }).filter(person => person.risk_type === selectedRiskType);
+  }, [data, searchQuery, selectedRiskType]); // Added selectedRiskType as dependency
 
   const table = useReactTable({
     data: filteredData,
