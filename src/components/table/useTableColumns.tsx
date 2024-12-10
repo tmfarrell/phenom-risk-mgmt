@@ -6,6 +6,17 @@ import { Link } from 'react-router-dom';
 import { isHighRisk } from './tableConstants';
 import { Checkbox } from '../ui/checkbox';
 
+const formatDate = (dateString: string | null | undefined) => {
+  if (!dateString) return 'N/A';
+  try {
+    const date = new Date(dateString);
+    return date.toISOString().split('T')[0]; // Returns YYYY-MM-DD format
+  } catch (e) {
+    console.error('Error formatting date:', e);
+    return 'N/A';
+  }
+};
+
 export const useTableColumns = (visibleRiskColumns: string[]) => {
   const baseColumns: ColumnDef<Person>[] = [
     {
@@ -66,7 +77,7 @@ export const useTableColumns = (visibleRiskColumns: string[]) => {
           <ArrowUpDown className="ml-2 h-4 w-4" />
         </Button>
       ),
-      cell: ({ row }) => row.getValue('dob') || 'N/A',
+      cell: ({ row }) => formatDate(row.getValue('dob')),
     },
     {
       accessorKey: 'last_visit',
@@ -80,7 +91,7 @@ export const useTableColumns = (visibleRiskColumns: string[]) => {
           <ArrowUpDown className="ml-2 h-4 w-4" />
         </Button>
       ),
-      cell: ({ row }) => row.getValue('last_visit') || 'N/A',
+      cell: ({ row }) => formatDate(row.getValue('last_visit')),
     },
   ];
 
