@@ -5,7 +5,6 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { Header } from '@/components/Header';
 import { TitleSection } from '@/components/TitleSection';
 import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
-import { Label } from '@/components/ui/label';
 import { cn } from '@/lib/utils';
 import { useState } from 'react';
 
@@ -15,7 +14,6 @@ export default function Panel() {
   const selectedPatients = location.state?.selectedPatients as Person[] || [];
   const [selectedRiskType, setSelectedRiskType] = useState<'relative' | 'absolute'>('relative');
 
-  // Calculate average risks across selected patients for a specific timeframe
   const calculateAverageRisks = (timeframe: number) => {
     const riskFactors = ['ED', 'Hospitalization', 'Fall', 'Stroke', 'MI', 'CKD', 'Mental Health'];
     const averages: { [key: string]: number } = {};
@@ -78,36 +76,33 @@ export default function Panel() {
                   <div className="flex flex-col gap-4">
                     <div className="flex items-center justify-between">
                       <h2 className="text-xl font-semibold">Average Risk Factors</h2>
-                      <div className="flex flex-col gap-2">
-                        <Label className="text-center text-muted-foreground">Risk Type</Label>
-                        <ToggleGroup 
-                          type="single" 
-                          value={selectedRiskType}
-                          onValueChange={(value) => {
-                            if (value) setSelectedRiskType(value as 'relative' | 'absolute');
-                          }}
-                          className="flex gap-2"
+                      <ToggleGroup 
+                        type="single" 
+                        value={selectedRiskType}
+                        onValueChange={(value) => {
+                          if (value) setSelectedRiskType(value as 'relative' | 'absolute');
+                        }}
+                        className="flex gap-2"
+                      >
+                        <ToggleGroupItem 
+                          value="relative" 
+                          className={cn(
+                            "px-4 py-2 rounded-md",
+                            selectedRiskType === 'relative' ? "bg-blue-100 hover:bg-blue-200" : "hover:bg-gray-100"
+                          )}
                         >
-                          <ToggleGroupItem 
-                            value="relative" 
-                            className={cn(
-                              "px-4 py-2 rounded-md",
-                              selectedRiskType === 'relative' ? "bg-blue-100 hover:bg-blue-200" : "hover:bg-gray-100"
-                            )}
-                          >
-                            Relative
-                          </ToggleGroupItem>
-                          <ToggleGroupItem 
-                            value="absolute"
-                            className={cn(
-                              "px-4 py-2 rounded-md",
-                              selectedRiskType === 'absolute' ? "bg-blue-100 hover:bg-blue-200" : "hover:bg-gray-100"
-                            )}
-                          >
-                            Absolute
-                          </ToggleGroupItem>
-                        </ToggleGroup>
-                      </div>
+                          Relative
+                        </ToggleGroupItem>
+                        <ToggleGroupItem 
+                          value="absolute"
+                          className={cn(
+                            "px-4 py-2 rounded-md",
+                            selectedRiskType === 'absolute' ? "bg-blue-100 hover:bg-blue-200" : "hover:bg-gray-100"
+                          )}
+                        >
+                          Absolute
+                        </ToggleGroupItem>
+                      </ToggleGroup>
                     </div>
 
                     <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
