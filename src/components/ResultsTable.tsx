@@ -34,10 +34,16 @@ export const ResultsTable = ({
 
   const columns = useTableColumns(visibleRiskColumns);
 
-  // Reset row selection when data changes (e.g., due to search/filtering)
+  // Only reset selection if selected rows are no longer in the filtered data
   useEffect(() => {
-    setRowSelection({});
-  }, [data]);
+    const selectedIds = Object.keys(rowSelection);
+    const currentIds = data.map((row, index) => index.toString());
+    const hasInvalidSelection = selectedIds.some(id => !currentIds.includes(id));
+    
+    if (hasInvalidSelection) {
+      setRowSelection({});
+    }
+  }, [data, rowSelection]);
 
   const table = useReactTable({
     data,
