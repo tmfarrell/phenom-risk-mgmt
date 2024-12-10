@@ -42,7 +42,7 @@ export const ResultsTable = ({ data, visibleRiskColumns }: ResultsTableProps) =>
     },
     initialState: {
       pagination: {
-        pageSize: 10,
+        pageSize: 8,
       },
     },
   });
