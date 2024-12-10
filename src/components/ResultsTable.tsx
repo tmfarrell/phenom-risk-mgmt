@@ -35,8 +35,18 @@ export const ResultsTable = ({ data, visibleRiskColumns }: ResultsTableProps) =>
 
   const columns = useTableColumns(visibleRiskColumns);
 
+  // Filter data based on search query
+  const filteredData = data.filter(person => {
+    if (!searchQuery) return true;
+    const searchLower = searchQuery.toLowerCase();
+    return (
+      person.name?.toLowerCase().includes(searchLower) ||
+      person.mrn?.toString().includes(searchQuery)
+    );
+  });
+
   const table = useReactTable({
-    data,
+    data: filteredData,
     columns,
     getCoreRowModel: getCoreRowModel(),
     onSortingChange: setSorting,
@@ -62,19 +72,24 @@ export const ResultsTable = ({ data, visibleRiskColumns }: ResultsTableProps) =>
 
   const handleViewPanel = () => {
     console.log('Selected rows:', rowSelection);
-    const selectedPatients = data.filter((_, index) => rowSelection[index]);
+    const selectedPatients = filteredData.filter((_, index) => rowSelection[index]);
     navigate('/panel', { state: { selectedPatients } });
   };
 
+  const handleRiskColumnsChange = (newColumns: string[]) => {
+    console.log('Risk columns changed:', newColumns);
+    // This would typically be handled by the parent component
+  };
+
   return (
-    <div className="w-full rounded-md">
+    <div className="w-full">
       <TableControls
         searchQuery={searchQuery}
         onSearchChange={setSearchQuery}
         selectedTimeframe={selectedTimeframe}
         onTimeframeChange={setSelectedTimeframe}
         selectedRiskColumns={visibleRiskColumns}
-        onRiskColumnsChange={() => {}}
+        onRiskColumnsChange={handleRiskColumnsChange}
         timeframes={[1, 5]}
         selectedRiskType={selectedRiskType}
         onRiskTypeChange={setSelectedRiskType}
