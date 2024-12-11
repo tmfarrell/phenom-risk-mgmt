@@ -1,6 +1,5 @@
 import { Person } from '../types/population';
 import { Card } from './ui/card';
-import { Avatar, AvatarFallback } from './ui/avatar';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from './ui/table';
 import { usePatientData } from '@/hooks/usePatientData';
 import { ToggleGroup, ToggleGroupItem } from './ui/toggle-group';
@@ -54,38 +53,22 @@ export const DetailView = ({ person }: DetailViewProps) => {
     <div className="space-y-4">
       <Card className="detail-card p-6">
         <div className="flex items-center space-x-4 mb-6 pb-6 border-b">
-          <Avatar className="h-20 w-20">
-            <AvatarFallback>{person.name?.[0] || '?'}</AvatarFallback>
-          </Avatar>
           <div>
-            <h2 className="text-2xl font-bold">{person.name || 'Unknown'}</h2>
-            <p className="text-gray-500">Patient ID: {person.patient_id}</p>
+            <h2 className="text-2xl font-bold">
+              {person.name || 'Unknown'}
+              <span className="font-normal">
+                {person.age && person.gender ? ` (${person.age}${person.gender?.[0]})` : ''}
+              </span>
+            </h2>
+            <p className="text-gray-500">
+              MRN: {person.mrn || 'N/A'} | DOB: {person.dob || 'N/A'} | Last visit: {person.last_visit || 'N/A'}
+            </p>
           </div>
         </div>
         <div className="grid grid-cols-6 gap-4">
           <div className="text-center">
-            <span className="text-gray-500 block mb-2">Age</span>
-            <span className="font-medium">{person.age || 'Not specified'}</span>
-          </div>
-          <div className="text-center">
-            <span className="text-gray-500 block mb-2">Date of Birth</span>
-            <span className="font-medium">{person.dob || 'Not specified'}</span>
-          </div>
-          <div className="text-center">
-            <span className="text-gray-500 block mb-2">Gender</span>
-            <span className="font-medium">{person.gender || 'Not specified'}</span>
-          </div>
-          <div className="text-center">
             <span className="text-gray-500 block mb-2">Location</span>
             <span className="font-medium">{person.location || 'Not specified'}</span>
-          </div>
-          <div className="text-center">
-            <span className="text-gray-500 block mb-2">MRN</span>
-            <span className="font-medium">{person.mrn || 'Not specified'}</span>
-          </div>
-          <div className="text-center">
-            <span className="text-gray-500 block mb-2">Last Visit</span>
-            <span className="font-medium">{person.last_visit || 'Not specified'}</span>
           </div>
         </div>
       </Card>
