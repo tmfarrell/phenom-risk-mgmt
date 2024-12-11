@@ -19,11 +19,9 @@ export const PatientDetails = () => {
   console.log('PatientDetails - Selected Person:', person);
 
   const handleBack = () => {
-    // If we came from the panel page, go back there
     if (location.state?.from === 'panel') {
       navigate('/panel', { state: location.state });
     } else {
-      // Otherwise, go back to the main dashboard
       navigate('/');
     }
   };
@@ -70,7 +68,6 @@ export const PatientDetails = () => {
               ← Back to Dashboard
             </button>
           </div>
-          <h2 className="text-2xl font-semibold mb-4 text-left">Patient Details</h2>
           <DetailView person={person} />
         </div>
       </div>
