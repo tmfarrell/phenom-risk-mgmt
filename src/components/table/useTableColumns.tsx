@@ -40,17 +40,17 @@ export const useTableColumns = (visibleRiskColumns: string[]) => {
         </Button>
       ),
       cell: ({ row }) => (
-        <div>
+        <div className="text-left">
           <Link
             to={`/patient/${row.original.patient_id}`}
             className="text-blue-600 hover:text-blue-800 transition-colors"
           >
             {row.getValue('name')}
           </Link>
-          <div className="text-sm text-gray-500">
+          <div className="text-xs text-gray-500">
             MRN: {row.original.mrn || 'N/A'}
           </div>
-          <div className="text-sm text-gray-500">
+          <div className="text-xs text-gray-500">
             DOB: {row.original.dob || 'N/A'}
           </div>
         </div>
