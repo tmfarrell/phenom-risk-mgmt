@@ -61,8 +61,7 @@ export const DetailView = ({ person }: DetailViewProps) => {
         </p>
       </div>
 
-      <div className="flex justify-between items-center mb-4">
-        <h3 className="text-lg font-semibold">Risk Factors</h3>
+      <div className="flex justify-end items-center mb-4">
         <ToggleGroup 
           type="single" 
           value={selectedRiskType}
