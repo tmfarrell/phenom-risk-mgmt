@@ -52,7 +52,7 @@ export const DetailView = ({ person }: DetailViewProps) => {
   return (
     <div className="space-y-4">
       <Card className="detail-card p-6">
-        <div className="mb-6 pb-6 border-b">
+        <div className="mb-6">
           <div>
             <h2 className="text-2xl font-bold text-left">
               {person.name || 'Unknown'}
@@ -60,7 +60,7 @@ export const DetailView = ({ person }: DetailViewProps) => {
                 {person.age && person.gender ? ` (${person.age}${person.gender?.[0]})` : ''}
               </span>
             </h2>
-            <p className="text-gray-500">
+            <p className="text-gray-500 text-left">
               MRN: {person.mrn || 'N/A'} | DOB: {person.dob || 'N/A'} | Last visit: {person.last_visit || 'N/A'}
             </p>
           </div>
