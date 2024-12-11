@@ -50,23 +50,12 @@ export const useTableColumns = (visibleRiskColumns: string[]) => {
           <div className="text-sm text-gray-500">
             MRN: {row.original.mrn || 'N/A'}
           </div>
+          <div className="text-sm text-gray-500">
+            DOB: {row.original.dob || 'N/A'}
+          </div>
         </div>
       ),
       enableColumnFilter: true,
-    },
-    {
-      accessorKey: 'dob',
-      header: ({ column }) => (
-        <Button
-          variant="ghost"
-          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-          className="hover:bg-transparent whitespace-nowrap"
-        >
-          Date of Birth
-          <ArrowUpDown className="ml-2 h-4 w-4" />
-        </Button>
-      ),
-      cell: ({ row }) => row.getValue('dob') || 'N/A',
     },
     {
       accessorKey: 'last_visit',
