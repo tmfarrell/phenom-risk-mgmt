@@ -6,9 +6,8 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { useState } from 'react';
 import { Person } from '@/types/population';
 import { TableControls } from '@/components/table/TableControls';
-import { Button } from '@/components/ui/button';
-import { PanelTopOpen } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
+import { Switch } from '@/components/ui/switch';
+import { Label } from '@/components/ui/label';
 
 export default function Index() {
   const { data: patientData, isLoading, error } = usePatientData();
@@ -23,11 +22,7 @@ export default function Index() {
     'MI',
   ]);
   const [selectedPatients, setSelectedPatients] = useState<Person[]>([]);
-  const navigate = useNavigate();
-
-  const handleViewPanel = () => {
-    navigate('/panel', { state: { selectedPatients } });
-  };
+  const [showSelectedOnly, setShowSelectedOnly] = useState(false);
 
   const filteredData = patientData?.filter((patient: Person) => {
     const searchLower = searchQuery.toLowerCase();
@@ -37,8 +32,9 @@ export default function Index() {
 
     const timeframeMatches = patient.prediction_timeframe_yrs === Number(selectedTimeframe);
     const riskTypeMatches = patient.risk_type === selectedRiskType;
+    const selectedFilter = showSelectedOnly ? selectedPatients.some(p => p.patient_id === patient.patient_id) : true;
 
-    return searchMatches && timeframeMatches && riskTypeMatches;
+    return searchMatches && timeframeMatches && riskTypeMatches && selectedFilter;
   });
 
   if (error) {
@@ -77,14 +73,14 @@ export default function Index() {
                   selectedRiskType={selectedRiskType}
                   onRiskTypeChange={setSelectedRiskType}
                 />
-                <Button
-                  onClick={handleViewPanel}
-                  className={`ml-4 ${selectedPatients.length > 0 ? 'bg-blue-500 hover:bg-blue-600' : ''}`}
-                  disabled={selectedPatients.length === 0}
-                >
-                  <PanelTopOpen className="mr-2 h-4 w-4" />
-                  View Panel
-                </Button>
+                <div className="flex items-center space-x-2">
+                  <Switch
+                    id="show-selected"
+                    checked={showSelectedOnly}
+                    onCheckedChange={setShowSelectedOnly}
+                  />
+                  <Label htmlFor="show-selected">Only show selected patients</Label>
+                </div>
               </div>
               {isLoading ? (
                 <div className="space-y-3">
