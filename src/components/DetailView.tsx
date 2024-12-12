@@ -41,10 +41,19 @@ export const DetailView = ({ person }: DetailViewProps) => {
   const fiveYearRisks = patientRisks.find(p => p.prediction_timeframe_yrs === 5);
 
   const riskFactors = ['ED', 'Hospitalization', 'Fall', 'Stroke', 'MI', 'CKD', 'Mental Health'];
+  const riskFieldMap = {
+    'Mental Health': 'Mental_Health',
+  };
 
   const isHighRisk = (value: number | string | null | undefined, riskType: 'relative' | 'absolute') => {
     if (typeof value !== 'number') return false;
     return riskType === 'absolute' ? value > 50 : value > 5;
+  };
+
+  const getRiskValue = (risks: Person | undefined, riskFactor: string) => {
+    if (!risks) return null;
+    const fieldName = riskFieldMap[riskFactor as keyof typeof riskFieldMap] || riskFactor;
+    return risks[fieldName as keyof Person];
   };
 
   return (
@@ -103,11 +112,11 @@ export const DetailView = ({ person }: DetailViewProps) => {
             {riskFactors.map((risk) => (
               <TableRow key={risk}>
                 <TableCell className="font-medium">{risk}</TableCell>
-                <TableCell className={isHighRisk(oneYearRisks?.[risk as keyof Person], selectedRiskType) ? 'bg-red-100' : ''}>
-                  {formatRiskValue(oneYearRisks?.[risk as keyof Person], selectedRiskType)}
+                <TableCell className={isHighRisk(getRiskValue(oneYearRisks, risk), selectedRiskType) ? 'bg-red-100' : ''}>
+                  {formatRiskValue(getRiskValue(oneYearRisks, risk), selectedRiskType)}
                 </TableCell>
-                <TableCell className={isHighRisk(fiveYearRisks?.[risk as keyof Person], selectedRiskType) ? 'bg-red-100' : ''}>
-                  {formatRiskValue(fiveYearRisks?.[risk as keyof Person], selectedRiskType)}
+                <TableCell className={isHighRisk(getRiskValue(fiveYearRisks, risk), selectedRiskType) ? 'bg-red-100' : ''}>
+                  {formatRiskValue(getRiskValue(fiveYearRisks, risk), selectedRiskType)}
                 </TableCell>
               </TableRow>
             ))}
