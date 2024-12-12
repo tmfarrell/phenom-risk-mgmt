@@ -14,6 +14,7 @@ interface DetailViewProps {
 
 export const DetailView = ({ person }: DetailViewProps) => {
   const [selectedRiskType, setSelectedRiskType] = useState<'relative' | 'absolute'>('relative');
+  const [selectedTimeframe, setSelectedTimeframe] = useState<string>('1');
 
   if (!person) {
     return (
@@ -38,7 +39,7 @@ export const DetailView = ({ person }: DetailViewProps) => {
   
   // Get the latest risks for each timeframe and risk type
   const latestRisks = patientRisks
-    .filter(p => p.risk_type === selectedRiskType)
+    .filter(p => p.risk_type === selectedRiskType && p.prediction_timeframe_yrs === Number(selectedTimeframe))
     .reduce((acc, curr) => {
       const key = `${curr.prediction_timeframe_yrs}`;
       if (!acc[key] || new Date(curr.recorded_date || '') > new Date(acc[key].recorded_date || '')) {
@@ -47,8 +48,7 @@ export const DetailView = ({ person }: DetailViewProps) => {
       return acc;
     }, {} as Record<string, Person>);
 
-  const oneYearRisks = latestRisks['1'];
-  const fiveYearRisks = latestRisks['5'];
+  const currentRisks = latestRisks[selectedTimeframe];
 
   const riskFactors = ['ED', 'Hospitalization', 'Fall', 'Stroke', 'MI', 'CKD', 'Mental Health'];
   const riskFieldMap = {
@@ -67,7 +67,10 @@ export const DetailView = ({ person }: DetailViewProps) => {
   };
 
   // Filter risks for the selected risk type for the trends chart
-  const selectedTypeRisks = patientRisks.filter(p => p.risk_type === selectedRiskType);
+  const selectedTypeRisks = patientRisks.filter(p => 
+    p.risk_type === selectedRiskType && 
+    p.prediction_timeframe_yrs === Number(selectedTimeframe)
+  );
 
   return (
     <Card className="p-6">
@@ -83,7 +86,35 @@ export const DetailView = ({ person }: DetailViewProps) => {
         </p>
       </div>
 
-      <div className="flex justify-end items-center mb-4">
+      <div className="flex justify-end items-center gap-4 mb-4">
+        <ToggleGroup 
+          type="single" 
+          value={selectedTimeframe}
+          onValueChange={(value) => {
+            if (value) setSelectedTimeframe(value);
+          }}
+          className="flex gap-2"
+        >
+          <ToggleGroupItem 
+            value="1" 
+            className={cn(
+              "px-4 py-2 rounded-md",
+              selectedTimeframe === '1' ? "bg-blue-100 hover:bg-blue-200" : "hover:bg-gray-100"
+            )}
+          >
+            1 Year
+          </ToggleGroupItem>
+          <ToggleGroupItem 
+            value="5"
+            className={cn(
+              "px-4 py-2 rounded-md",
+              selectedTimeframe === '5' ? "bg-blue-100 hover:bg-blue-200" : "hover:bg-gray-100"
+            )}
+          >
+            5 Years
+          </ToggleGroupItem>
+        </ToggleGroup>
+
         <ToggleGroup 
           type="single" 
           value={selectedRiskType}
@@ -117,23 +148,19 @@ export const DetailView = ({ person }: DetailViewProps) => {
           <TableHeader>
             <TableRow>
               <TableHead>Risk Factor</TableHead>
-              <TableHead>1 Year Risk</TableHead>
-              <TableHead>5 Year Risk</TableHead>
               <TableHead>Calculated Date</TableHead>
+              <TableHead>Risk Value</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {riskFactors.map((risk) => (
               <TableRow key={risk}>
                 <TableCell className="font-medium">{risk}</TableCell>
-                <TableCell className={isHighRisk(getRiskValue(oneYearRisks, risk), selectedRiskType) ? 'bg-red-100' : ''}>
-                  {formatRiskValue(getRiskValue(oneYearRisks, risk), selectedRiskType)}
-                </TableCell>
-                <TableCell className={isHighRisk(getRiskValue(fiveYearRisks, risk), selectedRiskType) ? 'bg-red-100' : ''}>
-                  {formatRiskValue(getRiskValue(fiveYearRisks, risk), selectedRiskType)}
-                </TableCell>
                 <TableCell>
-                  {oneYearRisks?.recorded_date ? format(new Date(oneYearRisks.recorded_date), 'MM/dd/yyyy') : 'N/A'}
+                  {currentRisks?.recorded_date ? format(new Date(currentRisks.recorded_date), 'yyyy-MM-dd') : 'N/A'}
+                </TableCell>
+                <TableCell className={isHighRisk(getRiskValue(currentRisks, risk), selectedRiskType) ? 'bg-red-100' : ''}>
+                  {formatRiskValue(getRiskValue(currentRisks, risk), selectedRiskType)}
                 </TableCell>
               </TableRow>
             ))}
@@ -141,7 +168,10 @@ export const DetailView = ({ person }: DetailViewProps) => {
         </Table>
       </div>
 
-      <RiskTrendsChart data={selectedTypeRisks} selectedRiskType={selectedRiskType} />
+      <RiskTrendsChart 
+        data={selectedTypeRisks} 
+        selectedRiskType={selectedRiskType} 
+      />
     </Card>
   );
 };
