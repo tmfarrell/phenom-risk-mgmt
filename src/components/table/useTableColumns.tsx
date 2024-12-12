@@ -110,18 +110,31 @@ export const useTableColumns = (visibleRiskColumns: string[]) => {
         return change.toFixed(2);
       };
 
+      const getArrowColor = (change: number, riskType: string) => {
+        if (riskType === 'absolute') {
+          if (change > 15) return 'text-red-500';
+          if (change < -15) return 'text-green-500';
+          return 'text-black';
+        } else {
+          if (change > 1) return 'text-red-500';
+          if (change < -1) return 'text-green-500';
+          return 'text-black';
+        }
+      };
+
       const renderChangeArrow = (change: number, threshold: number) => {
         if (Math.abs(change) <= threshold) return null;
 
         const tooltipText = `${formatChangeValue(change, riskType)} change from ${changeSince || 'unknown date'}`;
+        const arrowColor = getArrowColor(change, riskType);
 
         return (
           <TooltipProvider>
             <Tooltip>
               <TooltipTrigger>
                 {change > 0 
-                  ? <ArrowUp className="h-4 w-4 text-red-500 ml-2" />
-                  : <ArrowDown className="h-4 w-4 text-green-500 ml-2" />
+                  ? <ArrowUp className={`h-4 w-4 ml-2 ${arrowColor}`} />
+                  : <ArrowDown className={`h-4 w-4 ml-2 ${arrowColor}`} />
                 }
               </TooltipTrigger>
               <TooltipContent>
