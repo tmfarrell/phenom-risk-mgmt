@@ -3,7 +3,7 @@ import { Person } from '@/types/population';
 import { Button } from '../ui/button';
 import { ArrowUpDown, ArrowUp, ArrowDown } from 'lucide-react';
 import { Link } from 'react-router-dom';
-import { isHighRisk } from './tableConstants';
+import { isHighRisk, getFieldName } from './tableConstants';
 import { Checkbox } from '../ui/checkbox';
 import { 
   Tooltip,
@@ -80,7 +80,7 @@ export const useTableColumns = (visibleRiskColumns: string[]) => {
   ];
 
   const riskColumns: ColumnDef<Person>[] = visibleRiskColumns.map((column): ColumnDef<Person> => ({
-    accessorKey: column,
+    accessorKey: getFieldName(column),
     header: ({ column: tableColumn }) => (
       <Button
         variant="ghost"
@@ -92,9 +92,10 @@ export const useTableColumns = (visibleRiskColumns: string[]) => {
       </Button>
     ),
     cell: ({ row }) => {
-      const value = row.getValue(column) as number;
+      const fieldName = getFieldName(column);
+      const value = row.getValue(fieldName) as number;
       const riskType = row.original.risk_type;
-      const changeField = `${column}_change` as keyof Person;
+      const changeField = `${fieldName}_change` as keyof Person;
       const change = row.original[changeField] as number;
       const changeSince = row.original.change_since;
 
