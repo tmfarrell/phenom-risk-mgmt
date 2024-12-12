@@ -133,8 +133,8 @@ export const useTableColumns = (visibleRiskColumns: string[]) => {
             <Tooltip>
               <TooltipTrigger>
                 {change > 0 
-                  ? <ArrowUp className={`h-4 w-4 ml-2 ${arrowColor}`} />
-                  : <ArrowDown className={`h-4 w-4 ml-2 ${arrowColor}`} />
+                  ? <ArrowUp className={`h-4 w-4 ${arrowColor}`} />
+                  : <ArrowDown className={`h-4 w-4 ${arrowColor}`} />
                 }
               </TooltipTrigger>
               <TooltipContent>
@@ -151,20 +151,28 @@ export const useTableColumns = (visibleRiskColumns: string[]) => {
         const isHighAbsoluteRisk = roundedValue > 50;
         return (
           <div className="flex items-center justify-center w-full">
-            <div className={`${isHighAbsoluteRisk ? 'bg-red-100' : ''} w-16 text-center py-1 rounded`}>
-              <span>{`${roundedValue}%`}</span>
+            <div className="flex items-center min-w-[5rem]">
+              <div className={`${isHighAbsoluteRisk ? 'bg-red-100' : ''} w-16 text-center py-1 rounded`}>
+                <span>{`${roundedValue}%`}</span>
+              </div>
+              <div className="w-4 ml-2">
+                {renderChangeArrow(change, 5)}
+              </div>
             </div>
-            {renderChangeArrow(change, 5)}
           </div>
         );
       } else {
         // For relative risk
         return (
           <div className="flex items-center justify-center w-full">
-            <div className={`${isHighRisk(value) ? 'bg-red-100' : ''} w-16 text-center py-1 rounded`}>
-              <span>{value.toFixed(2)}</span>
+            <div className="flex items-center min-w-[5rem]">
+              <div className={`${isHighRisk(value) ? 'bg-red-100' : ''} w-16 text-center py-1 rounded`}>
+                <span>{value.toFixed(2)}</span>
+              </div>
+              <div className="w-4 ml-2">
+                {renderChangeArrow(change, 0.3)}
+              </div>
             </div>
-            {renderChangeArrow(change, 0.3)}
           </div>
         );
       }
