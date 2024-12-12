@@ -102,7 +102,7 @@ export const useTableColumns = (visibleRiskColumns: string[]) => {
         return (
           <div className={`${isHighAbsoluteRisk ? 'bg-red-100' : ''} whitespace-nowrap px-2 flex items-center justify-between`}>
             <span>{`${roundedValue}%`}</span>
-            {Math.abs(change) > 0.3 && (
+            {Math.abs(change) > 5 && (
               change > 0 
                 ? <ArrowUp className="h-4 w-4 text-red-500 ml-2" />
                 : <ArrowDown className="h-4 w-4 text-green-500 ml-2" />
