@@ -1,7 +1,7 @@
 import { ResultsTable } from '@/components/ResultsTable';
 import { Header } from '@/components/Header';
 import { TitleSection } from '@/components/TitleSection';
-import { usePatientData } from '@/hooks/usePatientData';
+import { usePatientDataLatest } from '@/hooks/usePatientDataLatest';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useState } from 'react';
 import { Person } from '@/types/population';
@@ -10,7 +10,7 @@ import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
 
 export default function Index() {
-  const { data: patientData, isLoading, error } = usePatientData();
+  const { data: patientData, isLoading, error } = usePatientDataLatest();
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedTimeframe, setSelectedTimeframe] = useState<string>('1');
   const [selectedRiskType, setSelectedRiskType] = useState<'relative' | 'absolute'>('relative');
