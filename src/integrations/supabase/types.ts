@@ -44,46 +44,70 @@ export type Database = {
       }
       phenom_risk: {
         Row: {
+          change_since: string | null
           CKD: number | null
+          CKD_change: number | null
           ED: number | null
+          ED_change: number | null
           Fall: number | null
+          Fall_change: number | null
           Hospitalization: number | null
-          "Mental Health": number | null
+          Hospitalization_change: number | null
+          Mental_Health: number | null
+          Mental_Health_change: number | null
           MI: number | null
+          MI_change: number | null
           patient_id: number
           prediction_timeframe_yrs: number | null
           recorded_date: string | null
           risk_abs_id: number
           risk_type: Database["public"]["Enums"]["risk_type"]
           Stroke: number | null
+          Stroke_change: number | null
         }
         Insert: {
+          change_since?: string | null
           CKD?: number | null
+          CKD_change?: number | null
           ED?: number | null
+          ED_change?: number | null
           Fall?: number | null
+          Fall_change?: number | null
           Hospitalization?: number | null
-          "Mental Health"?: number | null
+          Hospitalization_change?: number | null
+          Mental_Health?: number | null
+          Mental_Health_change?: number | null
           MI?: number | null
+          MI_change?: number | null
           patient_id: number
           prediction_timeframe_yrs?: number | null
           recorded_date?: string | null
           risk_abs_id?: number
           risk_type?: Database["public"]["Enums"]["risk_type"]
           Stroke?: number | null
+          Stroke_change?: number | null
         }
         Update: {
+          change_since?: string | null
           CKD?: number | null
+          CKD_change?: number | null
           ED?: number | null
+          ED_change?: number | null
           Fall?: number | null
+          Fall_change?: number | null
           Hospitalization?: number | null
-          "Mental Health"?: number | null
+          Hospitalization_change?: number | null
+          Mental_Health?: number | null
+          Mental_Health_change?: number | null
           MI?: number | null
+          MI_change?: number | null
           patient_id?: number
           prediction_timeframe_yrs?: number | null
           recorded_date?: string | null
           risk_abs_id?: number
           risk_type?: Database["public"]["Enums"]["risk_type"]
           Stroke?: number | null
+          Stroke_change?: number | null
         }
         Relationships: [
           {
