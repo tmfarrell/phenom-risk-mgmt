@@ -18,7 +18,7 @@ export const usePatientData = () => {
         throw patientsError;
       }
 
-      // Fetch risk data and order by recorded_date to get latest entries
+      // Fetch risk data and order by recorded_date
       const { data: risks, error: risksError } = await supabase
         .from('phenom_risk')
         .select('*')
@@ -31,25 +31,9 @@ export const usePatientData = () => {
 
       console.log('Raw data:', { patients, risks });
 
-      // Create a map to store the latest risk entry for each unique combination
-      const latestRisks = new Map();
-      
-      if (risks) {
-        risks.forEach(risk => {
-          // Create a unique key for each combination
-          const key = `${risk.patient_id}-${risk.prediction_timeframe_yrs}-${risk.risk_type}`;
-          
-          // Only store the first occurrence (which is the latest due to our ordering)
-          if (!latestRisks.has(key)) {
-            latestRisks.set(key, risk);
-          }
-        });
-      }
-
-      // Transform data to match Person interface using only the latest risks
+      // Transform data to match Person interface
       const transformedData: Person[] = (patients || []).flatMap((patient) => {
-        const patientRisks = Array.from(latestRisks.values())
-          .filter(risk => risk.patient_id === patient.patient_id);
+        const patientRisks = risks?.filter(risk => risk.patient_id === patient.patient_id) || [];
         
         // If no risks found for patient, return single entry with null values
         if (patientRisks.length === 0) {
@@ -76,7 +60,7 @@ export const usePatientData = () => {
           }];
         }
         
-        // Return an entry for each risk timeframe and type combination
+        // Return an entry for each risk record
         return patientRisks.map(risk => ({
           ...patient,
           ED: risk.ED,

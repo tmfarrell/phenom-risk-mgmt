@@ -5,6 +5,8 @@ import { usePatientData } from '@/hooks/usePatientData';
 import { ToggleGroup, ToggleGroupItem } from './ui/toggle-group';
 import { useState } from 'react';
 import { cn } from '@/lib/utils';
+import { RiskTrendsChart } from './RiskTrendsChart';
+import { format } from 'date-fns';
 
 interface DetailViewProps {
   person: Person | null;
@@ -32,13 +34,21 @@ export const DetailView = ({ person }: DetailViewProps) => {
   };
 
   const { data: patientData } = usePatientData();
-  const patientRisks = patientData?.filter(p => 
-    p.patient_id === person.patient_id && 
-    p.risk_type === selectedRiskType
-  ) || [];
+  const patientRisks = patientData?.filter(p => p.patient_id === person.patient_id) || [];
   
-  const oneYearRisks = patientRisks.find(p => p.prediction_timeframe_yrs === 1);
-  const fiveYearRisks = patientRisks.find(p => p.prediction_timeframe_yrs === 5);
+  // Get the latest risks for each timeframe and risk type
+  const latestRisks = patientRisks
+    .filter(p => p.risk_type === selectedRiskType)
+    .reduce((acc, curr) => {
+      const key = `${curr.prediction_timeframe_yrs}`;
+      if (!acc[key] || new Date(curr.recorded_date || '') > new Date(acc[key].recorded_date || '')) {
+        acc[key] = curr;
+      }
+      return acc;
+    }, {} as Record<string, Person>);
+
+  const oneYearRisks = latestRisks['1'];
+  const fiveYearRisks = latestRisks['5'];
 
   const riskFactors = ['ED', 'Hospitalization', 'Fall', 'Stroke', 'MI', 'CKD', 'Mental Health'];
   const riskFieldMap = {
@@ -55,6 +65,9 @@ export const DetailView = ({ person }: DetailViewProps) => {
     const fieldName = riskFieldMap[riskFactor as keyof typeof riskFieldMap] || riskFactor;
     return risks[fieldName as keyof Person];
   };
+
+  // Filter risks for the selected risk type for the trends chart
+  const selectedTypeRisks = patientRisks.filter(p => p.risk_type === selectedRiskType);
 
   return (
     <Card className="p-6">
@@ -106,6 +119,7 @@ export const DetailView = ({ person }: DetailViewProps) => {
               <TableHead>Risk Factor</TableHead>
               <TableHead>1 Year Risk</TableHead>
               <TableHead>5 Year Risk</TableHead>
+              <TableHead>Calculated Date</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -118,11 +132,16 @@ export const DetailView = ({ person }: DetailViewProps) => {
                 <TableCell className={isHighRisk(getRiskValue(fiveYearRisks, risk), selectedRiskType) ? 'bg-red-100' : ''}>
                   {formatRiskValue(getRiskValue(fiveYearRisks, risk), selectedRiskType)}
                 </TableCell>
+                <TableCell>
+                  {oneYearRisks?.recorded_date ? format(new Date(oneYearRisks.recorded_date), 'MM/dd/yyyy') : 'N/A'}
+                </TableCell>
               </TableRow>
             ))}
           </TableBody>
         </Table>
       </div>
+
+      <RiskTrendsChart data={selectedTypeRisks} selectedRiskType={selectedRiskType} />
     </Card>
   );
 };
