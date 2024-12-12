@@ -150,16 +150,20 @@ export const useTableColumns = (visibleRiskColumns: string[]) => {
         const roundedValue = Math.round(value);
         const isHighAbsoluteRisk = roundedValue > 50;
         return (
-          <div className={`${isHighAbsoluteRisk ? 'bg-red-100' : ''} whitespace-nowrap px-2 flex items-center justify-center`}>
-            <span>{`${roundedValue}%`}</span>
+          <div className="flex items-center justify-center w-full">
+            <div className={`${isHighAbsoluteRisk ? 'bg-red-100' : ''} w-16 text-center py-1 rounded`}>
+              <span>{`${roundedValue}%`}</span>
+            </div>
             {renderChangeArrow(change, 5)}
           </div>
         );
       } else {
         // For relative risk
         return (
-          <div className={`${isHighRisk(value) ? 'bg-red-100' : ''} whitespace-nowrap px-2 flex items-center justify-center`}>
-            <span>{value.toFixed(2)}</span>
+          <div className="flex items-center justify-center w-full">
+            <div className={`${isHighRisk(value) ? 'bg-red-100' : ''} w-16 text-center py-1 rounded`}>
+              <span>{value.toFixed(2)}</span>
+            </div>
             {renderChangeArrow(change, 0.3)}
           </div>
         );
