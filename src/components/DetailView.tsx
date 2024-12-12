@@ -24,22 +24,22 @@ export const DetailView = ({ person }: DetailViewProps) => {
   }
 
   const { data: patientData } = usePatientData();
+  
+  // Filter data for the current patient
   const patientRisks = patientData?.filter(p => p.patient_id === person.patient_id) || [];
   
-  // Get the latest risks for each timeframe and risk type
-  const latestRisks = patientRisks
-    .filter(p => p.risk_type === selectedRiskType && p.prediction_timeframe_yrs === Number(selectedTimeframe))
-    .reduce((acc, curr) => {
-      const key = `${curr.prediction_timeframe_yrs}`;
-      if (!acc[key] || new Date(curr.recorded_date || '') > new Date(acc[key].recorded_date || '')) {
-        acc[key] = curr;
-      }
-      return acc;
-    }, {} as Record<string, Person>);
+  // Get the latest risk record for the selected risk type and timeframe
+  const latestRisk = patientRisks
+    .filter(p => 
+      p.risk_type === selectedRiskType && 
+      p.prediction_timeframe_yrs === Number(selectedTimeframe)
+    )
+    .sort((a, b) => {
+      if (!a.recorded_date || !b.recorded_date) return 0;
+      return new Date(b.recorded_date).getTime() - new Date(a.recorded_date).getTime();
+    })[0];
 
-  const currentRisks = latestRisks[selectedTimeframe];
-
-  // Filter risks for the selected risk type for the trends chart
+  // Filter risks for the selected risk type and timeframe for the trends chart
   const selectedTypeRisks = patientRisks.filter(p => 
     p.risk_type === selectedRiskType && 
     p.prediction_timeframe_yrs === Number(selectedTimeframe)
@@ -57,7 +57,7 @@ export const DetailView = ({ person }: DetailViewProps) => {
       />
 
       <RiskTable 
-        currentRisks={currentRisks}
+        currentRisks={latestRisk}
         selectedRiskType={selectedRiskType}
       />
 
