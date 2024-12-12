@@ -1,7 +1,7 @@
 import { ColumnDef } from '@tanstack/react-table';
 import { Person } from '@/types/population';
 import { Button } from '../ui/button';
-import { ArrowUpDown } from 'lucide-react';
+import { ArrowUpDown, ArrowUp, ArrowDown } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { isHighRisk } from './tableConstants';
 import { Checkbox } from '../ui/checkbox';
@@ -88,6 +88,8 @@ export const useTableColumns = (visibleRiskColumns: string[]) => {
     cell: ({ row }) => {
       const value = row.getValue(column) as number;
       const riskType = row.original.risk_type;
+      const changeField = `${column}_change` as keyof Person;
+      const change = row.original[changeField] as number;
 
       if (value === undefined || value === null) {
         return 'N/A';
@@ -98,15 +100,25 @@ export const useTableColumns = (visibleRiskColumns: string[]) => {
         const roundedValue = Math.round(value);
         const isHighAbsoluteRisk = roundedValue > 50;
         return (
-          <div className={`${isHighAbsoluteRisk ? 'bg-red-100' : ''} whitespace-nowrap px-2`}>
-            {`${roundedValue}%`}
+          <div className={`${isHighAbsoluteRisk ? 'bg-red-100' : ''} whitespace-nowrap px-2 flex items-center justify-between`}>
+            <span>{`${roundedValue}%`}</span>
+            {Math.abs(change) > 0.3 && (
+              change > 0 
+                ? <ArrowUp className="h-4 w-4 text-red-500 ml-2" />
+                : <ArrowDown className="h-4 w-4 text-green-500 ml-2" />
+            )}
           </div>
         );
       } else {
-        // For relative risk, keep the existing formatting
+        // For relative risk
         return (
-          <div className={`${isHighRisk(value) ? 'bg-red-100' : ''} whitespace-nowrap px-2`}>
-            {value.toFixed(2)}
+          <div className={`${isHighRisk(value) ? 'bg-red-100' : ''} whitespace-nowrap px-2 flex items-center justify-between`}>
+            <span>{value.toFixed(2)}</span>
+            {Math.abs(change) > 0.3 && (
+              change > 0 
+                ? <ArrowUp className="h-4 w-4 text-red-500 ml-2" />
+                : <ArrowDown className="h-4 w-4 text-green-500 ml-2" />
+            )}
           </div>
         );
       }
