@@ -116,8 +116,8 @@ export const useTableColumns = (visibleRiskColumns: string[]) => {
           if (change < -15) return 'text-green-500';
           return 'text-black';
         } else {
-          if (change > 1) return 'text-red-500';
-          if (change < -1) return 'text-green-500';
+          if (change > 0.75) return 'text-red-500';
+          if (change < -0.75) return 'text-green-500';
           return 'text-black';
         }
       };
