@@ -3,13 +3,32 @@ import { supabase } from '@/integrations/supabase/client';
 import { Button } from './ui/button';
 import { LogOut } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import { useToast } from './ui/use-toast';
 
 export const Header = () => {
   const navigate = useNavigate();
+  const { toast } = useToast();
 
   const handleLogout = async () => {
-    await supabase.auth.signOut();
-    navigate('/login');
+    try {
+      const { error } = await supabase.auth.signOut();
+      if (error) throw error;
+      
+      toast({
+        title: "Logged out successfully",
+        duration: 2000
+      });
+      
+      navigate('/login');
+    } catch (error) {
+      console.error('Error logging out:', error);
+      toast({
+        title: "Error logging out",
+        description: "Please try again",
+        variant: "destructive",
+        duration: 2000
+      });
+    }
   };
 
   return (

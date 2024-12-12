@@ -34,18 +34,20 @@ export const usePatientData = () => {
       // Create a map to store the latest risk entry for each unique combination
       const latestRisks = new Map();
       
-      risks.forEach(risk => {
-        // Create a unique key for each combination
-        const key = `${risk.patient_id}-${risk.prediction_timeframe_yrs}-${risk.risk_type}`;
-        
-        // Only store the first occurrence (which is the latest due to our ordering)
-        if (!latestRisks.has(key)) {
-          latestRisks.set(key, risk);
-        }
-      });
+      if (risks) {
+        risks.forEach(risk => {
+          // Create a unique key for each combination
+          const key = `${risk.patient_id}-${risk.prediction_timeframe_yrs}-${risk.risk_type}`;
+          
+          // Only store the first occurrence (which is the latest due to our ordering)
+          if (!latestRisks.has(key)) {
+            latestRisks.set(key, risk);
+          }
+        });
+      }
 
       // Transform data to match Person interface using only the latest risks
-      const transformedData: Person[] = patients.flatMap((patient) => {
+      const transformedData: Person[] = (patients || []).flatMap((patient) => {
         const patientRisks = Array.from(latestRisks.values())
           .filter(risk => risk.patient_id === patient.patient_id);
         

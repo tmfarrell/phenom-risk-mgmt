@@ -9,14 +9,16 @@ interface TableBodyProps {
 
 export const TableBody = ({ table, columns }: TableBodyProps) => {
   return (
-    <UITableBody className="table-auto w-max">
+    <UITableBody>
       {table.getRowModel().rows?.length ? (
         table.getRowModel().rows.map((row) => (
-          <TableRow key={row.id}>
+          <TableRow key={row.id} data-state={row.getIsSelected() && "selected"}>
             {row.getVisibleCells().map((cell, index) => (
               <TableCell
                 key={cell.id}
-                className={`${index === 0 ? 'sticky left-0 bg-background z-20 shadow-[2px_0_5px_-2px_rgba(0,0,0,0.1)]' : ''} whitespace-nowrap p-2`}
+                className={`${
+                  index === 0 ? 'sticky left-0 bg-background z-20 shadow-[2px_0_5px_-2px_rgba(0,0,0,0.1)]' : ''
+                } whitespace-nowrap p-2`}
               >
                 {flexRender(cell.column.columnDef.cell, cell.getContext())}
               </TableCell>
