@@ -5,6 +5,12 @@ import { ArrowUpDown, ArrowUp, ArrowDown } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { isHighRisk } from './tableConstants';
 import { Checkbox } from '../ui/checkbox';
+import { 
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from '../ui/tooltip';
 
 export const useTableColumns = (visibleRiskColumns: string[]) => {
   const baseColumns: ColumnDef<Person>[] = [
@@ -90,10 +96,40 @@ export const useTableColumns = (visibleRiskColumns: string[]) => {
       const riskType = row.original.risk_type;
       const changeField = `${column}_change` as keyof Person;
       const change = row.original[changeField] as number;
+      const changeSince = row.original.change_since;
 
       if (value === undefined || value === null) {
         return 'N/A';
       }
+
+      const formatChangeValue = (change: number, riskType: string) => {
+        if (riskType === 'absolute') {
+          return `${Math.round(change)}%`;
+        }
+        return change.toFixed(2);
+      };
+
+      const renderChangeArrow = (change: number, threshold: number) => {
+        if (Math.abs(change) <= threshold) return null;
+
+        const tooltipText = `${formatChangeValue(change, riskType)} change from ${changeSince || 'unknown date'}`;
+
+        return (
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger>
+                {change > 0 
+                  ? <ArrowUp className="h-4 w-4 text-red-500 ml-2" />
+                  : <ArrowDown className="h-4 w-4 text-green-500 ml-2" />
+                }
+              </TooltipTrigger>
+              <TooltipContent>
+                <p>{tooltipText}</p>
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
+        );
+      };
 
       // Format based on risk type
       if (riskType === 'absolute') {
@@ -102,11 +138,7 @@ export const useTableColumns = (visibleRiskColumns: string[]) => {
         return (
           <div className={`${isHighAbsoluteRisk ? 'bg-red-100' : ''} whitespace-nowrap px-2 flex items-center justify-between`}>
             <span>{`${roundedValue}%`}</span>
-            {Math.abs(change) > 5 && (
-              change > 0 
-                ? <ArrowUp className="h-4 w-4 text-red-500 ml-2" />
-                : <ArrowDown className="h-4 w-4 text-green-500 ml-2" />
-            )}
+            {renderChangeArrow(change, 5)}
           </div>
         );
       } else {
@@ -114,11 +146,7 @@ export const useTableColumns = (visibleRiskColumns: string[]) => {
         return (
           <div className={`${isHighRisk(value) ? 'bg-red-100' : ''} whitespace-nowrap px-2 flex items-center justify-between`}>
             <span>{value.toFixed(2)}</span>
-            {Math.abs(change) > 0.3 && (
-              change > 0 
-                ? <ArrowUp className="h-4 w-4 text-red-500 ml-2" />
-                : <ArrowDown className="h-4 w-4 text-green-500 ml-2" />
-            )}
+            {renderChangeArrow(change, 0.3)}
           </div>
         );
       }

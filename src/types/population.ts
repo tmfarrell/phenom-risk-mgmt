@@ -10,6 +10,7 @@ export interface Person {
   recorded_date?: string | null;
   prediction_timeframe_yrs?: number | null;
   risk_type?: 'relative' | 'absolute';
+  change_since?: string | null;
   // Risk factors
   ED?: number | null;
   Hospitalization?: number | null;

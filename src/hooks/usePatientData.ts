@@ -71,7 +71,8 @@ export const usePatientData = () => {
             Mental_Health_change: null,
             recorded_date: null,
             prediction_timeframe_yrs: null,
-            risk_type: null
+            risk_type: null,
+            change_since: null
           }];
         }
         
@@ -94,7 +95,8 @@ export const usePatientData = () => {
           Mental_Health_change: risk.Mental_Health_change,
           recorded_date: risk.recorded_date,
           prediction_timeframe_yrs: risk.prediction_timeframe_yrs,
-          risk_type: risk.risk_type
+          risk_type: risk.risk_type,
+          change_since: risk.change_since
         }));
       });
 
