@@ -21,18 +21,26 @@ interface ResultsTableProps {
   data: Person[];
   visibleRiskColumns: string[];
   onSelectionChange?: (selectedPatients: Person[]) => void;
+  averageRisks: {
+    [timeframe: string]: {
+      [riskFactor: string]: string;
+    };
+  };
+  selectedTimeframe: string;
 }
 
 export const ResultsTable = ({ 
   data, 
   visibleRiskColumns,
-  onSelectionChange 
+  onSelectionChange,
+  averageRisks,
+  selectedTimeframe
 }: ResultsTableProps) => {
   const [sorting, setSorting] = useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
   const [rowSelection, setRowSelection] = useState<RowSelectionState>({});
 
-  const columns = useTableColumns(visibleRiskColumns);
+  const columns = useTableColumns(visibleRiskColumns, averageRisks[selectedTimeframe] || {});
 
   const table = useReactTable({
     data,
@@ -56,7 +64,6 @@ export const ResultsTable = ({
       },
     },
     getRowId: (row) => row.patient_id.toString(),
-    // This ensures the table maintains its state when selections change
     autoResetPageIndex: false,
   });
 

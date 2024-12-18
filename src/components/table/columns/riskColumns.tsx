@@ -3,7 +3,6 @@ import { Person } from '@/types/population';
 import { Button } from '@/components/ui/button';
 import { ArrowUpDown, ArrowUp, ArrowDown } from 'lucide-react';
 import { isHighRisk, getFieldName } from '../tableConstants';
-import { calculateAverageRisk } from '../utils/riskCalculations';
 import { 
   Tooltip,
   TooltipContent,
@@ -11,12 +10,13 @@ import {
   TooltipTrigger,
 } from '@/components/ui/tooltip';
 
-export const getRiskColumns = (visibleRiskColumns: string[]): ColumnDef<Person>[] => 
+export const getRiskColumns = (
+  visibleRiskColumns: string[],
+  averageRisks: { [key: string]: string }
+): ColumnDef<Person>[] => 
   visibleRiskColumns.map((column): ColumnDef<Person> => ({
     accessorKey: getFieldName(column),
-    header: ({ table }) => {
-      const averageRisk = calculateAverageRisk(table.getCoreRowModel().rows.map(row => row.original), getFieldName(column));
-      
+    header: ({ table }) => {      
       return (
         <div className="flex flex-col items-center">
           <Button
@@ -28,7 +28,7 @@ export const getRiskColumns = (visibleRiskColumns: string[]): ColumnDef<Person>[
             <ArrowUpDown className="ml-2 h-4 w-4" />
           </Button>
           <div className="text-xs text-blue-600 bg-white px-2 py-1 rounded mt-1 shadow-sm">
-            Avg: {averageRisk}
+            Avg: {averageRisks[column] || 'N/A'}
           </div>
         </div>
       );

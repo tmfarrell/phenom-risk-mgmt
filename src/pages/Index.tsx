@@ -8,6 +8,7 @@ import { Person } from '@/types/population';
 import { TableControls } from '@/components/table/TableControls';
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
+import { calculateAverageRisks } from '@/components/table/utils/riskCalculations';
 
 export default function Index() {
   const { data: patientData, isLoading, error } = usePatientDataLatest();
@@ -23,6 +24,9 @@ export default function Index() {
   ]);
   const [selectedPatients, setSelectedPatients] = useState<Person[]>([]);
   const [showSelectedOnly, setShowSelectedOnly] = useState(false);
+
+  // Calculate average risks from the full dataset
+  const averageRisks = patientData ? calculateAverageRisks(patientData) : {};
 
   const filteredData = patientData?.filter((patient: Person) => {
     const searchLower = searchQuery.toLowerCase();
@@ -92,6 +96,8 @@ export default function Index() {
                   data={filteredData || []}
                   visibleRiskColumns={selectedRiskColumns}
                   onSelectionChange={setSelectedPatients}
+                  averageRisks={averageRisks}
+                  selectedTimeframe={selectedTimeframe}
                 />
               )}
             </div>
