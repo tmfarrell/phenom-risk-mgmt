@@ -79,18 +79,39 @@ export const useTableColumns = (visibleRiskColumns: string[]) => {
     },
   ];
 
+  const calculateAverageRisk = (data: Person[], field: string): string => {
+    const absoluteRisks = data.filter(person => 
+      person.risk_type === 'absolute' && 
+      person[field as keyof Person] !== null
+    ).map(person => person[field as keyof Person] as number);
+
+    if (absoluteRisks.length === 0) return 'N/A';
+    
+    const average = absoluteRisks.reduce((sum, risk) => sum + risk, 0) / absoluteRisks.length;
+    return `${Math.round(average)}%`;
+  };
+
   const riskColumns: ColumnDef<Person>[] = visibleRiskColumns.map((column): ColumnDef<Person> => ({
     accessorKey: getFieldName(column),
-    header: ({ column: tableColumn }) => (
-      <Button
-        variant="ghost"
-        onClick={() => tableColumn.toggleSorting(tableColumn.getIsSorted() === "asc")}
-        className="hover:bg-transparent whitespace-nowrap"
-      >
-        {column}
-        <ArrowUpDown className="ml-2 h-4 w-4" />
-      </Button>
-    ),
+    header: ({ table }) => {
+      const averageRisk = calculateAverageRisk(table.getCoreRowModel().rows.map(row => row.original), getFieldName(column));
+      
+      return (
+        <div className="flex flex-col items-center">
+          <Button
+            variant="ghost"
+            onClick={() => table.getColumn(getFieldName(column))?.toggleSorting(table.getColumn(getFieldName(column))?.getIsSorted() === "asc")}
+            className="hover:bg-transparent whitespace-nowrap"
+          >
+            {column}
+            <ArrowUpDown className="ml-2 h-4 w-4" />
+          </Button>
+          <div className="text-xs bg-gray-100 px-2 py-1 rounded mt-1">
+            Avg: {averageRisk}
+          </div>
+        </div>
+      );
+    },
     cell: ({ row }) => {
       const fieldName = getFieldName(column);
       const value = row.getValue(fieldName) as number;
