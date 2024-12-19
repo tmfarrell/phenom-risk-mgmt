@@ -10,7 +10,7 @@ interface RiskTableProps {
 }
 
 export const RiskTable = ({ currentRisks, selectedRiskType, allRisks }: RiskTableProps) => {
-  const riskFactors = ['ED', 'Hospitalization', 'Fall', 'Stroke', 'MI', 'CKD', 'Mental Health'];
+  const riskFactors = ['ED', 'Hospitalization', 'Fall', 'Stroke', 'MI'];
   const { data: patientData } = usePatientData();
 
   // Calculate global min and max for all sparklines
@@ -22,8 +22,7 @@ export const RiskTable = ({ currentRisks, selectedRiskType, allRisks }: RiskTabl
         return new Date(a.recorded_date).getTime() - new Date(b.recorded_date).getTime();
       })
       .map(risk => {
-        const fieldName = risk === 'Mental Health' ? 'Mental_Health' : risk;
-        const value = risk[fieldName as keyof Person];
+        const value = risk[risk as keyof Person];
         return typeof value === 'number' ? value : 0;
       });
   }).flat();
@@ -48,9 +47,8 @@ export const RiskTable = ({ currentRisks, selectedRiskType, allRisks }: RiskTabl
 
     if (relevantRisks.length === 0) return 'N/A';
 
-    const fieldName = riskFactor === 'Mental Health' ? 'Mental_Health' : riskFactor;
     const sum = relevantRisks.reduce((acc, curr) => {
-      const value = curr[fieldName as keyof Person];
+      const value = curr[riskFactor as keyof Person];
       return acc + (typeof value === 'number' ? value : 0);
     }, 0);
 
