@@ -15,7 +15,7 @@ export const RiskTable = ({ currentRisks, selectedRiskType, allRisks }: RiskTabl
 
   // Set y-axis domain based on risk type
   const yAxisDomain: [number, number] = selectedRiskType === 'relative' 
-    ? [-5, 10]  // Domain for relative risk
+    ? [0, 7.5]  // Updated domain for relative risk
     : [0, 100]; // Domain for absolute risk
 
   const calculateAverageRisk = (riskFactor: string, timeframe: number | undefined) => {
