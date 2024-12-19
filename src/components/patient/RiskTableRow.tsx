@@ -10,6 +10,12 @@ import {
   getChangeValue,
   getRiskTrendData 
 } from './utils/riskUtils';
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 interface RiskTableRowProps {
   risk: string;
@@ -20,6 +26,29 @@ interface RiskTableRowProps {
   yAxisDomain: [number, number];
 }
 
+const riskDetails: Record<string, { fullName: string; description: string }> = {
+  'ED': {
+    fullName: 'Emergency Department',
+    description: 'Risk of an emergency department encounter'
+  },
+  'Hospitalization': {
+    fullName: 'Hospitalization',
+    description: 'Risk of a hospital admission'
+  },
+  'Fall': {
+    fullName: 'Fall',
+    description: 'Risk of a patient fall requiring clinical attention'
+  },
+  'Stroke': {
+    fullName: 'Stroke',
+    description: 'Risk of a future stroke'
+  },
+  'MI': {
+    fullName: 'Myocardial Infarction',
+    description: 'Risk of a myocardial infarction'
+  }
+};
+
 export const RiskTableRow = ({ 
   risk, 
   currentRisks, 
@@ -28,9 +57,22 @@ export const RiskTableRow = ({
   averageRisk,
   yAxisDomain 
 }: RiskTableRowProps) => {
+  const details = riskDetails[risk];
+
   return (
     <TableRow>
-      <TableCell className="font-medium">{risk}</TableCell>
+      <TableCell className="font-medium">
+        <TooltipProvider>
+          <Tooltip>
+            <TooltipTrigger className="text-left">
+              {details.fullName}
+            </TooltipTrigger>
+            <TooltipContent>
+              <p>{details.description}</p>
+            </TooltipContent>
+          </Tooltip>
+        </TooltipProvider>
+      </TableCell>
       <TableCell>
         <SparkLine 
           data={getRiskTrendData(allRisks, risk)}
