@@ -9,7 +9,7 @@ export const formatRiskValue = (value: number | string | null | undefined, riskT
     if (riskType === 'absolute') {
       return `${Math.round(value)}%`;
     }
-    return `${value.toFixed(2)}x`;
+    return `${value.toFixed(1)}x`;  // Changed from toFixed(2) to toFixed(1)
   }
   return 'Not available';
 };
