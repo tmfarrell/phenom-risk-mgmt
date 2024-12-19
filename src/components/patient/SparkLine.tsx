@@ -1,27 +1,39 @@
-import { Line, LineChart, ResponsiveContainer, Tooltip, YAxis } from 'recharts';
+import { Line, LineChart, ResponsiveContainer, Tooltip, YAxis, ReferenceLine } from 'recharts';
 
 interface SparkLineProps {
   data: number[];
   color?: string;
   yAxisDomain?: [number, number];
+  averageRisk?: string;
 }
 
 export const SparkLine = ({ 
   data, 
   color = "hsl(var(--primary))",
-  yAxisDomain
+  yAxisDomain,
+  averageRisk
 }: SparkLineProps) => {
   // Transform data into format required by recharts
   const chartData = data.map((value, index) => ({ value }));
 
+  // Parse average risk from string (e.g., "25%" -> 25)
+  const avgValue = averageRisk ? parseFloat(averageRisk.replace('%', '')) : undefined;
+
   return (
-    <div className="w-[100px] h-[30px]">
+    <div className="w-[200px] h-[30px]"> {/* Increased width from 100px to 200px */}
       <ResponsiveContainer width="100%" height="100%">
         <LineChart data={chartData}>
           <YAxis 
             domain={yAxisDomain || ['auto', 'auto']}
             hide={true}
           />
+          {avgValue !== undefined && (
+            <ReferenceLine 
+              y={avgValue} 
+              stroke="#9CA3AF" 
+              strokeDasharray="3 3"
+            />
+          )}
           <Tooltip 
             content={({ active, payload }) => {
               if (active && payload && payload.length) {
