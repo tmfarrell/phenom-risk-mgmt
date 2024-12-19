@@ -17,16 +17,12 @@ export interface Person {
   Fall?: number | null;
   Stroke?: number | null;
   MI?: number | null;
-  CKD?: number | null;
-  Mental_Health?: number | null;
   // Risk changes
   ED_change?: number | null;
   Hospitalization_change?: number | null;
   Fall_change?: number | null;
   Stroke_change?: number | null;
   MI_change?: number | null;
-  CKD_change?: number | null;
-  Mental_Health_change?: number | null;
   [key: string]: string | number | null | undefined;
 }
 
