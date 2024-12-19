@@ -18,7 +18,7 @@ export const getRiskColumns = (
     accessorKey: getFieldName(column),
     header: ({ table }) => {      
       return (
-        <div className="flex flex-col items-center">
+        <div className="flex flex-col items-center pb-2">
           <Button
             variant="ghost"
             onClick={() => table.getColumn(getFieldName(column))?.toggleSorting(table.getColumn(getFieldName(column))?.getIsSorted() === "asc")}
@@ -27,7 +27,7 @@ export const getRiskColumns = (
             {column}
             <ArrowUpDown className="ml-2 h-4 w-4" />
           </Button>
-          <div className="text-xs text-blue-400/70 bg-white px-2 py-1 rounded mt-1 shadow-sm">
+          <div className="text-xs text-blue-400/70 bg-white px-2 py-0.5 rounded mt-0.5 shadow-sm">
             Avg: {averageRisks[column] || 'N/A'}
           </div>
         </div>
