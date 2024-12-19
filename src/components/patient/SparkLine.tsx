@@ -5,13 +5,15 @@ interface SparkLineProps {
   color?: string;
   yAxisDomain?: [number, number];
   averageRisk?: string;
+  riskType?: 'relative' | 'absolute';
 }
 
 export const SparkLine = ({ 
   data, 
   color = "hsl(var(--primary))",
   yAxisDomain,
-  averageRisk
+  averageRisk,
+  riskType = 'absolute'
 }: SparkLineProps) => {
   // Transform data into format required by recharts
   const chartData = data.map((value, index) => ({ value }));
@@ -19,11 +21,13 @@ export const SparkLine = ({
   // Parse average risk from string (e.g., "25%" -> 25)
   const avgValue = averageRisk ? parseFloat(averageRisk.replace('%', '')) : undefined;
 
-  // Calculate domain to ensure average line is visible
+  // Calculate domain to ensure reference line is visible
   const calculateDomain = () => {
     const values = data;
-    if (avgValue !== undefined) {
+    if (riskType === 'absolute' && avgValue !== undefined) {
       values.push(avgValue);
+    } else if (riskType === 'relative') {
+      values.push(1); // Add reference value for relative risk
     }
     const min = Math.min(...values);
     const max = Math.max(...values);
@@ -39,9 +43,16 @@ export const SparkLine = ({
             domain={calculateDomain()}
             hide={true}
           />
-          {avgValue !== undefined && (
+          {riskType === 'absolute' && avgValue !== undefined && (
             <ReferenceLine 
               y={avgValue} 
+              stroke="#9CA3AF" 
+              strokeDasharray="3 3"
+            />
+          )}
+          {riskType === 'relative' && (
+            <ReferenceLine 
+              y={1} 
               stroke="#9CA3AF" 
               strokeDasharray="3 3"
             />

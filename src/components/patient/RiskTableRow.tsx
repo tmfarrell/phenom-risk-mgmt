@@ -61,11 +61,12 @@ export const RiskTableRow = ({
           <span className="text-sm text-gray-500 font-normal">{details.description}</span>
         </div>
       </TableCell>
-      <TableCell className="min-w-[220px]"> {/* Added min-width to ensure column stays wide */}
+      <TableCell className="min-w-[220px]">
         <SparkLine 
           data={getRiskTrendData(allRisks, risk)}
           yAxisDomain={yAxisDomain}
           averageRisk={selectedRiskType === 'absolute' ? averageRisk : undefined}
+          riskType={selectedRiskType}
         />
       </TableCell>
       <TableCell>
