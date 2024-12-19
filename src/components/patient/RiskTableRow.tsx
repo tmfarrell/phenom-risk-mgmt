@@ -57,8 +57,8 @@ export const RiskTableRow = ({
     <TableRow>
       <TableCell className="font-medium">
         <div className="flex flex-col items-start">
-          <span>{details.fullName}</span>
-          <span className="text-sm text-gray-500">{details.description}</span>
+          <span className="font-bold">{details.fullName}</span>
+          <span className="text-sm text-gray-500 font-normal">{details.description}</span>
         </div>
       </TableCell>
       <TableCell>
