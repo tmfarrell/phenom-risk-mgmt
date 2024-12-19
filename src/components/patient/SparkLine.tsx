@@ -63,7 +63,11 @@ export const SparkLine = ({
                 const value = payload[0].value;
                 return (
                   <div className="bg-white border border-gray-200 shadow-sm rounded p-2 text-xs">
-                    {typeof value === 'number' ? value.toFixed(2) : value}
+                    {typeof value === 'number' 
+                      ? riskType === 'relative' 
+                        ? value.toFixed(1) 
+                        : value.toFixed(2)
+                      : value}
                   </div>
                 );
               }
