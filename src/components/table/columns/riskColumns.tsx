@@ -27,7 +27,7 @@ export const getRiskColumns = (
             {column}
             <ArrowUpDown className="ml-2 h-4 w-4" />
           </Button>
-          <div className="text-xs text-blue-400/70 bg-white px-2 py-1 rounded mt-1 shadow-sm">
+          <div className="text-white text-xs px-2 py-1 rounded mt-1">
             Avg: {averageRisks[column] || 'N/A'}
           </div>
         </div>
