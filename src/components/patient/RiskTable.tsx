@@ -25,6 +25,30 @@ export const RiskTable = ({ currentRisks, selectedRiskType, allRisks }: RiskTabl
 
   const { data: patientData } = usePatientData();
 
+  // Calculate global min and max for all sparklines
+  const allSparklineData = riskFactors.map(risk => {
+    const fieldName = riskFieldMap[risk as keyof typeof riskFieldMap] || risk;
+    return allRisks
+      .sort((a, b) => {
+        if (!a.recorded_date || !b.recorded_date) return 0;
+        return new Date(a.recorded_date).getTime() - new Date(b.recorded_date).getTime();
+      })
+      .map(risk => {
+        const value = risk[fieldName as keyof Person];
+        return typeof value === 'number' ? value : 0;
+      });
+  }).flat();
+
+  const globalMin = Math.min(...allSparklineData);
+  const globalMax = Math.max(...allSparklineData);
+  
+  // Add padding to the domain
+  const padding = (globalMax - globalMin) * 0.1;
+  const yAxisDomain: [number, number] = [
+    Math.max(0, globalMin - padding), // Don't go below 0 for risk values
+    globalMax + padding
+  ];
+
   const calculateAverageRisk = (riskFactor: string, timeframe: number | undefined) => {
     if (!patientData || !timeframe) return 'N/A';
     
@@ -144,7 +168,10 @@ export const RiskTable = ({ currentRisks, selectedRiskType, allRisks }: RiskTabl
             <TableRow key={risk}>
               <TableCell className="font-medium">{risk}</TableCell>
               <TableCell>
-                <SparkLine data={getRiskTrendData(risk)} />
+                <SparkLine 
+                  data={getRiskTrendData(risk)} 
+                  yAxisDomain={yAxisDomain}
+                />
               </TableCell>
               <TableCell>
                 <div className="flex items-center gap-2">

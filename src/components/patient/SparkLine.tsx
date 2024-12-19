@@ -1,11 +1,16 @@
-import { Line, LineChart, ResponsiveContainer, Tooltip } from 'recharts';
+import { Line, LineChart, ResponsiveContainer, Tooltip, YAxis } from 'recharts';
 
 interface SparkLineProps {
   data: number[];
   color?: string;
+  yAxisDomain?: [number, number];
 }
 
-export const SparkLine = ({ data, color = "hsl(var(--primary))" }: SparkLineProps) => {
+export const SparkLine = ({ 
+  data, 
+  color = "hsl(var(--primary))",
+  yAxisDomain
+}: SparkLineProps) => {
   // Transform data into format required by recharts
   const chartData = data.map((value, index) => ({ value }));
 
@@ -13,6 +18,10 @@ export const SparkLine = ({ data, color = "hsl(var(--primary))" }: SparkLineProp
     <div className="w-[100px] h-[30px]">
       <ResponsiveContainer width="100%" height="100%">
         <LineChart data={chartData}>
+          <YAxis 
+            domain={yAxisDomain || ['auto', 'auto']}
+            hide={true}
+          />
           <Tooltip 
             content={({ active, payload }) => {
               if (active && payload && payload.length) {
