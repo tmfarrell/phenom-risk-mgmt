@@ -58,7 +58,7 @@ export const TableControls = ({
     <div className="flex justify-between items-center mb-6">
       <div className="grid grid-cols-3 gap-8 flex-1 mr-8">
         <div className="flex flex-col gap-2">
-          <div className="flex items-center gap-1 justify-center">
+          <div className="flex items-center gap-1 justify-center w-full">
             <Label htmlFor="risk-type" className="text-center text-muted-foreground">Risk Type</Label>
             <Tooltip>
               <TooltipTrigger asChild>
@@ -100,7 +100,7 @@ export const TableControls = ({
         </div>
 
         <div className="flex flex-col gap-2">
-          <Label htmlFor="risk-timeframe" className="text-center text-muted-foreground">Time Period</Label>
+          <Label htmlFor="risk-timeframe" className="text-center text-muted-foreground mx-auto">Time Period</Label>
           <ToggleGroup 
             type="single" 
             value={selectedTimeframe}
@@ -125,7 +125,7 @@ export const TableControls = ({
         </div>
 
         <div className="flex flex-col gap-2">
-          <Label htmlFor="risk-factors" className="text-center text-muted-foreground">Risk Factors</Label>
+          <Label htmlFor="risk-factors" className="text-center text-muted-foreground mx-auto">Risk Factors</Label>
           <Popover open={open} onOpenChange={setOpen}>
             <PopoverTrigger asChild>
               <Button
@@ -176,7 +176,7 @@ export const TableControls = ({
       </div>
 
       <div className="flex flex-col gap-2">
-        <Label htmlFor="search" className="text-center text-muted-foreground">Search</Label>
+        <Label htmlFor="search" className="text-center text-muted-foreground mx-auto">Search</Label>
         <div className="relative">
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500 h-4 w-4" />
           <Input
