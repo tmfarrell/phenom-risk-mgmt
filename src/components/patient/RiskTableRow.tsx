@@ -10,12 +10,6 @@ import {
   getChangeValue,
   getRiskTrendData 
 } from './utils/riskUtils';
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
 
 interface RiskTableRowProps {
   risk: string;
@@ -62,16 +56,10 @@ export const RiskTableRow = ({
   return (
     <TableRow>
       <TableCell className="font-medium">
-        <TooltipProvider>
-          <Tooltip>
-            <TooltipTrigger className="text-left">
-              {details.fullName}
-            </TooltipTrigger>
-            <TooltipContent>
-              <p>{details.description}</p>
-            </TooltipContent>
-          </Tooltip>
-        </TooltipProvider>
+        <div className="flex flex-col items-start">
+          <span>{details.fullName}</span>
+          <span className="text-sm text-gray-500">{details.description}</span>
+        </div>
       </TableCell>
       <TableCell>
         <SparkLine 
