@@ -20,11 +20,11 @@ export const SparkLine = ({
   const avgValue = averageRisk ? parseFloat(averageRisk.replace('%', '')) : undefined;
 
   return (
-    <div className="w-[200px] h-[30px]"> {/* Increased width from 100px to 200px */}
+    <div className="w-[200px] h-[30px]">
       <ResponsiveContainer width="100%" height="100%">
         <LineChart data={chartData}>
           <YAxis 
-            domain={yAxisDomain || ['auto', 'auto']}
+            domain={['auto', 'auto']}
             hide={true}
           />
           {avgValue !== undefined && (
