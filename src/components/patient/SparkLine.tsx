@@ -16,9 +16,10 @@ export const SparkLine = ({ data, color = "hsl(var(--primary))" }: SparkLineProp
           <Tooltip 
             content={({ active, payload }) => {
               if (active && payload && payload.length) {
+                const value = payload[0].value;
                 return (
                   <div className="bg-white border border-gray-200 shadow-sm rounded p-2 text-xs">
-                    {payload[0].value.toFixed(2)}
+                    {typeof value === 'number' ? value.toFixed(2) : value}
                   </div>
                 );
               }
