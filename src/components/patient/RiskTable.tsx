@@ -9,13 +9,15 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from '@/components/ui/tooltip';
+import { SparkLine } from './SparkLine';
 
 interface RiskTableProps {
   currentRisks: Person | undefined;
   selectedRiskType: 'relative' | 'absolute';
+  allRisks: Person[];
 }
 
-export const RiskTable = ({ currentRisks, selectedRiskType }: RiskTableProps) => {
+export const RiskTable = ({ currentRisks, selectedRiskType, allRisks }: RiskTableProps) => {
   const riskFactors = ['ED', 'Hospitalization', 'Fall', 'Stroke', 'MI', 'CKD', 'Mental Health'];
   const riskFieldMap = {
     'Mental Health': 'Mental_Health',
@@ -113,12 +115,26 @@ export const RiskTable = ({ currentRisks, selectedRiskType }: RiskTableProps) =>
     );
   };
 
+  const getRiskTrendData = (riskFactor: string) => {
+    const fieldName = riskFieldMap[riskFactor as keyof typeof riskFieldMap] || riskFactor;
+    return allRisks
+      .sort((a, b) => {
+        if (!a.recorded_date || !b.recorded_date) return 0;
+        return new Date(a.recorded_date).getTime() - new Date(b.recorded_date).getTime();
+      })
+      .map(risk => {
+        const value = risk[fieldName as keyof Person];
+        return typeof value === 'number' ? value : 0;
+      });
+  };
+
   return (
     <div className="overflow-x-auto">
       <Table>
         <TableHeader>
           <TableRow>
             <TableHead>Risk Factor</TableHead>
+            <TableHead>Risk Trend</TableHead>
             <TableHead>Risk Value</TableHead>
             <TableHead>Calculated Date</TableHead>
           </TableRow>
@@ -127,6 +143,9 @@ export const RiskTable = ({ currentRisks, selectedRiskType }: RiskTableProps) =>
           {riskFactors.map((risk) => (
             <TableRow key={risk}>
               <TableCell className="font-medium">{risk}</TableCell>
+              <TableCell>
+                <SparkLine data={getRiskTrendData(risk)} />
+              </TableCell>
               <TableCell>
                 <div className="flex items-center gap-2">
                   <div className="flex flex-col">
