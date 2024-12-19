@@ -19,12 +19,24 @@ export const SparkLine = ({
   // Parse average risk from string (e.g., "25%" -> 25)
   const avgValue = averageRisk ? parseFloat(averageRisk.replace('%', '')) : undefined;
 
+  // Calculate domain to ensure average line is visible
+  const calculateDomain = () => {
+    const values = data;
+    if (avgValue !== undefined) {
+      values.push(avgValue);
+    }
+    const min = Math.min(...values);
+    const max = Math.max(...values);
+    const padding = (max - min) * 0.1; // Add 10% padding
+    return [Math.max(0, min - padding), max + padding];
+  };
+
   return (
     <div className="w-[200px] h-[30px]">
       <ResponsiveContainer width="100%" height="100%">
         <LineChart data={chartData}>
           <YAxis 
-            domain={['auto', 'auto']}
+            domain={calculateDomain()}
             hide={true}
           />
           {avgValue !== undefined && (
