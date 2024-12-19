@@ -100,7 +100,7 @@ export const TableControls = ({
         </div>
 
         <div className="flex flex-col gap-2">
-          <Label htmlFor="risk-timeframe" className="text-center text-muted-foreground">Risk Time Period</Label>
+          <Label htmlFor="risk-timeframe" className="text-center text-muted-foreground">Time Period</Label>
           <ToggleGroup 
             type="single" 
             value={selectedTimeframe}
@@ -176,12 +176,13 @@ export const TableControls = ({
       </div>
 
       <div className="flex flex-col gap-2">
-        <Label htmlFor="search" className="text-center text-muted-foreground">Search (Name or MRN)</Label>
+        <Label htmlFor="search" className="text-center text-muted-foreground">Search</Label>
         <div className="relative">
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500 h-4 w-4" />
           <Input
             id="search"
             type="text"
+            placeholder="Name or MRN"
             value={searchQuery}
             onChange={(e) => onSearchChange(e.target.value)}
             className="pl-9"
