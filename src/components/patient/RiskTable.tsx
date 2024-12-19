@@ -26,8 +26,9 @@ export const RiskTable = ({ currentRisks, selectedRiskType }: RiskTableProps) =>
   const calculateAverageRisk = (riskFactor: string, timeframe: number | undefined) => {
     if (!patientData || !timeframe) return 'N/A';
     
+    // Always filter for absolute risks regardless of selected risk type
     const relevantRisks = patientData.filter(
-      p => p.risk_type === selectedRiskType && 
+      p => p.risk_type === 'absolute' && 
       p.prediction_timeframe_yrs === timeframe
     );
 
@@ -40,9 +41,7 @@ export const RiskTable = ({ currentRisks, selectedRiskType }: RiskTableProps) =>
     }, 0);
 
     const avg = sum / relevantRisks.length;
-    return selectedRiskType === 'absolute' 
-      ? `${Math.round(avg)}%`
-      : `${avg.toFixed(2)}x`;
+    return `${Math.round(avg)}%`;
   };
 
   const formatRiskValue = (value: number | string | null | undefined, riskType: 'relative' | 'absolute') => {
@@ -129,20 +128,20 @@ export const RiskTable = ({ currentRisks, selectedRiskType }: RiskTableProps) =>
             <TableRow key={risk}>
               <TableCell className="font-medium">{risk}</TableCell>
               <TableCell>
-                <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
                   <div className="flex flex-col">
-                    <div className={`${isHighRisk(getRiskValue(currentRisks, risk), selectedRiskType) ? 'bg-red-100' : ''} px-2 py-1 rounded`}>
-                      {formatRiskValue(getRiskValue(currentRisks, risk), selectedRiskType)}
+                    <div className="flex items-center gap-1">
+                      <span className={`${isHighRisk(getRiskValue(currentRisks, risk), selectedRiskType) ? 'bg-red-100' : ''} px-2 py-1 rounded`}>
+                        {formatRiskValue(getRiskValue(currentRisks, risk), selectedRiskType)}
+                      </span>
+                      {renderChangeArrow(
+                        getChangeValue(currentRisks, risk),
+                        selectedRiskType === 'absolute' ? 5 : 0.3
+                      )}
                     </div>
                     <div className="text-xs text-blue-400/70 bg-white px-2 py-1 rounded mt-1 shadow-sm">
                       Avg: {calculateAverageRisk(risk, currentRisks?.prediction_timeframe_yrs)}
                     </div>
-                  </div>
-                  <div className="w-4 ml-2">
-                    {renderChangeArrow(
-                      getChangeValue(currentRisks, risk),
-                      selectedRiskType === 'absolute' ? 5 : 0.3
-                    )}
                   </div>
                 </div>
               </TableCell>
