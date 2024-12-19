@@ -18,7 +18,7 @@ export const RiskControls = ({
   return (
     <div className="flex justify-end items-center gap-8 mb-4">
       <div className="flex flex-col gap-2">
-        <Label className="text-sm text-gray-600">Risk Type</Label>
+        <Label className="text-sm text-gray-600 text-center mx-auto">Risk Type</Label>
         <ToggleGroup 
           type="single" 
           value={selectedRiskType}
@@ -49,7 +49,7 @@ export const RiskControls = ({
       </div>
 
       <div className="flex flex-col gap-2">
-        <Label className="text-sm text-gray-600">Time Frame</Label>
+        <Label className="text-sm text-gray-600 text-center mx-auto">Time Period</Label>
         <ToggleGroup 
           type="single" 
           value={selectedTimeframe}
