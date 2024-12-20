@@ -7,7 +7,7 @@ interface TitleSectionProps {
 export const TitleSection: React.FC<TitleSectionProps> = ({ title }) => {
   return (
     <div 
-      className="relative bg-gradient-to-r from-indigo-500 to-purple-600 text-white py-12 px-6"
+      className="relative bg-gradient-to-r from-indigo-500 to-purple-600 text-white py-8 px-6"
       style={{ 
           backgroundImage: 'url(/lovable-uploads/b1f3f269-8c2a-47d4-a798-45bcf74087c9.png)',
           backgroundSize: 'cover',
