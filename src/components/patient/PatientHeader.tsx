@@ -10,30 +10,30 @@ export const PatientHeader = ({ person }: PatientHeaderProps) => {
     : '';
 
   return (
-    <div className="mb-8">
-      <h2 className="text-2xl text-left mb-4">
+    <div className="mb-4">
+      <h2 className="text-2xl text-left mb-2">
         <span className="font-bold">{person.name || 'Unknown'}</span>
         <span className="font-normal">{ageGenderString}</span>
       </h2>
       <div className="grid grid-cols-5 gap-4 text-sm">
         <div>
-          <p className="text-gray-500 font-medium mb-1">MRN</p>
+          <p className="text-gray-500 font-medium mb-0.5">MRN</p>
           <p>{person.mrn || 'N/A'}</p>
         </div>
         <div>
-          <p className="text-gray-500 font-medium mb-1">DOB</p>
+          <p className="text-gray-500 font-medium mb-0.5">DOB</p>
           <p>{person.dob || 'N/A'}</p>
         </div>
         <div>
-          <p className="text-gray-500 font-medium mb-1">Age</p>
+          <p className="text-gray-500 font-medium mb-0.5">Age</p>
           <p>{person.age || 'N/A'}</p>
         </div>
         <div>
-          <p className="text-gray-500 font-medium mb-1">Sex</p>
+          <p className="text-gray-500 font-medium mb-0.5">Sex</p>
           <p>{person.gender || 'N/A'}</p>
         </div>
         <div>
-          <p className="text-gray-500 font-medium mb-1">Last Visit</p>
+          <p className="text-gray-500 font-medium mb-0.5">Last Visit</p>
           <p>{person.last_visit || 'N/A'}</p>
         </div>
       </div>
