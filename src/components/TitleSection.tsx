@@ -14,8 +14,12 @@ export const TitleSection: React.FC<TitleSectionProps> = ({ title }) => {
           backgroundPosition: 'center'
         }}
     >
-      <div className="max-w-[1600px] mx-auto">
-        <h1 className="text-3xl font-bold">PhenOM Risk Management Report</h1>
+      <div className="max-w-[1600px] mx-auto text-left">
+        <h1 className="text-3xl">
+          <span className="font-bold">PhenOM</span>
+          <span className="align-super text-sm">™</span>
+          <span className="font-bold"> Patient Risk Panel</span>
+        </h1>
         <p className="text-sm mt-2 opacity-90">Medicare Advantage Plan (All)</p>
       </div>
     </div>
