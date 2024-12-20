@@ -52,6 +52,9 @@ export const RiskTableRow = ({
   yAxisDomain 
 }: RiskTableRowProps) => {
   const details = riskDetails[risk];
+  
+  // Check if all values for this risk factor are null
+  const hasValidRiskData = allRisks.some(r => getRiskValue(r, risk) !== null);
 
   return (
     <TableRow>
@@ -62,12 +65,16 @@ export const RiskTableRow = ({
         </div>
       </TableCell>
       <TableCell className="min-w-[220px]">
-        <SparkLine 
-          data={getRiskTrendData(allRisks, risk)}
-          yAxisDomain={yAxisDomain}
-          averageRisk={selectedRiskType === 'absolute' ? averageRisk : undefined}
-          riskType={selectedRiskType}
-        />
+        {hasValidRiskData ? (
+          <SparkLine 
+            data={getRiskTrendData(allRisks, risk)}
+            yAxisDomain={yAxisDomain}
+            averageRisk={selectedRiskType === 'absolute' ? averageRisk : undefined}
+            riskType={selectedRiskType}
+          />
+        ) : (
+          <div className="text-gray-400 italic">No data available</div>
+        )}
       </TableCell>
       <TableCell>
         <div className="flex items-center gap-2">
@@ -89,7 +96,10 @@ export const RiskTableRow = ({
         </div>
       </TableCell>
       <TableCell>
-        {currentRisks?.recorded_date ? format(new Date(currentRisks.recorded_date), 'yyyy-MM-dd') : 'N/A'}
+        {hasValidRiskData && currentRisks?.recorded_date ? 
+          format(new Date(currentRisks.recorded_date), 'yyyy-MM-dd') : 
+          <span className="text-gray-400 italic">No data</span>
+        }
       </TableCell>
     </TableRow>
   );
