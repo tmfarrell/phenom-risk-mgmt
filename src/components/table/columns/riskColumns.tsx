@@ -42,7 +42,7 @@ export const getRiskColumns = (
       const changeSince = row.original.change_since;
 
       if (value === undefined || value === null) {
-        return 'N/A';
+        return <span className="text-[#8E9196]">N/A</span>;
       }
 
       const formatChangeValue = (change: number, riskType: string) => {
@@ -107,7 +107,7 @@ export const getRiskColumns = (
           <div className="flex items-center justify-center w-full">
             <div className="flex items-center min-w-[5rem]">
               <div className={`${isHighRisk(value) ? 'bg-red-100' : ''} w-16 text-center py-1 rounded`}>
-                <span>{value.toFixed(1)}x</span>
+                <span>{value.toFixed(1)}<span className="text-[#8E9196]">x</span></span>
               </div>
               <div className="w-4 ml-2">
                 {renderChangeArrow(change, 0.3)}
