@@ -5,10 +5,15 @@ interface PatientHeaderProps {
 }
 
 export const PatientHeader = ({ person }: PatientHeaderProps) => {
+  const ageGenderString = person.age && person.gender 
+    ? ` (${person.age}${person.gender?.[0]})`
+    : '';
+
   return (
     <div className="mb-8">
-      <h2 className="text-2xl font-bold text-left mb-4">
-        {person.name || 'Unknown'}
+      <h2 className="text-2xl text-left mb-4">
+        <span className="font-bold">{person.name || 'Unknown'}</span>
+        <span className="font-normal">{ageGenderString}</span>
       </h2>
       <div className="grid grid-cols-5 gap-4 text-sm">
         <div>

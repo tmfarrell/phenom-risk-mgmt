@@ -45,21 +45,25 @@ export const DetailView = ({ person }: DetailViewProps) => {
   );
 
   return (
-    <Card className="p-6">
-      <PatientHeader person={person} />
+    <div className="space-y-6">
+      <Card className="p-6">
+        <PatientHeader person={person} />
+      </Card>
       
-      <RiskControls 
-        selectedTimeframe={selectedTimeframe}
-        selectedRiskType={selectedRiskType}
-        onTimeframeChange={setSelectedTimeframe}
-        onRiskTypeChange={setSelectedRiskType}
-      />
+      <Card className="p-6">
+        <RiskControls 
+          selectedTimeframe={selectedTimeframe}
+          selectedRiskType={selectedRiskType}
+          onTimeframeChange={setSelectedTimeframe}
+          onRiskTypeChange={setSelectedRiskType}
+        />
 
-      <RiskTable 
-        currentRisks={latestRisk}
-        selectedRiskType={selectedRiskType}
-        allRisks={selectedTypeRisks}
-      />
-    </Card>
+        <RiskTable 
+          currentRisks={latestRisk}
+          selectedRiskType={selectedRiskType}
+          allRisks={selectedTypeRisks}
+        />
+      </Card>
+    </div>
   );
 };
