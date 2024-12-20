@@ -19,7 +19,7 @@ import { useState } from 'react';
 import { Label } from '../ui/label';
 import { ToggleGroup, ToggleGroupItem } from '../ui/toggle-group';
 import { Badge } from '../ui/badge';
-import { RISK_COLUMNS } from './tableConstants';
+import { RISK_COLUMNS, DISABLED_RISK_COLUMNS } from './tableConstants';
 import {
   Tooltip,
   TooltipContent,
@@ -165,6 +165,18 @@ export const TableControls = ({
                           )}
                         />
                         {column}
+                      </CommandItem>
+                    ))}
+                    {DISABLED_RISK_COLUMNS.map((column) => (
+                      <CommandItem
+                        key={column}
+                        value={column}
+                        disabled
+                        className="opacity-50 cursor-not-allowed"
+                      >
+                        <Check className="mr-2 h-4 w-4 opacity-0" />
+                        {column}
+                        <span className="ml-2 text-xs text-muted-foreground">(Coming soon)</span>
                       </CommandItem>
                     ))}
                   </CommandGroup>

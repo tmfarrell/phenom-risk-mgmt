@@ -8,6 +8,10 @@ export const RISK_COLUMNS = [
   'MI',
 ] as const;
 
+export const DISABLED_RISK_COLUMNS = [
+  'Medication adherence'
+] as const;
+
 // Map display names to database field names
 export const RISK_COLUMN_FIELD_MAP: Record<string, string> = {};
 
