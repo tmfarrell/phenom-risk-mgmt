@@ -176,7 +176,6 @@ export const TableControls = ({
                       >
                         <Check className="mr-2 h-4 w-4 opacity-0" />
                         {column}
-                        <span className="ml-2 text-xs text-muted-foreground">(Coming soon)</span>
                       </CommandItem>
                     ))}
                   </CommandGroup>
