@@ -41,7 +41,7 @@ export const getBaseColumns = (): ColumnDef<Person>[] => [
       <div className="text-left">
         <Link
           to={`/patient/${row.original.patient_id}`}
-          className="text-[#002d72] hover:text-[#002d72]/80 transition-colors"
+          className="text-blue-600 hover:text-blue-800 transition-colors"
         >
           {row.getValue('name')}
         </Link>
