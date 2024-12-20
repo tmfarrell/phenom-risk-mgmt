@@ -45,7 +45,7 @@ export const RiskTable = ({ currentRisks, selectedRiskType, allRisks }: RiskTabl
             <TableHead>Risk Factor</TableHead>
             <TableHead>Risk Trend</TableHead>
             <TableHead>Risk Value</TableHead>
-            <TableHead>Calculated Date</TableHead>
+            <TableHead>Last Updated</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
