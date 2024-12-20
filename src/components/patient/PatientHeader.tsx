@@ -6,16 +6,32 @@ interface PatientHeaderProps {
 
 export const PatientHeader = ({ person }: PatientHeaderProps) => {
   return (
-    <div>
-      <h2 className="text-2xl font-bold text-left mb-2">
+    <div className="mb-8">
+      <h2 className="text-2xl font-bold text-left mb-4">
         {person.name || 'Unknown'}
-        <span className="font-normal">
-          {person.age && person.gender ? ` (${person.age}${person.gender?.[0]})` : ''}
-        </span>
       </h2>
-      <p className="text-gray-500 text-left mb-6">
-        MRN: {person.mrn || 'N/A'} | DOB: {person.dob || 'N/A'} | Last visit: {person.last_visit || 'N/A'}
-      </p>
+      <div className="grid grid-cols-5 gap-4 text-sm">
+        <div>
+          <p className="text-gray-500 font-medium mb-1">MRN</p>
+          <p>{person.mrn || 'N/A'}</p>
+        </div>
+        <div>
+          <p className="text-gray-500 font-medium mb-1">DOB</p>
+          <p>{person.dob || 'N/A'}</p>
+        </div>
+        <div>
+          <p className="text-gray-500 font-medium mb-1">Age</p>
+          <p>{person.age || 'N/A'}</p>
+        </div>
+        <div>
+          <p className="text-gray-500 font-medium mb-1">Sex</p>
+          <p>{person.gender || 'N/A'}</p>
+        </div>
+        <div>
+          <p className="text-gray-500 font-medium mb-1">Last Visit</p>
+          <p>{person.last_visit || 'N/A'}</p>
+        </div>
+      </div>
     </div>
   );
 };
