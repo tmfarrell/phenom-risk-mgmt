@@ -16,7 +16,7 @@ export const RiskControls = ({
   onRiskTypeChange,
 }: RiskControlsProps) => {
   return (
-    <div className="flex justify-end items-center gap-8 mb-4">
+    <div className="flex justify-start items-center gap-8 mb-4">
       <div className="flex flex-col gap-2">
         <Label className="text-sm text-gray-600 text-center mx-auto">Risk Type</Label>
         <ToggleGroup 
