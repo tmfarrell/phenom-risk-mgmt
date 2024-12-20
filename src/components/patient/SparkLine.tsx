@@ -10,6 +10,7 @@ interface SparkLineProps {
 
 export const SparkLine = ({ 
   data, 
+  color = "hsl(var(--primary))",
   yAxisDomain,
   averageRisk,
   riskType = 'absolute'
@@ -72,10 +73,10 @@ export const SparkLine = ({
           <Line
             type="monotone"
             dataKey="value"
-            stroke="#002d72"
+            stroke={color}
             strokeWidth={1.5}
-            dot={{ r: 1.5, fill: "#002d72" }}
-            activeDot={{ r: 3, fill: "#002d72" }}
+            dot={{ r: 1.5, fill: color }}
+            activeDot={{ r: 3, fill: color }}
           />
         </LineChart>
       </ResponsiveContainer>
