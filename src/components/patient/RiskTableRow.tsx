@@ -35,11 +35,11 @@ const riskDetails: Record<string, { fullName: string; description: string }> = {
   },
   'Stroke': {
     fullName: 'Stroke',
-    description: 'Risk of a future stroke'
+    description: 'Risk of first stroke'
   },
   'MI': {
     fullName: 'Myocardial Infarction',
-    description: 'Risk of a myocardial infarction'
+    description: 'Risk of first myocardial infarction'
   }
 };
 
@@ -65,16 +65,12 @@ export const RiskTableRow = ({
         </div>
       </TableCell>
       <TableCell className="min-w-[220px]">
-        {hasValidRiskData ? (
-          <SparkLine 
-            data={getRiskTrendData(allRisks, risk)}
-            yAxisDomain={yAxisDomain}
-            averageRisk={selectedRiskType === 'absolute' ? averageRisk : undefined}
-            riskType={selectedRiskType}
-          />
-        ) : (
-          <div className="text-gray-400 italic">No data available</div>
-        )}
+        <SparkLine 
+          data={hasValidRiskData ? getRiskTrendData(allRisks, risk) : []}
+          yAxisDomain={yAxisDomain}
+          averageRisk={selectedRiskType === 'absolute' ? averageRisk : undefined}
+          riskType={selectedRiskType}
+        />
       </TableCell>
       <TableCell>
         <div className="flex items-center gap-2">
