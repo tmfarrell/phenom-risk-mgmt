@@ -22,7 +22,7 @@ export const usePatientDataLatest = () => {
       const { data: risks, error: risksError } = await supabase
         .from('phenom_risk')
         .select('*')
-        .order('recorded_date', { ascending: false });
+        .order('calculated_date', { ascending: false });
 
       if (risksError) {
         console.error('Error fetching risks:', risksError);
@@ -34,7 +34,7 @@ export const usePatientDataLatest = () => {
       // Get unique combinations and their latest records
       const latestRisks = risks?.reduce((acc, risk) => {
         const key = `${risk.patient_id}-${risk.risk_type}-${risk.prediction_timeframe_yrs}`;
-        if (!acc[key] || new Date(risk.recorded_date || '') > new Date(acc[key].recorded_date || '')) {
+        if (!acc[key] || new Date(risk.calculated_date || '') > new Date(acc[key].calculated_date || '')) {
           acc[key] = risk;
         }
         return acc;
@@ -79,7 +79,7 @@ export const usePatientDataLatest = () => {
           Fall_change: risk.Fall_change,
           Stroke_change: risk.Stroke_change,
           MI_change: risk.MI_change,
-          recorded_date: risk.recorded_date,
+          recorded_date: risk.calculated_date,
           prediction_timeframe_yrs: risk.prediction_timeframe_yrs,
           risk_type: risk.risk_type,
           change_since: risk.change_since

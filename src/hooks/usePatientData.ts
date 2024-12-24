@@ -18,11 +18,11 @@ export const usePatientData = () => {
         throw patientsError;
       }
 
-      // Fetch risk data and order by recorded_date
+      // Fetch risk data and order by calculated_date
       const { data: risks, error: risksError } = await supabase
         .from('phenom_risk')
         .select('*')
-        .order('recorded_date', { ascending: false });
+        .order('calculated_date', { ascending: false });
 
       if (risksError) {
         console.error('Error fetching risks:', risksError);
@@ -69,7 +69,7 @@ export const usePatientData = () => {
           Fall_change: risk.Fall_change,
           Stroke_change: risk.Stroke_change,
           MI_change: risk.MI_change,
-          recorded_date: risk.recorded_date,
+          recorded_date: risk.calculated_date,
           prediction_timeframe_yrs: risk.prediction_timeframe_yrs,
           risk_type: risk.risk_type,
           change_since: risk.change_since
