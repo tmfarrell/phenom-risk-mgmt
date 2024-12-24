@@ -58,8 +58,8 @@ export const getRiskColumns = (
           if (change < -15) return 'text-green-500';
           return 'text-black';
         } else {
-          if (change > 1) return 'text-red-500';
-          if (change < -1) return 'text-green-500';
+          if (change > 1.5) return 'text-red-500';
+          if (change < -1.5) return 'text-green-500';
           return 'text-black';
         }
       };
@@ -110,7 +110,7 @@ export const getRiskColumns = (
                 <span>{value.toFixed(1)}<span>×</span></span>
               </div>
               <div className="w-4 ml-2">
-                {renderChangeArrow(change, 0.5)}
+                {renderChangeArrow(change, 1)}
               </div>
             </div>
           </div>
