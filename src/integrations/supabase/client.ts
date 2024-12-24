@@ -12,8 +12,15 @@ export const supabase = createClient<Database>(supabaseUrl, supabaseKey, {
   }
 });
 
-// Add debug logging for auth state
+// Add debug logging for auth state and API calls
 supabase.auth.onAuthStateChange((event, session) => {
   console.log('Supabase auth event:', event);
   console.log('Session:', session);
+});
+
+// Add debug logging for API calls
+supabase.from('patient').select('*').then(response => {
+  console.log('Test API call response:', response);
+}).catch(error => {
+  console.error('Test API call error:', error);
 });
