@@ -23,7 +23,7 @@ interface RiskTableRowProps {
 const riskDetails: Record<string, { fullName: string; description: string }> = {
   'ED': {
     fullName: 'Emergency Department',
-    description: 'Risk of an emergency department encounter'
+    description: 'Risk of an emergency department visit'
   },
   'Hospitalization': {
     fullName: 'Hospitalization',
