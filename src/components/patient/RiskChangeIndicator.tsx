@@ -18,7 +18,7 @@ export const RiskChangeIndicator = ({
   selectedRiskType,
   changeSince 
 }: RiskChangeIndicatorProps) => {
-  if (!change || Math.abs(change) <= (selectedRiskType === 'absolute' ? 5 : 0.3)) return null;
+  if (!change || Math.abs(change) <= (selectedRiskType === 'absolute' ? 10 : 0.5)) return null;
 
   const tooltipText = `${formatChangeValue(change, selectedRiskType)} change from ${changeSince || 'unknown date'}`;
   const arrowColor = getArrowColor(change, selectedRiskType);
