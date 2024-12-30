@@ -1,7 +1,7 @@
 import { ColumnDef } from '@tanstack/react-table';
 import { Person } from '@/types/population';
 import { Button } from '@/components/ui/button';
-import { ArrowUpDown } from 'lucide-react';
+import { ArrowUpDown, ArrowUp, ArrowDown } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { Checkbox } from '@/components/ui/checkbox';
 
@@ -27,16 +27,27 @@ export const getBaseColumns = (): ColumnDef<Person>[] => [
   },
   {
     accessorKey: 'name',
-    header: ({ column }) => (
-      <Button
-        variant="ghost"
-        onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-        className="hover:bg-transparent"
-      >
-        Name
-        <ArrowUpDown className="ml-2 h-4 w-4" />
-      </Button>
-    ),
+    header: ({ column }) => {
+      const isSorted = column.getIsSorted();
+      return (
+        <Button
+          variant="ghost"
+          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+          className="hover:bg-transparent"
+        >
+          Name
+          {isSorted ? (
+            isSorted === "asc" ? (
+              <ArrowUp className="ml-2 h-4 w-4 font-bold" />
+            ) : (
+              <ArrowDown className="ml-2 h-4 w-4 font-bold" />
+            )
+          ) : (
+            <ArrowUpDown className="ml-2 h-4 w-4" />
+          )}
+        </Button>
+      );
+    },
     cell: ({ row }) => (
       <div className="text-left">
         <Link
@@ -57,16 +68,27 @@ export const getBaseColumns = (): ColumnDef<Person>[] => [
   },
   {
     accessorKey: 'last_visit',
-    header: ({ column }) => (
-      <Button
-        variant="ghost"
-        onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-        className="hover:bg-transparent whitespace-nowrap"
-      >
-        Last Visit
-        <ArrowUpDown className="ml-2 h-4 w-4" />
-      </Button>
-    ),
+    header: ({ column }) => {
+      const isSorted = column.getIsSorted();
+      return (
+        <Button
+          variant="ghost"
+          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+          className="hover:bg-transparent whitespace-nowrap"
+        >
+          Last Visit
+          {isSorted ? (
+            isSorted === "asc" ? (
+              <ArrowUp className="ml-2 h-4 w-4 font-bold" />
+            ) : (
+              <ArrowDown className="ml-2 h-4 w-4 font-bold" />
+            )
+          ) : (
+            <ArrowUpDown className="ml-2 h-4 w-4" />
+          )}
+        </Button>
+      );
+    },
     cell: ({ row }) => row.getValue('last_visit') || 'N/A',
   },
 ];

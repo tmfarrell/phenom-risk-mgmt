@@ -16,16 +16,25 @@ export const getRiskColumns = (
 ): ColumnDef<Person>[] => 
   visibleRiskColumns.map((column): ColumnDef<Person> => ({
     accessorKey: getFieldName(column),
-    header: ({ table }) => {      
+    header: ({ table, column: tableColumn }) => {      
+      const isSorted = tableColumn.getIsSorted();
       return (
         <div className="flex flex-col items-center pb-2">
           <Button
             variant="ghost"
-            onClick={() => table.getColumn(getFieldName(column))?.toggleSorting(table.getColumn(getFieldName(column))?.getIsSorted() === "asc")}
+            onClick={() => tableColumn.toggleSorting(tableColumn.getIsSorted() === "asc")}
             className="hover:bg-transparent whitespace-nowrap"
           >
             {column}
-            <ArrowUpDown className="ml-2 h-4 w-4" />
+            {isSorted ? (
+              isSorted === "asc" ? (
+                <ArrowUp className="ml-2 h-4 w-4 font-bold" />
+              ) : (
+                <ArrowDown className="ml-2 h-4 w-4 font-bold" />
+              )
+            ) : (
+              <ArrowUpDown className="ml-2 h-4 w-4" />
+            )}
           </Button>
           <div className="text-xs text-blue-400/70 bg-white px-2 py-0.5 rounded mt-0.5 shadow-sm">
             Avg: {averageRisks[column] || 'N/A'}
