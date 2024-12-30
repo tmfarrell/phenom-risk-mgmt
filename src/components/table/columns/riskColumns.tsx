@@ -76,7 +76,7 @@ export const getRiskColumns = (
       const renderChangeArrow = (change: number, threshold: number) => {
         if (Math.abs(change) <= threshold) return null;
 
-        const tooltipText = `${formatChangeValue(change, riskType)} change from ${changeSince || 'unknown date'}`;
+        const tooltipText = `${change > 0 ? '+' : ''}${formatChangeValue(change, riskType)} change from ${changeSince || 'unknown date'}`;
         const arrowColor = getArrowColor(change, riskType);
 
         return (
