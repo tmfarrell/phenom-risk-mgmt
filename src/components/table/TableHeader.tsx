@@ -1,31 +1,67 @@
-import { Table, flexRender } from '@tanstack/react-table';
-import { TableHead, TableHeader as UITableHeader, TableRow } from '../ui/table';
-import { Person } from '@/types/population';
+import { Table, TableHead, TableHeader as TableHeaderUI, TableRow } from "@/components/ui/table";
+import { Column, SortDirection, Table as TableType, flexRender } from "@tanstack/react-table";
+import { ArrowDown, ArrowUp } from "lucide-react";
+import { cn } from "@/lib/utils";
 
-interface TableHeaderProps {
-  table: Table<Person>;
+interface TableHeaderProps<T> {
+  table: TableType<T>;
 }
 
-export const TableHeader = ({ table }: TableHeaderProps) => {
+export function TableHeader<T>({ table }: TableHeaderProps<T>) {
   return (
-    <UITableHeader className="sticky top-0">
-      <TableRow className="bg-blue-50">
-        {table.getHeaderGroups().map((headerGroup) => (
-          headerGroup.headers.map((header, index) => (
-            <TableHead
-              key={header.id}
-              className={`${index === 0 ? 'sticky left-0 bg-blue-50 z-20 shadow-[2px_0_5px_-2px_rgba(0,0,0,0.1)]' : ''}`}
-            >
-              {header.isPlaceholder
-                ? null
-                : flexRender(
+    <TableHeaderUI>
+      {table.getHeaderGroups().map((headerGroup) => (
+        <TableRow key={headerGroup.id}>
+          {headerGroup.headers.map((header) => {
+            const isSorted = header.column.getIsSorted();
+            
+            // Function to handle sort toggle with descending first
+            const handleSortClick = () => {
+              if (!header.column.getCanSort()) return;
+              
+              const currentDirection = header.column.getIsSorted();
+              if (!currentDirection) {
+                header.column.toggleSorting(true); // true for descending first
+              } else {
+                header.column.toggleSorting(currentDirection === "desc");
+              }
+            };
+
+            return (
+              <TableHead
+                key={header.id}
+                onClick={handleSortClick}
+                className={cn(
+                  header.column.getCanSort() && "cursor-pointer select-none",
+                )}
+              >
+                <div className="flex items-center gap-1">
+                  {flexRender(
                     header.column.columnDef.header,
                     header.getContext()
                   )}
-            </TableHead>
-          ))
-        ))}
-      </TableRow>
-    </UITableHeader>
+                  {header.column.getCanSort() && (
+                    <div className="flex flex-col ml-1">
+                      <ArrowUp 
+                        className={cn(
+                          "h-3 w-3 -mb-1",
+                          isSorted === "asc" ? "text-foreground" : "text-muted-foreground/30"
+                        )}
+                      />
+                      <ArrowDown 
+                        className={cn(
+                          "h-3 w-3",
+                          isSorted === "desc" ? "text-foreground" : "text-muted-foreground/30"
+                        )}
+                      />
+                    </div>
+                  )}
+                </div>
+              </TableHead>
+            );
+          })}
+        </TableRow>
+      ))}
+    </TableHeaderUI>
   );
-};
+}
