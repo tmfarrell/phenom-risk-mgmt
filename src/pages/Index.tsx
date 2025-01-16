@@ -67,6 +67,29 @@ export default function Index() {
         <div className="max-w-[1600px] mx-auto">
           <div className="flex flex-col space-y-6">
             <div className="glass-card p-6">
+              <div className="flex justify-end mb-4">
+                <ToggleGroup 
+                  type="single" 
+                  value={viewMode}
+                  onValueChange={(value) => {
+                    if (value) setViewMode(value as 'patient' | 'population');
+                  }}
+                  className="border rounded-lg"
+                >
+                  <ToggleGroupItem 
+                    value="patient" 
+                    className="px-4 py-2 data-[state=on]:bg-primary data-[state=on]:text-white"
+                  >
+                    Patient
+                  </ToggleGroupItem>
+                  <ToggleGroupItem 
+                    value="population"
+                    className="px-4 py-2 data-[state=on]:bg-primary data-[state=on]:text-white"
+                  >
+                    Population
+                  </ToggleGroupItem>
+                </ToggleGroup>
+              </div>
               <div className="flex justify-between items-center mb-4">
                 <TableControls
                   searchQuery={searchQuery}
@@ -79,36 +102,13 @@ export default function Index() {
                   selectedRiskType={selectedRiskType}
                   onRiskTypeChange={setSelectedRiskType}
                 />
-                <div className="flex items-center space-x-4">
-                  <div className="flex items-center space-x-2">
-                    <Switch
-                      id="show-selected"
-                      checked={showSelectedOnly}
-                      onCheckedChange={setShowSelectedOnly}
-                    />
-                    <Label htmlFor="show-selected">Only show selected patients</Label>
-                  </div>
-                  <ToggleGroup 
-                    type="single" 
-                    value={viewMode}
-                    onValueChange={(value) => {
-                      if (value) setViewMode(value as 'patient' | 'population');
-                    }}
-                    className="border rounded-lg"
-                  >
-                    <ToggleGroupItem 
-                      value="patient" 
-                      className="px-4 py-2 data-[state=on]:bg-primary data-[state=on]:text-white"
-                    >
-                      Patient
-                    </ToggleGroupItem>
-                    <ToggleGroupItem 
-                      value="population"
-                      className="px-4 py-2 data-[state=on]:bg-primary data-[state=on]:text-white"
-                    >
-                      Population
-                    </ToggleGroupItem>
-                  </ToggleGroup>
+                <div className="flex items-center space-x-2">
+                  <Switch
+                    id="show-selected"
+                    checked={showSelectedOnly}
+                    onCheckedChange={setShowSelectedOnly}
+                  />
+                  <Label htmlFor="show-selected">Only show selected patients</Label>
                 </div>
               </div>
               {isLoading ? (
