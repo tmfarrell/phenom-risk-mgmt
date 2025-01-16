@@ -9,6 +9,7 @@ import { TableControls } from '@/components/table/TableControls';
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
 import { calculateAverageRisks } from '@/components/table/utils/riskCalculations';
+import { ViewToggle } from '@/components/ViewToggle';
 
 export default function Index() {
   const { data: patientData, isLoading, error } = usePatientDataLatest();
@@ -24,6 +25,7 @@ export default function Index() {
   ]);
   const [selectedPatients, setSelectedPatients] = useState<Person[]>([]);
   const [showSelectedOnly, setShowSelectedOnly] = useState(false);
+  const [viewMode, setViewMode] = useState<'patient' | 'population'>('patient');
 
   // Calculate average risks from the full dataset
   const averageRisks = patientData ? calculateAverageRisks(patientData) : {};
@@ -65,7 +67,7 @@ export default function Index() {
         <div className="max-w-[1600px] mx-auto">
           <div className="flex flex-col space-y-6">
             <div className="glass-card p-6">
-              <div className="flex justify-between items-center mb-4">
+              <div className="flex justify-between items-start mb-4">
                 <TableControls
                   searchQuery={searchQuery}
                   onSearchChange={setSearchQuery}
@@ -77,13 +79,19 @@ export default function Index() {
                   selectedRiskType={selectedRiskType}
                   onRiskTypeChange={setSelectedRiskType}
                 />
-                <div className="flex items-center space-x-2">
-                  <Switch
-                    id="show-selected"
-                    checked={showSelectedOnly}
-                    onCheckedChange={setShowSelectedOnly}
+                <div className="flex flex-col items-end space-y-4">
+                  <ViewToggle 
+                    selectedView={viewMode} 
+                    onViewChange={setViewMode} 
                   />
-                  <Label htmlFor="show-selected">Only show selected patients</Label>
+                  <div className="flex items-center space-x-2">
+                    <Switch
+                      id="show-selected"
+                      checked={showSelectedOnly}
+                      onCheckedChange={setShowSelectedOnly}
+                    />
+                    <Label htmlFor="show-selected">Only show selected patients</Label>
+                  </div>
                 </div>
               </div>
               {isLoading ? (
