@@ -132,7 +132,7 @@ export function PopulationRiskDistribution({
                 angle: -90, 
                 position: 'insideLeft',
                 style: { textAnchor: 'middle' },
-                offset: 10
+                dx: -10
               }} 
             />
             <Tooltip />
