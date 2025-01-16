@@ -107,24 +107,6 @@ export type Database = {
           },
         ]
       }
-      phenom_risk_dist: {
-        Row: {
-          post: number | null
-          pre: number
-          range: string
-        }
-        Insert: {
-          post?: number | null
-          pre: number
-          range: string
-        }
-        Update: {
-          post?: number | null
-          pre?: number
-          range?: string
-        }
-        Relationships: []
-      }
     }
     Views: {
       [_ in never]: never

@@ -1,28 +1,30 @@
 import { createClient } from '@supabase/supabase-js';
+import type { Database } from './types';
 
-const supabaseUrl = 'https://onyninrwfmomluobsvpt.supabase.co';
-const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9ueW5pbnJ3Zm1vbWx1b2JzdnB0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3MDk2NTg1NzcsImV4cCI6MjAyNTIzNDU3N30.GDW-3yMjrYYwTxkF7QBwsF0Q9Lgy_VWRVXEQJpYbvPs';
+const supabaseUrl = "https://onyninrwfmomluobsvpt.supabase.co";
+const supabaseKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9ueW5pbnJ3Zm1vbWx1b2JzdnB0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzM1MTU3MTgsImV4cCI6MjA0OTA5MTcxOH0.4S6y_hacaK000pfd4101pKvctYXHCdLd-iy-OGrO4dQ";
 
-export const supabase = createClient(supabaseUrl, supabaseKey, {
+export const supabase = createClient<Database>(supabaseUrl, supabaseKey, {
   auth: {
-    persistSession: true,
     autoRefreshToken: true,
+    persistSession: true,
     detectSessionInUrl: true
   }
 });
 
-// Debug logging for development
-if (process.env.NODE_ENV === 'development') {
-  console.log('Supabase client initialized');
-  
-  // Test the connection
-  void supabase.auth.getSession().then(({ data: { session } }) => {
-    if (session) {
-      console.log('Connected to Supabase with session:', session.user.id);
-    } else {
-      console.log('Connected to Supabase (no active session)');
-    }
-  }).catch(error => {
-    console.error('Error connecting to Supabase:', error);
+// Add debug logging for auth state and API calls
+supabase.auth.onAuthStateChange((event, session) => {
+  console.log('Supabase auth event:', event);
+  console.log('Session:', session);
+});
+
+// Add debug logging for API calls using Promise.prototype methods
+void supabase
+  .from('patient')
+  .select('*')
+  .then(response => {
+    console.log('Test API call response:', response);
+  })
+  .catch(error => {
+    console.error('Test API call error:', error);
   });
-}
