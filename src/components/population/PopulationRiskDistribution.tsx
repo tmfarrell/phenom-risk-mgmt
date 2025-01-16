@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend } from 'recharts';
+import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, Legend } from 'recharts';
 import { ChartContainer } from '@/components/ui/chart';
 import { Label } from '@/components/ui/label';
 import {
@@ -76,7 +76,7 @@ export function PopulationRiskDistribution({
             },
           }}
         >
-          <BarChart
+          <AreaChart
             data={distributionData}
             margin={{
               top: 20,
@@ -102,17 +102,23 @@ export function PopulationRiskDistribution({
             />
             <Tooltip />
             <Legend />
-            <Bar 
+            <Area 
+              type="monotone"
               dataKey="pre" 
               fill="#60A5FA" 
+              stroke="#60A5FA"
               name="Previous Distribution"
+              fillOpacity={0.6}
             />
-            <Bar 
+            <Area 
+              type="monotone"
               dataKey="post" 
               fill="#3B82F6" 
+              stroke="#3B82F6"
               name="Current Distribution"
+              fillOpacity={0.6}
             />
-          </BarChart>
+          </AreaChart>
         </ChartContainer>
       </div>
     </div>
