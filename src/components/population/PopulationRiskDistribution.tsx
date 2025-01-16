@@ -4,6 +4,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, Legend } from 'recharts';
 import { ChartContainer } from '@/components/ui/chart';
 import { Label } from '@/components/ui/label';
+import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
 import {
   Select,
   SelectContent,
@@ -12,6 +13,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { RISK_COLUMNS } from '../table/tableConstants';
+import { cn } from '@/lib/utils';
 
 interface PopulationRiskDistributionProps {
   selectedTimeframe: string;
@@ -23,9 +25,10 @@ export function PopulationRiskDistribution({
   selectedRiskType,
 }: PopulationRiskDistributionProps) {
   const [selectedRiskFactor, setSelectedRiskFactor] = useState<string>(RISK_COLUMNS[0]);
+  const [localTimeframe, setLocalTimeframe] = useState<string>(selectedTimeframe);
 
   const { data: distributionData, isLoading } = useQuery({
-    queryKey: ['risk-distribution', selectedTimeframe, selectedRiskType, selectedRiskFactor],
+    queryKey: ['risk-distribution', localTimeframe, selectedRiskType, selectedRiskFactor],
     queryFn: async () => {
       console.log('Fetching risk distribution data...');
       const { data, error } = await supabase
@@ -43,7 +46,7 @@ export function PopulationRiskDistribution({
 
   return (
     <div className="space-y-6">
-      <div className="flex justify-end space-x-4">
+      <div className="flex justify-end items-center space-x-8">
         <div className="w-[200px]">
           <Label className="mb-2 block">Risk Factor</Label>
           <Select
@@ -61,6 +64,37 @@ export function PopulationRiskDistribution({
               ))}
             </SelectContent>
           </Select>
+        </div>
+
+        <div className="flex flex-col gap-2">
+          <Label className="text-sm text-gray-600 text-center mx-auto">Time Period</Label>
+          <ToggleGroup 
+            type="single" 
+            value={localTimeframe}
+            onValueChange={(value) => {
+              if (value) setLocalTimeframe(value);
+            }}
+            className="flex gap-2"
+          >
+            <ToggleGroupItem 
+              value="1" 
+              className={cn(
+                "px-4 py-2 rounded-md",
+                localTimeframe === '1' ? "bg-blue-100 hover:bg-blue-200" : "hover:bg-gray-100"
+              )}
+            >
+              1 Year
+            </ToggleGroupItem>
+            <ToggleGroupItem 
+              value="5"
+              className={cn(
+                "px-4 py-2 rounded-md",
+                localTimeframe === '5' ? "bg-blue-100 hover:bg-blue-200" : "hover:bg-gray-100"
+              )}
+            >
+              5 Years
+            </ToggleGroupItem>
+          </ToggleGroup>
         </div>
       </div>
 
