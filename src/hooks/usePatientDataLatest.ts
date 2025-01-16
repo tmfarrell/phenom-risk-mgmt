@@ -1,14 +1,35 @@
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { Person } from '@/types/population';
+import { useEffect, useState } from 'react';
 
 export const usePatientDataLatest = () => {
+  const [session, setSession] = useState(null);
+
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setSession(session);
+    });
+
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((_event, session) => {
+      setSession(session);
+    });
+
+    return () => subscription.unsubscribe();
+  }, []);
+
   return useQuery({
     queryKey: ['patients-latest'],
     queryFn: async () => {
       console.log('Fetching latest patient data...');
       
-      // Fetch patients
+      if (!session) {
+        throw new Error('No authenticated session');
+      }
+      
+      // Fetch patients with authentication
       const { data: patients, error: patientsError } = await supabase
         .from('patient')
         .select('*');
@@ -88,6 +109,7 @@ export const usePatientDataLatest = () => {
 
       console.log('Transformed latest data:', transformedData);
       return transformedData;
-    }
+    },
+    enabled: !!session // Only run query when session exists
   });
 };
