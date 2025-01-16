@@ -98,7 +98,7 @@ export function PopulationRiskDistribution({
         </div>
       </div>
 
-      <div className="h-[400px] w-full">
+      <div className="h-[500px] w-full">
         <ChartContainer
           className="h-full"
           config={{
