@@ -9,6 +9,7 @@ import { TableControls } from '@/components/table/TableControls';
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
 import { calculateAverageRisks } from '@/components/table/utils/riskCalculations';
+import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
 
 export default function Index() {
   const { data: patientData, isLoading, error } = usePatientDataLatest();
@@ -24,6 +25,7 @@ export default function Index() {
   ]);
   const [selectedPatients, setSelectedPatients] = useState<Person[]>([]);
   const [showSelectedOnly, setShowSelectedOnly] = useState(false);
+  const [viewMode, setViewMode] = useState<'patient' | 'population'>('patient');
 
   // Calculate average risks from the full dataset
   const averageRisks = patientData ? calculateAverageRisks(patientData) : {};
@@ -77,13 +79,36 @@ export default function Index() {
                   selectedRiskType={selectedRiskType}
                   onRiskTypeChange={setSelectedRiskType}
                 />
-                <div className="flex items-center space-x-2">
-                  <Switch
-                    id="show-selected"
-                    checked={showSelectedOnly}
-                    onCheckedChange={setShowSelectedOnly}
-                  />
-                  <Label htmlFor="show-selected">Only show selected patients</Label>
+                <div className="flex items-center space-x-4">
+                  <div className="flex items-center space-x-2">
+                    <Switch
+                      id="show-selected"
+                      checked={showSelectedOnly}
+                      onCheckedChange={setShowSelectedOnly}
+                    />
+                    <Label htmlFor="show-selected">Only show selected patients</Label>
+                  </div>
+                  <ToggleGroup 
+                    type="single" 
+                    value={viewMode}
+                    onValueChange={(value) => {
+                      if (value) setViewMode(value as 'patient' | 'population');
+                    }}
+                    className="border rounded-lg"
+                  >
+                    <ToggleGroupItem 
+                      value="patient" 
+                      className="px-4 py-2 data-[state=on]:bg-primary data-[state=on]:text-white"
+                    >
+                      Patient
+                    </ToggleGroupItem>
+                    <ToggleGroupItem 
+                      value="population"
+                      className="px-4 py-2 data-[state=on]:bg-primary data-[state=on]:text-white"
+                    >
+                      Population
+                    </ToggleGroupItem>
+                  </ToggleGroup>
                 </div>
               </div>
               {isLoading ? (
