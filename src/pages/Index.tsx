@@ -10,6 +10,7 @@ import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
 import { calculateAverageRisks } from '@/components/table/utils/riskCalculations';
 import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
+import { PopulationRiskDistribution } from '@/components/population/PopulationRiskDistribution';
 
 export default function Index() {
   const { data: patientData, isLoading, error } = usePatientDataLatest();
@@ -90,39 +91,49 @@ export default function Index() {
                   </ToggleGroupItem>
                 </ToggleGroup>
               </div>
-              <div className="flex justify-between items-center mb-4">
-                <TableControls
-                  searchQuery={searchQuery}
-                  onSearchChange={setSearchQuery}
-                  selectedTimeframe={selectedTimeframe}
-                  onTimeframeChange={setSelectedTimeframe}
-                  selectedRiskColumns={selectedRiskColumns}
-                  onRiskColumnsChange={setSelectedRiskColumns}
-                  timeframes={[1, 5]}
-                  selectedRiskType={selectedRiskType}
-                  onRiskTypeChange={setSelectedRiskType}
-                />
-                <div className="flex items-center space-x-2">
-                  <Switch
-                    id="show-selected"
-                    checked={showSelectedOnly}
-                    onCheckedChange={setShowSelectedOnly}
-                  />
-                  <Label htmlFor="show-selected">Only show selected patients</Label>
-                </div>
-              </div>
-              {isLoading ? (
-                <div className="space-y-3">
-                  <Skeleton className="h-[40px] w-full" />
-                  <Skeleton className="h-[400px] w-full" />
-                </div>
+
+              {viewMode === 'patient' ? (
+                <>
+                  <div className="flex justify-between items-center mb-4">
+                    <TableControls
+                      searchQuery={searchQuery}
+                      onSearchChange={setSearchQuery}
+                      selectedTimeframe={selectedTimeframe}
+                      onTimeframeChange={setSelectedTimeframe}
+                      selectedRiskColumns={selectedRiskColumns}
+                      onRiskColumnsChange={setSelectedRiskColumns}
+                      timeframes={[1, 5]}
+                      selectedRiskType={selectedRiskType}
+                      onRiskTypeChange={setSelectedRiskType}
+                    />
+                    <div className="flex items-center space-x-2">
+                      <Switch
+                        id="show-selected"
+                        checked={showSelectedOnly}
+                        onCheckedChange={setShowSelectedOnly}
+                      />
+                      <Label htmlFor="show-selected">Only show selected patients</Label>
+                    </div>
+                  </div>
+                  {isLoading ? (
+                    <div className="space-y-3">
+                      <Skeleton className="h-[40px] w-full" />
+                      <Skeleton className="h-[400px] w-full" />
+                    </div>
+                  ) : (
+                    <ResultsTable
+                      data={filteredData || []}
+                      visibleRiskColumns={selectedRiskColumns}
+                      onSelectionChange={setSelectedPatients}
+                      averageRisks={averageRisks}
+                      selectedTimeframe={selectedTimeframe}
+                    />
+                  )}
+                </>
               ) : (
-                <ResultsTable
-                  data={filteredData || []}
-                  visibleRiskColumns={selectedRiskColumns}
-                  onSelectionChange={setSelectedPatients}
-                  averageRisks={averageRisks}
+                <PopulationRiskDistribution
                   selectedTimeframe={selectedTimeframe}
+                  selectedRiskType={selectedRiskType}
                 />
               )}
             </div>
