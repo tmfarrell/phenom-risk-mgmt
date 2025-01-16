@@ -131,7 +131,8 @@ export function PopulationRiskDistribution({
                 value: 'Number of Patients', 
                 angle: -90, 
                 position: 'insideLeft',
-                style: { textAnchor: 'middle' }
+                style: { textAnchor: 'middle' },
+                offset: 10
               }} 
             />
             <Tooltip />
@@ -141,7 +142,7 @@ export function PopulationRiskDistribution({
               dataKey="pre" 
               fill="#60A5FA" 
               stroke="#60A5FA"
-              name="Previous Distribution"
+              name="Pre"
               fillOpacity={0.6}
             />
             <Area 
@@ -149,7 +150,7 @@ export function PopulationRiskDistribution({
               dataKey="post" 
               fill="#3B82F6" 
               stroke="#3B82F6"
-              name="Current Distribution"
+              name="Post"
               fillOpacity={0.6}
             />
           </AreaChart>
