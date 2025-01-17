@@ -44,7 +44,9 @@ export const getRiskColumns = (
     },
     cell: ({ row }) => {
       const fieldName = getFieldName(column);
-      const value = row.getValue(fieldName) as number;
+      const rawValue = row.getValue(fieldName) as number;
+      // Apply Math.abs() to the value
+      const value = rawValue !== null && rawValue !== undefined ? Math.abs(rawValue) : rawValue;
       const riskType = row.original.risk_type;
       const changeField = `${fieldName}_change` as keyof Person;
       const change = row.original[changeField] as number;
