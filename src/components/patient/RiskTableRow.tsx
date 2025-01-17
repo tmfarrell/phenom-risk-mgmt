@@ -56,6 +56,10 @@ export const RiskTableRow = ({
   // Check if all values for this risk factor are null
   const hasValidRiskData = allRisks.some(r => getRiskValue(r, risk) !== null);
 
+  // Get the risk value and apply Math.abs() if it's a number
+  const riskValue = getRiskValue(currentRisks, risk);
+  const absoluteRiskValue = typeof riskValue === 'number' ? Math.abs(riskValue) : riskValue;
+
   return (
     <TableRow>
       <TableCell className="font-medium">
@@ -76,8 +80,8 @@ export const RiskTableRow = ({
         <div className="flex items-center gap-2">
           <div className="flex flex-col">
             <div className="flex items-center gap-1">
-              <span className={`${isHighRisk(getRiskValue(currentRisks, risk), selectedRiskType) ? 'bg-red-100' : ''} px-2 py-1 rounded`}>
-                {formatRiskValue(getRiskValue(currentRisks, risk), selectedRiskType)}
+              <span className={`${isHighRisk(absoluteRiskValue, selectedRiskType) ? 'bg-red-100' : ''} px-2 py-1 rounded`}>
+                {formatRiskValue(absoluteRiskValue, selectedRiskType)}
               </span>
               <RiskChangeIndicator 
                 change={getChangeValue(currentRisks, risk)}
