@@ -44,7 +44,7 @@ export const getRiskColumns = (
     },
     cell: ({ row }) => {
       const fieldName = getFieldName(column);
-      const value = row.getValue(fieldName) as number;
+      const value = Math.abs(row.getValue(fieldName) as number);
       const riskType = row.original.risk_type;
       const changeField = `${fieldName}_change` as keyof Person;
       const change = row.original[changeField] as number;
@@ -58,7 +58,7 @@ export const getRiskColumns = (
         if (riskType === 'absolute') {
           return `${Math.round(change)}%`;
         }
-        return change.toFixed(1);
+        return change.toFixed(2);
       };
 
       const getArrowColor = (change: number, riskType: string) => {
@@ -116,7 +116,7 @@ export const getRiskColumns = (
           <div className="flex items-center justify-center w-full">
             <div className="flex items-center min-w-[5rem]">
               <div className={`${isHighRisk(value) ? 'bg-red-100' : ''} w-16 text-center py-1 rounded`}>
-                <span>{value.toFixed(1)}<span>×</span></span>
+                <span>{value.toFixed(2)}<span>×</span></span>
               </div>
               <div className="w-4 ml-2">
                 {renderChangeArrow(change, 1)}
