@@ -97,13 +97,11 @@ export const getRiskColumns = (
       };
 
       if (riskType === 'absolute') {
-        const roundedValue = Math.round(value);
-        const isHighAbsoluteRisk = roundedValue > 50;
         return (
           <div className="flex items-center justify-center w-full">
             <div className="flex items-center min-w-[5rem]">
-              <div className={`${isHighAbsoluteRisk ? 'bg-red-100' : ''} w-16 text-center py-1 rounded`}>
-                <span>{`${roundedValue}%`}</span>
+              <div className={`${value > 50 ? 'bg-red-100' : ''} w-16 text-center py-1 rounded`}>
+                <span>{value.toFixed(1)}%</span>
               </div>
               <div className="w-4 ml-2">
                 {renderChangeArrow(change, 10)}
