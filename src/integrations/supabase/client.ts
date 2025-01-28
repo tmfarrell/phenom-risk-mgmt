@@ -19,12 +19,11 @@ supabase.auth.onAuthStateChange((event, session) => {
 });
 
 // Add debug logging for API calls using Promise methods
-void supabase
-  .from('patient')
-  .select('*')
-  .then(response => {
+void (async () => {
+  try {
+    const response = await supabase.from('patient').select('*');
     console.log('Test API call response:', response);
-  })
-  .catch(error => {
+  } catch (error) {
     console.error('Test API call error:', error);
-  });
+  }
+})();

@@ -47,21 +47,23 @@ export const getRiskColumns = (
       const value = Math.abs(row.getValue(fieldName) as number);
       const riskType = row.original.risk_type;
       const changeField = `${fieldName}_change` as keyof Person;
-      const change = row.original[changeField] as number;
+      const change = row.original[changeField] as number | null | undefined;
       const changeSince = row.original.change_since;
 
       if (value === undefined || value === null) {
         return 'N/A';
       }
 
-      const formatChangeValue = (change: number, riskType: string) => {
+      const formatChangeValue = (change: number | null | undefined, riskType: string) => {
+        if (change === null || change === undefined) return 'N/A';
         if (riskType === 'absolute') {
-          return `${Math.round(change)}%`;
+          return `${change.toFixed(1)}%`;
         }
         return change.toFixed(2);
       };
 
-      const getArrowColor = (change: number, riskType: string) => {
+      const getArrowColor = (change: number | null | undefined, riskType: string) => {
+        if (change === null || change === undefined) return 'text-black';
         if (riskType === 'absolute') {
           if (change > 15) return 'text-red-500';
           if (change < -15) return 'text-green-500';
@@ -73,8 +75,8 @@ export const getRiskColumns = (
         }
       };
 
-      const renderChangeArrow = (change: number, threshold: number) => {
-        if (Math.abs(change) <= threshold) return null;
+      const renderChangeArrow = (change: number | null | undefined, threshold: number) => {
+        if (!change || Math.abs(change) <= threshold) return null;
 
         const tooltipText = `${change > 0 ? '+' : ''}${formatChangeValue(change, riskType)} change from ${changeSince || 'unknown date'}`;
         const arrowColor = getArrowColor(change, riskType);

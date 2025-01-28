@@ -6,7 +6,7 @@ export interface Person {
   last_visit?: string | null;
   age: number | null;
   gender: string | null;
-  location: string | null;
+  location?: string | null;
   recorded_date?: string | null;
   prediction_timeframe_yrs?: number | null;
   risk_type?: 'relative' | 'absolute';
