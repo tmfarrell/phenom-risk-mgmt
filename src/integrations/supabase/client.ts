@@ -18,7 +18,7 @@ supabase.auth.onAuthStateChange((event, session) => {
   console.log('Session:', session);
 });
 
-// Add debug logging for API calls using Promise.prototype methods
+// Add debug logging for API calls using Promise methods
 void supabase
   .from('patient')
   .select('*')

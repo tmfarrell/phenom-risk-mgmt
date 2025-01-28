@@ -33,14 +33,14 @@ export const usePatientDataLatest = () => {
 
       // Get unique combinations and their latest records
       const latestRisks = risks?.reduce((acc, risk) => {
-        const key = `${risk.patient_id}-${risk.risk_type}-${risk.prediction_timeframe_yrs}`;
+        const key = `${risk.patient_id}-${risk.risk_type}-${risk.time_period}`;
         if (!acc[key] || new Date(risk.calculated_date || '') > new Date(acc[key].calculated_date || '')) {
           acc[key] = risk;
         }
         return acc;
       }, {} as Record<string, any>);
 
-      // Transform data to match Person interface
+      // Transform data to match Person interface with new column names
       const transformedData: Person[] = (patients || []).flatMap((patient) => {
         const patientLatestRisks = Object.values(latestRisks || {})
           .filter((risk: any) => risk.patient_id === patient.patient_id);
@@ -49,16 +49,16 @@ export const usePatientDataLatest = () => {
         if (patientLatestRisks.length === 0) {
           return [{
             ...patient,
-            ED: null,
-            Hospitalization: null,
-            Fall: null,
-            Stroke: null,
-            MI: null,
-            ED_change: null,
-            Hospitalization_change: null,
-            Fall_change: null,
-            Stroke_change: null,
-            MI_change: null,
+            EMERGENCY_VISIT: null,
+            HOSPITALIZATION: null,
+            FALL: null,
+            STROKE: null,
+            INFARCTION: null,
+            EMERGENCY_VISIT_change: null,
+            HOSPITALIZATION_change: null,
+            FALL_change: null,
+            STROKE_change: null,
+            INFARCTION_change: null,
             recorded_date: null,
             prediction_timeframe_yrs: null,
             risk_type: null,
@@ -69,18 +69,18 @@ export const usePatientDataLatest = () => {
         // Return an entry for each unique risk type and timeframe combination
         return patientLatestRisks.map((risk: any) => ({
           ...patient,
-          ED: risk.ED,
-          Hospitalization: risk.Hospitalization,
-          Fall: risk.Fall,
-          Stroke: risk.Stroke,
-          MI: risk.MI,
-          ED_change: risk.ED_change,
-          Hospitalization_change: risk.Hospitalization_change,
-          Fall_change: risk.Fall_change,
-          Stroke_change: risk.Stroke_change,
-          MI_change: risk.MI_change,
+          EMERGENCY_VISIT: risk.EMERGENCY_VISIT,
+          HOSPITALIZATION: risk.HOSPITALIZATION,
+          FALL: risk.FALL,
+          STROKE: risk.STROKE,
+          INFARCTION: risk.INFARCTION,
+          EMERGENCY_VISIT_change: risk.EMERGENCY_VISIT_change,
+          HOSPITALIZATION_change: risk.HOSPITALIZATION_change,
+          FALL_change: risk.FALL_change,
+          STROKE_change: risk.STROKE_change,
+          INFARCTION_change: risk.INFARCTION_change,
           recorded_date: risk.calculated_date,
-          prediction_timeframe_yrs: risk.prediction_timeframe_yrs,
+          prediction_timeframe_yrs: risk.time_period,
           risk_type: risk.risk_type,
           change_since: risk.change_since
         }));
