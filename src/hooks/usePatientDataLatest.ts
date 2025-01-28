@@ -40,7 +40,7 @@ export const usePatientDataLatest = () => {
         return acc;
       }, {} as Record<string, any>);
 
-      // Transform data to match Person interface with new column names
+      // Transform data to match Person interface
       const transformedData: Person[] = (patients || []).flatMap((patient) => {
         const patientLatestRisks = Object.values(latestRisks || {})
           .filter((risk: any) => risk.patient_id === patient.patient_id);
@@ -67,23 +67,26 @@ export const usePatientDataLatest = () => {
         }
 
         // Return an entry for each unique risk type and timeframe combination
-        return patientLatestRisks.map((risk: any) => ({
-          ...patient,
-          EMERGENCY_VISIT: risk.EMERGENCY_VISIT,
-          HOSPITALIZATION: risk.HOSPITALIZATION,
-          FALL: risk.FALL,
-          STROKE: risk.STROKE,
-          INFARCTION: risk.INFARCTION,
-          EMERGENCY_VISIT_change: risk.EMERGENCY_VISIT_change,
-          HOSPITALIZATION_change: risk.HOSPITALIZATION_change,
-          FALL_change: risk.FALL_change,
-          STROKE_change: risk.STROKE_change,
-          INFARCTION_change: risk.INFARCTION_change,
-          recorded_date: risk.calculated_date,
-          prediction_timeframe_yrs: risk.time_period,
-          risk_type: risk.risk_type,
-          change_since: risk.change_since
-        }));
+        return patientLatestRisks.map((risk: any) => {
+          console.log('Processing latest risk record:', risk); // Debug log
+          return {
+            ...patient,
+            EMERGENCY_VISIT: risk.EMERGENCY_VISIT || null,
+            HOSPITALIZATION: risk.HOSPITALIZATION || null,
+            FALL: risk.FALL || null,
+            STROKE: risk.STROKE || null,
+            INFARCTION: risk.INFARCTION || null,
+            EMERGENCY_VISIT_change: risk.EMERGENCY_VISIT_change || null,
+            HOSPITALIZATION_change: risk.HOSPITALIZATION_change || null,
+            FALL_change: risk.FALL_change || null,
+            STROKE_change: risk.STROKE_change || null,
+            INFARCTION_change: risk.INFARCTION_change || null,
+            recorded_date: risk.calculated_date,
+            prediction_timeframe_yrs: risk.time_period,
+            risk_type: (risk.risk_type as 'relative' | 'absolute' | null) || null,
+            change_since: risk.change_since || null
+          };
+        });
       });
 
       console.log('Transformed latest data:', transformedData);
