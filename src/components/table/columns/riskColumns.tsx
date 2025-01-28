@@ -65,12 +65,12 @@ export const getRiskColumns = (
       const getArrowColor = (change: number | null | undefined, riskType: string) => {
         if (change === null || change === undefined) return 'text-black';
         if (riskType === 'absolute') {
-          if (change > 15) return 'text-red-500';
-          if (change < -15) return 'text-green-500';
+          if (change > 0.5) return 'text-red-500';
+          if (change < -0.5) return 'text-green-500';
           return 'text-black';
         } else {
-          if (change > 1.5) return 'text-red-500';
-          if (change < -1.5) return 'text-green-500';
+          if (change > 0.15) return 'text-red-500';
+          if (change < -0.15) return 'text-green-500';
           return 'text-black';
         }
       };
@@ -106,7 +106,7 @@ export const getRiskColumns = (
                 <span>{value.toFixed(1)}%</span>
               </div>
               <div className="w-4 ml-2">
-                {renderChangeArrow(change, 10)}
+                {renderChangeArrow(change, 0.25)}
               </div>
             </div>
           </div>
@@ -119,7 +119,7 @@ export const getRiskColumns = (
                 <span>{value.toFixed(2)}<span>×</span></span>
               </div>
               <div className="w-4 ml-2">
-                {renderChangeArrow(change, 1)}
+                {renderChangeArrow(change, 0.1)}
               </div>
             </div>
           </div>

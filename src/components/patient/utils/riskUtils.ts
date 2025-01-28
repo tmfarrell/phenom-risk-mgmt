@@ -40,12 +40,12 @@ export const formatChangeValue = (change: number, riskType: string) => {
 
 export const getArrowColor = (change: number, riskType: string) => {
   if (riskType === 'absolute') {
-    if (change > 15) return 'text-red-500';
-    if (change < -15) return 'text-green-500';
+    if (change > 0.5) return 'text-red-500';
+    if (change < -0.5) return 'text-green-500';
     return 'text-black';
   } else {
-    if (change > 1.5) return 'text-red-500';
-    if (change < -1.5) return 'text-green-500';
+    if (change > 0.15) return 'text-red-500';
+    if (change < -0.15) return 'text-green-500';
     return 'text-black';
   }
 };

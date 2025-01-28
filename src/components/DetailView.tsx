@@ -44,6 +44,8 @@ export const DetailView = ({ person }: DetailViewProps) => {
     p.prediction_timeframe_yrs === Number(selectedTimeframe)
   );
 
+  console.log("selectedTypeRisks", selectedTypeRisks); 
+
   return (
     <div className="space-y-6">
       <Card className="p-6">
