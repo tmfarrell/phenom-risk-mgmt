@@ -96,6 +96,48 @@ export type Database = {
         }
         Relationships: []
       }
+      phenom_risk_changes_pivot: {
+        Row: {
+          calculated_date: string | null
+          change_since: string | null
+          EMERGENCY_VISIT: number | null
+          FALL: number | null
+          HOSPITALIZATION: number | null
+          INFARCTION: number | null
+          patient_id: number | null
+          risk_type: string | null
+          STROKE: number | null
+          time_period: number | null
+          uniq_risk_idx: number | null
+        }
+        Insert: {
+          calculated_date?: string | null
+          change_since?: string | null
+          EMERGENCY_VISIT?: number | null
+          FALL?: number | null
+          HOSPITALIZATION?: number | null
+          INFARCTION?: number | null
+          patient_id?: number | null
+          risk_type?: string | null
+          STROKE?: number | null
+          time_period?: number | null
+          uniq_risk_idx?: number | null
+        }
+        Update: {
+          calculated_date?: string | null
+          change_since?: string | null
+          EMERGENCY_VISIT?: number | null
+          FALL?: number | null
+          HOSPITALIZATION?: number | null
+          INFARCTION?: number | null
+          patient_id?: number | null
+          risk_type?: string | null
+          STROKE?: number | null
+          time_period?: number | null
+          uniq_risk_idx?: number | null
+        }
+        Relationships: []
+      }
       phenom_risk_dist: {
         Row: {
           post: number | null
@@ -111,6 +153,45 @@ export type Database = {
           post?: number | null
           pre?: number
           range?: string
+        }
+        Relationships: []
+      }
+      phenom_risk_pivot: {
+        Row: {
+          calculated_date: string | null
+          EMERGENCY_VISIT: number | null
+          FALL: number | null
+          HOSPITALIZATION: number | null
+          INFARCTION: number | null
+          patient_id: number | null
+          risk_type: string | null
+          STROKE: number | null
+          time_period: number | null
+          uniq_risk_idx: number | null
+        }
+        Insert: {
+          calculated_date?: string | null
+          EMERGENCY_VISIT?: number | null
+          FALL?: number | null
+          HOSPITALIZATION?: number | null
+          INFARCTION?: number | null
+          patient_id?: number | null
+          risk_type?: string | null
+          STROKE?: number | null
+          time_period?: number | null
+          uniq_risk_idx?: number | null
+        }
+        Update: {
+          calculated_date?: string | null
+          EMERGENCY_VISIT?: number | null
+          FALL?: number | null
+          HOSPITALIZATION?: number | null
+          INFARCTION?: number | null
+          patient_id?: number | null
+          risk_type?: string | null
+          STROKE?: number | null
+          time_period?: number | null
+          uniq_risk_idx?: number | null
         }
         Relationships: []
       }
@@ -143,7 +224,18 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      phenom_risk_changes: {
+        Row: {
+          calculated_date: string | null
+          change_since: string | null
+          fact_type: string | null
+          patient_id: number | null
+          probability_change: number | null
+          relative_risk_change: number | null
+          time_period: number | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
       [_ in never]: never
