@@ -1,64 +1,32 @@
 import { Person } from '@/types/population';
 
-export const riskFieldMap = {
-  'Mental Health': 'Mental_Health',
+export const formatRiskValue = (value: number | null, riskType: 'relative' | 'absolute') => {
+  if (value === null) return 'N/A';
+  return riskType === 'relative' ? `${value.toFixed(2)}%` : `${value}`;
 };
 
-export const formatRiskValue = (value: number | string | null | undefined, riskType: 'relative' | 'absolute') => {
-  if (typeof value === 'number') {
-    if (riskType === 'absolute') {
-      return `${Math.round(value)}%`;
-    }
-    return `${value.toFixed(1)}×`;  // Changed from 'x' to '×'
-  }
-  return 'Not available';
+export const isHighRisk = (value: number | null, riskType: 'relative' | 'absolute') => {
+  if (value === null) return false;
+  return riskType === 'relative' ? value > 5 : value > 50;
 };
 
-export const isHighRisk = (value: number | string | null | undefined, riskType: 'relative' | 'absolute') => {
-  if (typeof value !== 'number') return false;
-  return riskType === 'absolute' ? value > 50 : value > 5;
+export const getRiskValue = (risk: Person | undefined, riskFactor: string) => {
+  return risk ? risk[riskFactor as keyof Person] : null;
 };
 
-export const getRiskValue = (risks: Person | undefined, riskFactor: string) => {
-  if (!risks) return null;
-  const fieldName = riskFieldMap[riskFactor as keyof typeof riskFieldMap] || riskFactor;
-  return risks[fieldName as keyof Person];
+export const getChangeValue = (currentRisks: Person | undefined, riskFactor: string) => {
+  return currentRisks ? currentRisks[`${riskFactor}_change` as keyof Person] : null;
 };
 
-export const getChangeValue = (risks: Person | undefined, riskFactor: string) => {
-  if (!risks) return null;
-  const fieldName = `${riskFieldMap[riskFactor as keyof typeof riskFieldMap] || riskFactor}_change`;
-  return risks[fieldName as keyof Person] as number | null;
-};
-
-export const formatChangeValue = (change: number, riskType: string) => {
-  if (riskType === 'absolute') {
-    return `${Math.round(change)}%`;
-  }
-  return change.toFixed(2);
-};
-
-export const getArrowColor = (change: number, riskType: string) => {
-  if (riskType === 'absolute') {
-    if (change > 0.5) return 'text-red-500';
-    if (change < -0.5) return 'text-green-500';
-    return 'text-black';
-  } else {
-    if (change > 0.15) return 'text-red-500';
-    if (change < -0.15) return 'text-green-500';
-    return 'text-black';
-  }
-};
-
-export const getRiskTrendData = (allRisks: Person[], riskFactor: string) => {
-  const fieldName = riskFieldMap[riskFactor as keyof typeof riskFieldMap] || riskFactor;
-  return allRisks
+export const getRiskTrendData = (risks: Person[], riskFactor: string) => {
+  return risks
+    .filter(r => getRiskValue(r, riskFactor) !== null)
+    .map(r => ({
+      value: getRiskValue(r, riskFactor) as number,
+      date: r.recorded_date
+    }))
     .sort((a, b) => {
-      if (!a.recorded_date || !b.recorded_date) return 0;
-      return new Date(a.recorded_date).getTime() - new Date(b.recorded_date).getTime();
-    })
-    .map(risk => {
-      const value = risk[fieldName as keyof Person];
-      return typeof value === 'number' ? value : 0;
+      if (!a.date || !b.date) return 0;
+      return new Date(a.date).getTime() - new Date(b.date).getTime();
     });
 };
