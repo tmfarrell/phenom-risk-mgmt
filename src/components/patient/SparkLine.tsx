@@ -1,7 +1,11 @@
 import { Line, LineChart, ResponsiveContainer, Tooltip, YAxis, ReferenceLine } from 'recharts';
+import { format } from 'date-fns';
 
 interface SparkLineProps {
-  data: number[];
+  data: Array<{
+    value: number;
+    date: string;
+  }>;
   color?: string;
   yAxisDomain?: [number, number];
   averageRisk?: string;
@@ -15,17 +19,11 @@ export const SparkLine = ({
   averageRisk,
   riskType = 'absolute'
 }: SparkLineProps) => {
-  // Transform data into format required by recharts
-  const chartData = data.map((value, index) => ({ value }));
-
-  // Parse average risk from string (e.g., "25%" -> 25)
-  const avgValue = averageRisk ? parseFloat(averageRisk.replace('%', '')) : undefined;
-
   // Calculate domain to ensure reference line is visible
   const calculateDomain = () => {
-    const values = data;
-    if (riskType === 'absolute' && avgValue !== undefined) {
-      values.push(avgValue);
+    const values = data.map(d => d.value);
+    if (riskType === 'absolute' && averageRisk !== undefined) {
+      values.push(parseFloat(averageRisk.replace('%', '')));
     } else if (riskType === 'relative') {
       values.push(1); // Add reference value for relative risk
     }
@@ -38,14 +36,14 @@ export const SparkLine = ({
   return (
     <div className="w-[200px] h-[30px]">
       <ResponsiveContainer width="100%" height="100%">
-        <LineChart data={chartData}>
+        <LineChart data={data}>
           <YAxis 
             domain={calculateDomain()}
             hide={true}
           />
-          {riskType === 'absolute' && avgValue !== undefined && (
+          {riskType === 'absolute' && averageRisk !== undefined && (
             <ReferenceLine 
-              y={avgValue} 
+              y={parseFloat(averageRisk.replace('%', ''))} 
               stroke="#9CA3AF" 
               strokeDasharray="3 3"
             />
@@ -60,10 +58,13 @@ export const SparkLine = ({
           <Tooltip 
             content={({ active, payload }) => {
               if (active && payload && payload.length) {
-                const value = payload[0].value;
+                const data = payload[0].payload;
                 return (
                   <div className="bg-white border border-gray-200 shadow-sm rounded p-2 text-xs">
-                    {typeof value === 'number' ? value.toFixed(2) : value}
+                    <div>value: {riskType === 'absolute' 
+                      ? `${Math.round(data.value)}%` 
+                      : data.value.toFixed(2)}</div>
+                    <div>date: {format(new Date(data.date), 'MM/dd/yyyy')}</div>
                   </div>
                 );
               }
