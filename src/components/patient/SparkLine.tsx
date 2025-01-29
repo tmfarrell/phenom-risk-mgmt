@@ -63,7 +63,10 @@ export const SparkLine = ({
                 const dataPoint = payload[0].payload as DataPoint;
                 return (
                   <div className="bg-white border border-gray-200 shadow-sm rounded p-2 text-xs">
-                    <div>value: {typeof dataPoint.value === 'number' ? dataPoint.value.toFixed(2) : dataPoint.value}</div>
+                    <div>value: {riskType === 'absolute' ? 
+                      `${Math.round(dataPoint.value)}%` : 
+                      dataPoint.value.toFixed(2)
+                    }</div>
                     {dataPoint.date && (
                       <div>date: {format(new Date(dataPoint.date), 'yyyy-MM-dd')}</div>
                     )}
