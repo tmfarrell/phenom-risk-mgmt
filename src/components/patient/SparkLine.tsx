@@ -1,5 +1,6 @@
 import { Line, LineChart, ResponsiveContainer, Tooltip, YAxis, ReferenceLine } from 'recharts';
 import { format, parseISO } from 'date-fns';
+import { zonedTimeToUtc, utcToZonedTime } from 'date-fns-tz';
 
 interface DataPoint {
   value: number;
@@ -21,18 +22,23 @@ export const SparkLine = ({
   averageRisk,
   riskType = 'absolute'
 }: SparkLineProps) => {
-  // Calculate domain to ensure reference line is visible
   const calculateDomain = () => {
     const values = data.map(d => d.value);
     if (riskType === 'absolute' && averageRisk !== undefined) {
       values.push(parseFloat(averageRisk.replace('%', '')));
     } else if (riskType === 'relative') {
-      values.push(1); // Add reference value for relative risk
+      values.push(1);
     }
     const min = Math.min(...values);
     const max = Math.max(...values);
-    const padding = (max - min) * 0.1; // Add 10% padding
+    const padding = (max - min) * 0.1;
     return [Math.max(0, min - padding), max + padding];
+  };
+
+  const formatDate = (dateStr: string) => {
+    const date = parseISO(dateStr);
+    const zonedDate = utcToZonedTime(date, 'America/New_York');
+    return format(zonedDate, 'yyyy-MM-dd');
   };
 
   return (
@@ -68,7 +74,7 @@ export const SparkLine = ({
                       dataPoint.value.toFixed(2)
                     }</div>
                     {dataPoint.date && (
-                      <div>date: {format(new Date(`${dataPoint.date}T00:00:00Z`), 'yyyy-MM-dd')}</div>
+                      <div>date: {formatDate(dataPoint.date)}</div>
                     )}
                   </div>
                 );

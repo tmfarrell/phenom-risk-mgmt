@@ -1,6 +1,5 @@
 import { Person } from '@/types/population';
 import { TableCell, TableRow } from '../ui/table';
-import { format } from 'date-fns';
 import { SparkLine } from './SparkLine';
 import { RiskChangeIndicator } from './RiskChangeIndicator';
 import { 
@@ -10,6 +9,8 @@ import {
   getChangeValue,
   getRiskTrendData 
 } from './utils/riskUtils';
+import { format, parseISO } from 'date-fns';
+import { utcToZonedTime } from 'date-fns-tz';
 
 interface RiskTableRowProps {
   risk: string;
@@ -56,6 +57,13 @@ export const RiskTableRow = ({
   // Check if all values for this risk factor are null
   const hasValidRiskData = allRisks.some(r => getRiskValue(r, risk) !== null);
 
+  const formatDate = (dateStr: string | undefined | null) => {
+    if (!dateStr) return null;
+    const date = parseISO(dateStr);
+    const zonedDate = utcToZonedTime(date, 'America/New_York');
+    return format(zonedDate, 'yyyy-MM-dd');
+  };
+
   return (
     <TableRow>
       <TableCell className="font-medium">
@@ -93,7 +101,7 @@ export const RiskTableRow = ({
       </TableCell>
       <TableCell>
         {hasValidRiskData && currentRisks?.recorded_date ? 
-          format(new Date(currentRisks.recorded_date), 'yyyy-MM-dd') : 
+          formatDate(currentRisks.recorded_date) : 
           <span className="text-gray-400 italic">No data</span>
         }
       </TableCell>
