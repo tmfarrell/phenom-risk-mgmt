@@ -8,7 +8,7 @@ import {
 import { formatChangeValue, getArrowColor } from './utils/riskUtils';
 import { parseISO } from 'date-fns';
 import { format } from 'date-fns';
-import { utcToZonedTime } from 'date-fns-tz';
+import { toZonedTime } from 'date-fns-tz';
 
 interface RiskChangeIndicatorProps {
   change: number | null;
@@ -26,7 +26,7 @@ export const RiskChangeIndicator = ({
   const formatDate = (dateStr: string | null | undefined) => {
     if (!dateStr) return 'unknown date';
     const date = parseISO(dateStr);
-    const zonedDate = utcToZonedTime(date, 'America/New_York');
+    const zonedDate = toZonedTime(date, 'America/New_York');
     return format(zonedDate, 'yyyy-MM-dd');
   };
 

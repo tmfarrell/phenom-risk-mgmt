@@ -10,7 +10,7 @@ import {
   getRiskTrendData 
 } from './utils/riskUtils';
 import { format, parseISO } from 'date-fns';
-import { utcToZonedTime } from 'date-fns-tz';
+import { toZonedTime } from 'date-fns-tz';
 
 interface RiskTableRowProps {
   risk: string;
@@ -60,7 +60,7 @@ export const RiskTableRow = ({
   const formatDate = (dateStr: string | undefined | null) => {
     if (!dateStr) return null;
     const date = parseISO(dateStr);
-    const zonedDate = utcToZonedTime(date, 'America/New_York');
+    const zonedDate = toZonedTime(date, 'America/New_York');
     return format(zonedDate, 'yyyy-MM-dd');
   };
 

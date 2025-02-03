@@ -1,6 +1,6 @@
 import { Line, LineChart, ResponsiveContainer, Tooltip, YAxis, ReferenceLine } from 'recharts';
 import { format, parseISO } from 'date-fns';
-import { zonedTimeToUtc, utcToZonedTime } from 'date-fns-tz';
+import { toZonedTime } from 'date-fns-tz';
 
 interface DataPoint {
   value: number;
@@ -37,7 +37,7 @@ export const SparkLine = ({
 
   const formatDate = (dateStr: string) => {
     const date = parseISO(dateStr);
-    const zonedDate = utcToZonedTime(date, 'America/New_York');
+    const zonedDate = toZonedTime(date, 'America/New_York');
     return format(zonedDate, 'yyyy-MM-dd');
   };
 
