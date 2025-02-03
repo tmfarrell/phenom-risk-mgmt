@@ -15,7 +15,16 @@ export const mockPeople: Person[] = [
     Stroke: 0.15,
     MI: 0.18,
     CKD: 0.25,
-    'Mental Health': 0.30
+    'Mental Health': 0.30,
+    ED_change: 0.05,
+    Hospitalization_change: 0.02,
+    Fall_change: 0.01,
+    Stroke_change: -0.02,
+    MI_change: 0.03,
+    recorded_date: '2024-01-15',
+    prediction_timeframe_yrs: 1,
+    risk_type: 'relative',
+    change_since: '2023-12-15'
   },
   {
     patient_id: 2,
@@ -31,7 +40,16 @@ export const mockPeople: Person[] = [
     Stroke: 0.05,
     MI: 0.08,
     CKD: 0.15,
-    'Mental Health': 0.20
+    'Mental Health': 0.20,
+    ED_change: -0.03,
+    Hospitalization_change: -0.01,
+    Fall_change: 0.00,
+    Stroke_change: -0.01,
+    MI_change: -0.02,
+    recorded_date: '2024-01-20',
+    prediction_timeframe_yrs: 1,
+    risk_type: 'relative',
+    change_since: '2023-12-20'
   },
   {
     patient_id: 3,
@@ -47,7 +65,16 @@ export const mockPeople: Person[] = [
     Stroke: 0.05,
     MI: 0.12,
     CKD: 0.18,
-    'Mental Health': 0.22
+    'Mental Health': 0.22,
+    ED_change: 0.02,
+    Hospitalization_change: 0.01,
+    Fall_change: 0.00,
+    Stroke_change: 0.00,
+    MI_change: 0.01,
+    recorded_date: '2024-01-25',
+    prediction_timeframe_yrs: 1,
+    risk_type: 'relative',
+    change_since: '2023-12-25'
   },
   {
     patient_id: 4,
@@ -63,7 +90,16 @@ export const mockPeople: Person[] = [
     Stroke: 0.10,
     MI: 0.15,
     CKD: 0.20,
-    'Mental Health': 0.28
+    'Mental Health': 0.28,
+    ED_change: 0.03,
+    Hospitalization_change: 0.02,
+    Fall_change: 0.01,
+    Stroke_change: 0.00,
+    MI_change: 0.01,
+    recorded_date: '2024-01-30',
+    prediction_timeframe_yrs: 1,
+    risk_type: 'relative',
+    change_since: '2023-12-30'
   },
   {
     patient_id: 5,
@@ -79,7 +115,16 @@ export const mockPeople: Person[] = [
     Stroke: 0.20,
     MI: 0.25,
     CKD: 0.30,
-    'Mental Health': 0.35
+    'Mental Health': 0.35,
+    ED_change: 0.04,
+    Hospitalization_change: 0.03,
+    Fall_change: 0.02,
+    Stroke_change: 0.01,
+    MI_change: 0.02,
+    recorded_date: '2024-02-05',
+    prediction_timeframe_yrs: 1,
+    risk_type: 'relative',
+    change_since: '2023-12-15'
   },
   {
     patient_id: 6,
@@ -95,7 +140,16 @@ export const mockPeople: Person[] = [
     Stroke: 0.30,
     MI: 0.35,
     CKD: 0.40,
-    'Mental Health': 0.45
+    'Mental Health': 0.45,
+    ED_change: 0.05,
+    Hospitalization_change: 0.04,
+    Fall_change: 0.03,
+    Stroke_change: 0.02,
+    MI_change: 0.01,
+    recorded_date: '2024-02-10',
+    prediction_timeframe_yrs: 1,
+    risk_type: 'relative',
+    change_since: '2023-12-20'
   },
   {
     patient_id: 7,
@@ -111,7 +165,16 @@ export const mockPeople: Person[] = [
     Stroke: 0.35,
     MI: 0.40,
     CKD: 0.45,
-    'Mental Health': 0.50
+    'Mental Health': 0.50,
+    ED_change: 0.06,
+    Hospitalization_change: 0.05,
+    Fall_change: 0.04,
+    Stroke_change: 0.03,
+    MI_change: 0.02,
+    recorded_date: '2024-02-15',
+    prediction_timeframe_yrs: 1,
+    risk_type: 'relative',
+    change_since: '2023-12-25'
   },
   {
     patient_id: 8,
@@ -127,7 +190,16 @@ export const mockPeople: Person[] = [
     Stroke: 0.40,
     MI: 0.45,
     CKD: 0.50,
-    'Mental Health': 0.55
+    'Mental Health': 0.55,
+    ED_change: 0.07,
+    Hospitalization_change: 0.06,
+    Fall_change: 0.05,
+    Stroke_change: 0.04,
+    MI_change: 0.03,
+    recorded_date: '2024-02-20',
+    prediction_timeframe_yrs: 1,
+    risk_type: 'relative',
+    change_since: '2023-12-30'
   },
   {
     patient_id: 9,
@@ -143,7 +215,16 @@ export const mockPeople: Person[] = [
     Stroke: 0.45,
     MI: 0.50,
     CKD: 0.55,
-    'Mental Health': 0.60
+    'Mental Health': 0.60,
+    ED_change: 0.08,
+    Hospitalization_change: 0.07,
+    Fall_change: 0.06,
+    Stroke_change: 0.05,
+    MI_change: 0.04,
+    recorded_date: '2024-02-25',
+    prediction_timeframe_yrs: 1,
+    risk_type: 'relative',
+    change_since: '2024-01-05'
   },
   {
     patient_id: 10,
@@ -159,7 +240,16 @@ export const mockPeople: Person[] = [
     Stroke: 0.50,
     MI: 0.55,
     CKD: 0.60,
-    'Mental Health': 0.65
+    'Mental Health': 0.65,
+    ED_change: 0.09,
+    Hospitalization_change: 0.08,
+    Fall_change: 0.07,
+    Stroke_change: 0.06,
+    MI_change: 0.05,
+    recorded_date: '2024-03-01',
+    prediction_timeframe_yrs: 1,
+    risk_type: 'relative',
+    change_since: '2024-01-15'
   }
 ];
 

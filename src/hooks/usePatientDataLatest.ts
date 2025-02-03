@@ -55,7 +55,7 @@ export const usePatientDataLatest = () => {
             Stroke: null,
             MI: null,
             ED_change: null,
-            Hospitlization_change: null,
+            Hospitalization_change: null,
             Fall_change: null,
             Stroke_change: null,
             MI_change: null,
