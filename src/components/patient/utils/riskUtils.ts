@@ -10,15 +10,10 @@ export const formatChangeValue = (value: number, riskType: 'relative' | 'absolut
 };
 
 export const getArrowColor = (change: number, riskType: 'relative' | 'absolute') => {
-  // Round the change value based on risk type to match display format
-  const roundedChange = riskType === 'relative' 
-    ? Number(change.toFixed(2))
-    : Math.round(change);
-
   if (riskType === 'relative') {
-    return roundedChange > 0.1 ? 'text-red-500' : 'text-green-500';
+    return change > 0.1 ? 'text-red-500' : 'text-green-500';
   }
-  return roundedChange > 1 ? 'text-red-500' : 'text-green-500';
+  return change > 1 ? 'text-red-500' : 'text-green-500';
 };
 
 export const isHighRisk = (value: number | null, riskType: 'relative' | 'absolute') => {
