@@ -1,5 +1,5 @@
 import { Line, LineChart, ResponsiveContainer, Tooltip, YAxis, ReferenceLine } from 'recharts';
-import { format } from 'date-fns';
+import { format, parseISO } from 'date-fns';
 
 interface DataPoint {
   value: number;
@@ -68,7 +68,7 @@ export const SparkLine = ({
                       dataPoint.value.toFixed(2)
                     }</div>
                     {dataPoint.date && (
-                      <div>date: {format(new Date(dataPoint.date), 'yyyy-MM-dd')}</div>
+                      <div>date: {format(new Date(`${dataPoint.date}T00:00:00Z`), 'yyyy-MM-dd')}</div>
                     )}
                   </div>
                 );
