@@ -6,14 +6,20 @@ export const formatRiskValue = (value: number | null, riskType: 'relative' | 'ab
 };
 
 export const formatChangeValue = (value: number, riskType: 'relative' | 'absolute') => {
-  return riskType === 'relative' ? `${value.toFixed(2)}` : `${Math.round(value)}%`;
+  return riskType === 'relative' ? `${value.toFixed(2)}` : `${value.toFixed(1)}%`;
 };
 
 export const getArrowColor = (change: number, riskType: 'relative' | 'absolute') => {
-  if (riskType === 'relative') {
-    return change > 0.1 ? 'text-red-500' : 'text-green-500';
+  if (change === null || change === undefined) return 'text-black';
+  if (riskType === 'absolute') {
+    if (change > 0.5) return 'text-red-500';
+    if (change < -0.5) return 'text-green-500';
+    return 'text-black';
+  } else {
+    if (change > 0.15) return 'text-red-500';
+    if (change < -0.15) return 'text-green-500';
+    return 'text-black';
   }
-  return change > 1 ? 'text-red-500' : 'text-green-500';
 };
 
 export const isHighRisk = (value: number | null, riskType: 'relative' | 'absolute') => {
