@@ -6,7 +6,7 @@ export const formatRiskValue = (value: number | null, riskType: 'relative' | 'ab
 };
 
 export const formatChangeValue = (value: number, riskType: 'relative' | 'absolute') => {
-  return riskType === 'relative' ? `${value.toFixed(2)}` : `${value.toFixed(1)}%`;
+  return riskType === 'relative' ? `${value.toFixed(2)}×` : `${value.toFixed(1)}%`;
 };
 
 export const getArrowColor = (change: number, riskType: 'relative' | 'absolute') => {
