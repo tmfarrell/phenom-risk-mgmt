@@ -13,7 +13,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { RISK_COLUMNS } from '../table/tableConstants';
+import { RISK_COLUMNS, RISK_COLUMN_FIELD_MAP } from '../table/tableConstants';
 import { cn } from '@/lib/utils';
 
 interface PopulationRiskDistributionProps {
@@ -31,17 +31,19 @@ export function PopulationRiskDistribution({
   const { data: distributionData, isLoading } = useQuery({
     queryKey: ['risk-distribution', localTimeframe, selectedRiskType, selectedRiskFactor],
     queryFn: async () => {
+      const dbRiskFactor = RISK_COLUMN_FIELD_MAP[selectedRiskFactor];
       console.log('Fetching risk distribution data with params:', {
         timeframe: localTimeframe,
         riskType: selectedRiskType,
         riskFactor: selectedRiskFactor,
+        dbRiskFactor: dbRiskFactor,
       });
 
       const { data, error } = await supabase
         .from('phenom_risk_dist')
         .select('*')
         .eq('time_period', parseInt(localTimeframe))
-        .eq('fact_type', selectedRiskFactor);
+        .eq('fact_type', dbRiskFactor);
 
       if (error) {
         console.error('Error fetching risk distribution:', error);
