@@ -140,7 +140,13 @@ export function PopulationRiskDistribution({
                 angle={-45} 
                 textAnchor="end"
                 height={60}
-                tickFormatter={(value) => value.split('-')[0]}
+                tickFormatter={(value) => `${value.split('-')[0]}%`}
+                label={{ 
+                  value: `Risk of ${selectedRiskFactor} (%)`, 
+                  position: 'insideBottom',
+                  offset: -35,
+                  style: { textAnchor: 'middle' }
+                }}
               />
               <YAxis 
                 label={{ 
