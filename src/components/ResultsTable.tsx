@@ -1,3 +1,4 @@
+
 import { Table } from './ui/table';
 import { ScrollArea } from './ui/scroll-area';
 import { Person } from '../types/population';
@@ -10,7 +11,6 @@ import {
   ColumnFiltersState,
   getPaginationRowModel,
   RowSelectionState,
-  SortDirection,
 } from '@tanstack/react-table';
 import { useState, useEffect } from 'react';
 import { TableHeader } from './table/TableHeader';
@@ -47,21 +47,7 @@ export const ResultsTable = ({
     data,
     columns,
     getCoreRowModel: getCoreRowModel(),
-    onSortingChange: (updater) => {
-      // Handle the sorting state update
-      if (typeof updater === 'function') {
-        setSorting((old) => {
-          const newSorting = updater(old);
-          // If this is a new sort (no previous sorting), set it to desc
-          if (newSorting.length === 1 && old.length === 0) {
-            return [{ ...newSorting[0], desc: true }];
-          }
-          return newSorting;
-        });
-      } else {
-        setSorting(updater);
-      }
-    },
+    onSortingChange: setSorting,
     getSortedRowModel: getSortedRowModel(),
     onColumnFiltersChange: setColumnFilters,
     getFilteredRowModel: getFilteredRowModel(),

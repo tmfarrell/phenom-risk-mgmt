@@ -1,3 +1,4 @@
+
 import { ColumnDef } from '@tanstack/react-table';
 import { Person } from '@/types/population';
 import { Button } from '@/components/ui/button';
@@ -15,7 +16,8 @@ export const getRiskColumns = (
   averageRisks: { [key: string]: string }
 ): ColumnDef<Person>[] => 
   visibleRiskColumns.map((column): ColumnDef<Person> => ({
-    accessorKey: getFieldName(column),
+    accessorKey: column,
+    accessorFn: (row) => row[column as keyof Person],
     header: ({ table, column: tableColumn }) => {      
       const isSorted = tableColumn.getIsSorted();
       return (
@@ -43,11 +45,9 @@ export const getRiskColumns = (
       );
     },
     cell: ({ row }) => {
-      //const fieldName = getFieldName(column);
-      const fieldName = column ; 
-      const value = Math.abs(row.original[fieldName] as number);
+      const value = Math.abs(row.original[column as keyof Person] as number);
       const riskType = row.original.risk_type;
-      const changeField = `${fieldName}_change` as keyof Person;
+      const changeField = `${column}_change` as keyof Person;
       const change = row.original[changeField] as number | null | undefined;
       const changeSince = row.original.change_since;
 
