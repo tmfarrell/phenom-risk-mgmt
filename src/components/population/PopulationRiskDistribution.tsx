@@ -1,3 +1,4 @@
+
 import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
@@ -30,10 +31,17 @@ export function PopulationRiskDistribution({
   const { data: distributionData, isLoading } = useQuery({
     queryKey: ['risk-distribution', localTimeframe, selectedRiskType, selectedRiskFactor],
     queryFn: async () => {
-      console.log('Fetching risk distribution data...');
+      console.log('Fetching risk distribution data with params:', {
+        timeframe: localTimeframe,
+        riskType: selectedRiskType,
+        riskFactor: selectedRiskFactor,
+      });
+
       const { data, error } = await supabase
         .from('phenom_risk_dist')
-        .select('*');
+        .select('*')
+        .eq('time_period', parseInt(localTimeframe))
+        .eq('fact_type', selectedRiskFactor);
 
       if (error) {
         console.error('Error fetching risk distribution:', error);
@@ -110,50 +118,56 @@ export function PopulationRiskDistribution({
             },
           }}
         >
-          <AreaChart
-            data={distributionData}
-            margin={{
-              top: 20,
-              right: 20,
-              bottom: 60,
-              left: 40,
-            }}
-          >
-            <CartesianGrid strokeDasharray="3 3" />
-            <XAxis 
-              dataKey="range" 
-              angle={-45} 
-              textAnchor="end"
-              height={60}
-            />
-            <YAxis 
-              label={{ 
-                value: 'Number of Patients', 
-                angle: -90, 
-                position: 'insideLeft',
-                style: { textAnchor: 'middle' },
-                dx: -10
-              }} 
-            />
-            <Tooltip />
-            <Legend />
-            <Area 
-              type="monotone"
-              dataKey="pre" 
-              fill="#60A5FA" 
-              stroke="#60A5FA"
-              name="Pre"
-              fillOpacity={0.6}
-            />
-            <Area 
-              type="monotone"
-              dataKey="post" 
-              fill="#3B82F6" 
-              stroke="#3B82F6"
-              name="Post"
-              fillOpacity={0.6}
-            />
-          </AreaChart>
+          {isLoading ? (
+            <div className="flex items-center justify-center h-full">
+              <p>Loading...</p>
+            </div>
+          ) : (
+            <AreaChart
+              data={distributionData}
+              margin={{
+                top: 20,
+                right: 20,
+                bottom: 60,
+                left: 40,
+              }}
+            >
+              <CartesianGrid strokeDasharray="3 3" />
+              <XAxis 
+                dataKey="range" 
+                angle={-45} 
+                textAnchor="end"
+                height={60}
+              />
+              <YAxis 
+                label={{ 
+                  value: 'Number of Patients', 
+                  angle: -90, 
+                  position: 'insideLeft',
+                  style: { textAnchor: 'middle' },
+                  dx: -10
+                }} 
+              />
+              <Tooltip />
+              <Legend />
+              <Area 
+                type="monotone"
+                dataKey="pre" 
+                fill="#60A5FA" 
+                stroke="#60A5FA"
+                name="Pre"
+                fillOpacity={0.6}
+              />
+              <Area 
+                type="monotone"
+                dataKey="post" 
+                fill="#3B82F6" 
+                stroke="#3B82F6"
+                name="Post"
+                fillOpacity={0.6}
+              />
+            </AreaChart>
+          )}
         </ChartContainer>
       </div>
     </div>
