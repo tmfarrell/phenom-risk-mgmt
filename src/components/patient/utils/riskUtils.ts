@@ -2,11 +2,11 @@ import { Person } from '@/types/population';
 
 export const formatRiskValue = (value: number | null, riskType: 'relative' | 'absolute') => {
   if (value === null) return 'N/A';
-  return riskType === 'relative' ? `${value.toFixed(2)}` : `${Math.round(value)}%`;
+  return riskType === 'relative' ? `${value.toFixed(2)}×` : `${Math.round(value)}%`;
 };
 
 export const formatChangeValue = (value: number, riskType: 'relative' | 'absolute') => {
-  return riskType === 'relative' ? `${value.toFixed(2)}×` : `${value.toFixed(1)}%`;
+  return riskType === 'relative' ? `${value.toFixed(2)}` : `${value.toFixed(1)}%`;
 };
 
 export const getArrowColor = (change: number, riskType: 'relative' | 'absolute') => {
