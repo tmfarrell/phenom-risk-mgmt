@@ -159,6 +159,7 @@ export function PopulationRiskDistribution({
               />
               <Tooltip 
                 formatter={(value: number) => [`${value}%`, undefined]}
+                labelFormatter={(label) => `${label.split('-')[0]}%`}
               />
               <Legend />
               <Area 
