@@ -142,7 +142,7 @@ export function PopulationRiskDistribution({
                 height={60}
                 tickFormatter={(value) => `${value.split('-')[0]}%`}
                 label={{ 
-                  value: `Risk of ${selectedRiskFactor} (%)`, 
+                  value: `Probability of ${selectedRiskFactor} (%)`, 
                   position: 'insideBottom',
                   offset: -35,
                   style: { textAnchor: 'middle' }
