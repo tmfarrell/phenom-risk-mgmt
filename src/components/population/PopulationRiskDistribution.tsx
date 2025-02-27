@@ -150,14 +150,16 @@ export function PopulationRiskDistribution({
               />
               <YAxis 
                 label={{ 
-                  value: 'Number of Patients', 
+                  value: 'Distribution of patients', 
                   angle: -90, 
                   position: 'insideLeft',
                   style: { textAnchor: 'middle' },
                   dx: -10
                 }} 
               />
-              <Tooltip />
+              <Tooltip 
+                formatter={(value: number) => [`${value}%`, undefined]}
+              />
               <Legend />
               <Area 
                 type="monotone"
