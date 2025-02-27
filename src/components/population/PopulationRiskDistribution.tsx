@@ -140,6 +140,7 @@ export function PopulationRiskDistribution({
                 angle={-45} 
                 textAnchor="end"
                 height={60}
+                tickFormatter={(value) => value.split('-')[0]}
               />
               <YAxis 
                 label={{ 
@@ -155,17 +156,17 @@ export function PopulationRiskDistribution({
               <Area 
                 type="monotone"
                 dataKey="pre" 
-                fill="#60A5FA" 
-                stroke="#60A5FA"
-                name="Pre"
+                fill="#ef4444" 
+                stroke="#ef4444"
+                name="Before Intervention"
                 fillOpacity={0.6}
               />
               <Area 
                 type="monotone"
                 dataKey="post" 
-                fill="#3B82F6" 
-                stroke="#3B82F6"
-                name="Post"
+                fill="#22c55e" 
+                stroke="#22c55e"
+                name="After Intervention"
                 fillOpacity={0.6}
               />
             </AreaChart>
