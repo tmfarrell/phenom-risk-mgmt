@@ -25,7 +25,7 @@ export const DetailView = ({ person }: DetailViewProps) => {
   }
 
   const { data: patientData } = usePatientData();
-  const { data: riskSummaries = [] } = useRiskSummaries(person.patient_id);
+  const { data: riskSummaries = [], isLoading: isLoadingSummaries } = useRiskSummaries(person.patient_id);
   
   // Filter data for the current patient
   const patientRisks = patientData?.filter(p => p.patient_id === person.patient_id) || [];
@@ -47,15 +47,9 @@ export const DetailView = ({ person }: DetailViewProps) => {
     p.prediction_timeframe_yrs === Number(selectedTimeframe)
   );
 
-  // Filter summaries for the selected risk type and timeframe
-  const filteredSummaries = riskSummaries.filter(
-    s => s.risk_type === selectedRiskType && s.time_period === Number(selectedTimeframe)
-  );
-
   console.log("selectedTypeRisks", selectedTypeRisks); 
   console.log("riskSummaries", riskSummaries);
-  console.log("filteredSummaries", filteredSummaries);
-
+  
   return (
     <div className="space-y-6">
       <Card className="p-6">
@@ -70,12 +64,16 @@ export const DetailView = ({ person }: DetailViewProps) => {
           onRiskTypeChange={setSelectedRiskType}
         />
 
-        <RiskTable 
-          currentRisks={latestRisk}
-          selectedRiskType={selectedRiskType}
-          allRisks={selectedTypeRisks}
-          riskSummaries={filteredSummaries}
-        />
+        {isLoadingSummaries ? (
+          <div className="py-4 text-center text-gray-500">Loading risk summaries...</div>
+        ) : (
+          <RiskTable 
+            currentRisks={latestRisk}
+            selectedRiskType={selectedRiskType}
+            allRisks={selectedTypeRisks}
+            riskSummaries={riskSummaries}
+          />
+        )}
       </Card>
     </div>
   );

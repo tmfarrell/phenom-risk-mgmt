@@ -1,4 +1,3 @@
-
 import { Person } from '@/types/population';
 import { Table, TableBody, TableHead, TableHeader, TableRow } from '../ui/table';
 import { usePatientData } from '@/hooks/usePatientData';
@@ -40,24 +39,31 @@ export const RiskTable = ({ currentRisks, selectedRiskType, allRisks, riskSummar
     return `${Math.round(avg)}%`;
   };
 
-  // Map fact_type values to our risk factor names
-  const factTypeMapping: { [key: string]: string } = {
-    'EMERGENCY_VISIT': 'ED',
-    'HOSPITALIZATION': 'Hospitalization',
-    'FALL': 'Fall',
-    'STROKE': 'Stroke',
-    'INFARCTION': 'MI'
+  // Map our risk factor names to the database fact_type values
+  const riskFactorToFactType: { [key: string]: string } = {
+    'ED': 'EMERGENCY_VISIT',
+    'Hospitalization': 'HOSPITALIZATION',
+    'Fall': 'FALL',
+    'Stroke': 'STROKE',
+    'MI': 'INFARCTION'
   };
 
   // Get summary for a specific risk factor
   const getSummary = (riskFactor: string) => {
-    // Convert our risk factor name to the database fact_type
-    const factTypeKeys = Object.keys(factTypeMapping);
-    const factType = factTypeKeys.find(key => factTypeMapping[key] === riskFactor);
+    const factType = riskFactorToFactType[riskFactor];
     
     if (!factType) return null;
     
-    return riskSummaries.find(s => s.fact_type === factType)?.summary || null;
+    const summary = riskSummaries.find(s => 
+      s.fact_type === factType && 
+      s.risk_type === selectedRiskType &&
+      s.time_period === currentRisks?.prediction_timeframe_yrs
+    );
+    
+    console.log(`Looking for summary: factor=${riskFactor}, fact_type=${factType}, risk_type=${selectedRiskType}, time_period=${currentRisks?.prediction_timeframe_yrs}`);
+    console.log('Found summary:', summary);
+    
+    return summary?.summary || null;
   };
 
   return (

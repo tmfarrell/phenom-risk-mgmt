@@ -17,6 +17,8 @@ export const useRiskSummaries = (patientId?: number) => {
     queryFn: async (): Promise<RiskSummary[]> => {
       if (!patientId) return [];
       
+      console.log(`Fetching risk summaries for patient ${patientId}`);
+      
       const { data, error } = await supabase
         .from('phenom_risk_summary')
         .select('*')
@@ -27,6 +29,7 @@ export const useRiskSummaries = (patientId?: number) => {
         throw new Error('Failed to fetch risk summaries');
       }
       
+      console.log('Fetched risk summaries:', data);
       return data || [];
     },
     enabled: !!patientId,
