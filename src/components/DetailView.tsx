@@ -1,3 +1,4 @@
+
 import { Person } from '../types/population';
 import { Card } from './ui/card';
 import { usePatientData } from '@/hooks/usePatientData';
@@ -5,6 +6,7 @@ import { useState } from 'react';
 import { PatientHeader } from './patient/PatientHeader';
 import { RiskControls } from './patient/RiskControls';
 import { RiskTable } from './patient/RiskTable';
+import { useRiskSummaries } from '@/hooks/useRiskSummaries';
 
 interface DetailViewProps {
   person: Person | null;
@@ -23,6 +25,7 @@ export const DetailView = ({ person }: DetailViewProps) => {
   }
 
   const { data: patientData } = usePatientData();
+  const { data: riskSummaries = [] } = useRiskSummaries(person.patient_id);
   
   // Filter data for the current patient
   const patientRisks = patientData?.filter(p => p.patient_id === person.patient_id) || [];
@@ -44,7 +47,14 @@ export const DetailView = ({ person }: DetailViewProps) => {
     p.prediction_timeframe_yrs === Number(selectedTimeframe)
   );
 
+  // Filter summaries for the selected risk type and timeframe
+  const filteredSummaries = riskSummaries.filter(
+    s => s.risk_type === selectedRiskType && s.time_period === Number(selectedTimeframe)
+  );
+
   console.log("selectedTypeRisks", selectedTypeRisks); 
+  console.log("riskSummaries", riskSummaries);
+  console.log("filteredSummaries", filteredSummaries);
 
   return (
     <div className="space-y-6">
@@ -64,6 +74,7 @@ export const DetailView = ({ person }: DetailViewProps) => {
           currentRisks={latestRisk}
           selectedRiskType={selectedRiskType}
           allRisks={selectedTypeRisks}
+          riskSummaries={filteredSummaries}
         />
       </Card>
     </div>

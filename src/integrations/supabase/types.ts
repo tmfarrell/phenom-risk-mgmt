@@ -147,6 +147,33 @@ export type Database = {
         }
         Relationships: []
       }
+      phenom_risk_summary: {
+        Row: {
+          fact_type: string
+          id: number
+          patient_id: number
+          risk_type: string
+          summary: string
+          time_period: number
+        }
+        Insert: {
+          fact_type: string
+          id?: number
+          patient_id: number
+          risk_type: string
+          summary: string
+          time_period: number
+        }
+        Update: {
+          fact_type?: string
+          id?: number
+          patient_id?: number
+          risk_type?: string
+          summary?: string
+          time_period?: number
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never

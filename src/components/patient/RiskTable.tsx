@@ -1,15 +1,18 @@
+
 import { Person } from '@/types/population';
 import { Table, TableBody, TableHead, TableHeader, TableRow } from '../ui/table';
 import { usePatientData } from '@/hooks/usePatientData';
 import { RiskTableRow } from './RiskTableRow';
+import { RiskSummary } from '@/hooks/useRiskSummaries';
 
 interface RiskTableProps {
   currentRisks: Person | undefined;
   selectedRiskType: 'relative' | 'absolute';
   allRisks: Person[];
+  riskSummaries?: RiskSummary[];
 }
 
-export const RiskTable = ({ currentRisks, selectedRiskType, allRisks }: RiskTableProps) => {
+export const RiskTable = ({ currentRisks, selectedRiskType, allRisks, riskSummaries = [] }: RiskTableProps) => {
   const riskFactors = ['ED', 'Hospitalization', 'Fall', 'Stroke', 'MI'];
   const { data: patientData } = usePatientData();
 
@@ -37,6 +40,26 @@ export const RiskTable = ({ currentRisks, selectedRiskType, allRisks }: RiskTabl
     return `${Math.round(avg)}%`;
   };
 
+  // Map fact_type values to our risk factor names
+  const factTypeMapping: { [key: string]: string } = {
+    'EMERGENCY_VISIT': 'ED',
+    'HOSPITALIZATION': 'Hospitalization',
+    'FALL': 'Fall',
+    'STROKE': 'Stroke',
+    'INFARCTION': 'MI'
+  };
+
+  // Get summary for a specific risk factor
+  const getSummary = (riskFactor: string) => {
+    // Convert our risk factor name to the database fact_type
+    const factTypeKeys = Object.keys(factTypeMapping);
+    const factType = factTypeKeys.find(key => factTypeMapping[key] === riskFactor);
+    
+    if (!factType) return null;
+    
+    return riskSummaries.find(s => s.fact_type === factType)?.summary || null;
+  };
+
   return (
     <div className="overflow-x-auto">
       <Table>
@@ -58,6 +81,7 @@ export const RiskTable = ({ currentRisks, selectedRiskType, allRisks }: RiskTabl
               allRisks={allRisks.filter(r => r.risk_type === selectedRiskType)}
               averageRisk={calculateAverageRisk(risk, currentRisks?.prediction_timeframe_yrs)}
               yAxisDomain={yAxisDomain}
+              summary={getSummary(risk)}
             />
           ))}
         </TableBody>

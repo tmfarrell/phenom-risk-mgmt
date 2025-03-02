@@ -1,3 +1,4 @@
+
 import { Person } from '@/types/population';
 import { TableCell, TableRow } from '../ui/table';
 import { SparkLine } from './SparkLine';
@@ -19,6 +20,7 @@ interface RiskTableRowProps {
   allRisks: Person[];
   averageRisk: string;
   yAxisDomain: [number, number];
+  summary: string | null;
 }
 
 const riskDetails: Record<string, { fullName: string; description: string }> = {
@@ -50,7 +52,8 @@ export const RiskTableRow = ({
   selectedRiskType, 
   allRisks,
   averageRisk,
-  yAxisDomain 
+  yAxisDomain,
+  summary
 }: RiskTableRowProps) => {
   const details = riskDetails[risk];
   
@@ -65,46 +68,58 @@ export const RiskTableRow = ({
   };
 
   return (
-    <TableRow>
-      <TableCell className="font-medium">
-        <div className="flex flex-col items-start">
-          <span className="font-bold">{details.fullName}</span>
-          <span className="text-sm text-gray-500 font-normal">{details.description}</span>
-        </div>
-      </TableCell>
-      <TableCell className="min-w-[220px]">
-        <SparkLine 
-          data={hasValidRiskData ? getRiskTrendData(allRisks, risk) : []}
-          yAxisDomain={yAxisDomain}
-          averageRisk={selectedRiskType === 'absolute' ? averageRisk : undefined}
-          riskType={selectedRiskType}
-        />
-      </TableCell>
-      <TableCell>
-        <div className="flex items-center gap-2">
-          <div className="flex flex-col">
-            <div className="flex items-center gap-1">
-              <span className={`${isHighRisk(getRiskValue(currentRisks, risk), selectedRiskType) ? 'bg-red-100' : ''} px-2 py-1 rounded`}>
-                {formatRiskValue(getRiskValue(currentRisks, risk), selectedRiskType)}
-              </span>
-              <RiskChangeIndicator 
-                change={getChangeValue(currentRisks, risk)}
-                selectedRiskType={selectedRiskType}
-                changeSince={currentRisks?.change_since}
-              />
-            </div>
-            <div className="text-xs text-blue-400/70 bg-white px-2 py-1 rounded mt-1 shadow-sm">
-              Avg: {averageRisk}
+    <>
+      <TableRow>
+        <TableCell className="font-medium">
+          <div className="flex flex-col items-start">
+            <span className="font-bold">{details.fullName}</span>
+            <span className="text-sm text-gray-500 font-normal">{details.description}</span>
+          </div>
+        </TableCell>
+        <TableCell className="min-w-[220px]">
+          <SparkLine 
+            data={hasValidRiskData ? getRiskTrendData(allRisks, risk) : []}
+            yAxisDomain={yAxisDomain}
+            averageRisk={selectedRiskType === 'absolute' ? averageRisk : undefined}
+            riskType={selectedRiskType}
+          />
+        </TableCell>
+        <TableCell>
+          <div className="flex items-center gap-2">
+            <div className="flex flex-col">
+              <div className="flex items-center gap-1">
+                <span className={`${isHighRisk(getRiskValue(currentRisks, risk), selectedRiskType) ? 'bg-red-100' : ''} px-2 py-1 rounded`}>
+                  {formatRiskValue(getRiskValue(currentRisks, risk), selectedRiskType)}
+                </span>
+                <RiskChangeIndicator 
+                  change={getChangeValue(currentRisks, risk)}
+                  selectedRiskType={selectedRiskType}
+                  changeSince={currentRisks?.change_since}
+                />
+              </div>
+              <div className="text-xs text-blue-400/70 bg-white px-2 py-1 rounded mt-1 shadow-sm">
+                Avg: {averageRisk}
+              </div>
             </div>
           </div>
-        </div>
-      </TableCell>
-      <TableCell>
-        {hasValidRiskData && currentRisks?.recorded_date ? 
-          formatDate(currentRisks.recorded_date) : 
-          <span className="text-gray-400 italic">No data</span>
-        }
-      </TableCell>
-    </TableRow>
+        </TableCell>
+        <TableCell>
+          {hasValidRiskData && currentRisks?.recorded_date ? 
+            formatDate(currentRisks.recorded_date) : 
+            <span className="text-gray-400 italic">No data</span>
+          }
+        </TableCell>
+      </TableRow>
+      {summary && (
+        <TableRow>
+          <TableCell colSpan={4} className="bg-gray-50 pb-4">
+            <div className="text-sm text-gray-700 p-2 border-l-2 border-blue-400 ml-4">
+              <span className="font-medium text-blue-600">Analysis: </span>
+              {summary}
+            </div>
+          </TableCell>
+        </TableRow>
+      )}
+    </>
   );
 };
