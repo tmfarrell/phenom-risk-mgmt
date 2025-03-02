@@ -12,6 +12,8 @@ import {
 } from './utils/riskUtils';
 import { format, parseISO } from 'date-fns';
 import { toZonedTime } from 'date-fns-tz';
+import { useState } from 'react';
+import { ChevronDown, ChevronRight } from 'lucide-react';
 
 interface RiskTableRowProps {
   risk: string;
@@ -55,6 +57,7 @@ export const RiskTableRow = ({
   yAxisDomain,
   summary
 }: RiskTableRowProps) => {
+  const [isExpanded, setIsExpanded] = useState(false);
   const details = riskDetails[risk];
   
   // Check if all values for this risk factor are null
@@ -69,11 +72,18 @@ export const RiskTableRow = ({
 
   return (
     <>
-      <TableRow>
+      <TableRow className="group cursor-pointer hover:bg-gray-50" onClick={() => summary && setIsExpanded(!isExpanded)}>
         <TableCell className="font-medium">
-          <div className="flex flex-col items-start">
-            <span className="font-bold">{details.fullName}</span>
-            <span className="text-sm text-gray-500 font-normal">{details.description}</span>
+          <div className="flex items-start gap-2">
+            {summary && (
+              <div className="mt-1 text-gray-400">
+                {isExpanded ? <ChevronDown size={16} /> : <ChevronRight size={16} />}
+              </div>
+            )}
+            <div className="flex flex-col items-start">
+              <span className="font-bold">{details.fullName}</span>
+              <span className="text-sm text-gray-500 font-normal">{details.description}</span>
+            </div>
           </div>
         </TableCell>
         <TableCell className="min-w-[220px]">
@@ -110,10 +120,10 @@ export const RiskTableRow = ({
           }
         </TableCell>
       </TableRow>
-      {summary && (
+      {summary && isExpanded && (
         <TableRow>
-          <TableCell colSpan={4} className="bg-gray-50 pb-4">
-            <div className="text-sm text-gray-700 p-2 border-l-2 border-blue-400 ml-4">
+          <TableCell colSpan={4} className="bg-gray-50 pb-4 animate-accordion-down">
+            <div className="text-sm text-gray-700 p-2 border-l-2 border-blue-400 ml-8">
               <span className="font-medium text-blue-600">Analysis: </span>
               {summary}
             </div>
