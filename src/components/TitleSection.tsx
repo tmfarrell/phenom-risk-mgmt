@@ -20,7 +20,7 @@ export const TitleSection: React.FC<TitleSectionProps> = ({ title }) => {
           <span className="align-super text-sm">™</span>
           <span className="font-bold"> Patient Risk Panel</span>
         </h1>
-        <p className="text-sm mt-2 opacity-90">Medicare Advantage Plan (All)</p>
+        {/*<p className="text-sm mt-2 opacity-90">Medicare Advantage Plan (All)</p>*/}
       </div>
     </div>
   );
