@@ -122,7 +122,7 @@ export const RiskTableRow = ({
       </TableRow>
       {summary && isExpanded && (
         <TableRow>
-          <TableCell colSpan={4} className="bg-gray-50 pb-4 animate-accordion-down">
+          <TableCell colSpan={4} className="bg-gray-50 pb-4 animate-accordion-down text-left">
             <div className="text-sm text-gray-700 p-2 border-l-2 border-blue-400 ml-8">
               <span className="font-medium text-blue-600">Analysis: </span>
               {summary}
