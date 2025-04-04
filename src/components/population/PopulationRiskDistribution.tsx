@@ -61,17 +61,19 @@ export function PopulationRiskDistribution({
   const { data: interventions } = useQuery({
     queryKey: ['interventions'],
     queryFn: async () => {
+      // Fix: Use the proper syntax for selecting distinct values
       const { data, error } = await supabase
         .from('phenom_risk_dist')
-        .select('intervention')
-        .distinct();
+        .select('intervention');
       
       if (error) {
         console.error('Error fetching interventions:', error);
         throw error;
       }
 
-      return data.map(item => item.intervention).sort();
+      // Process the data to get unique interventions
+      const uniqueInterventions = [...new Set(data.map(item => item.intervention))].filter(Boolean).sort();
+      return uniqueInterventions;
     }
   });
 
