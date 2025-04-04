@@ -275,7 +275,7 @@ export function PopulationRiskDistribution({
                 fill="#ef4444" 
                 stroke="#ef4444"
                 name="Before Intervention"
-                fillOpacity={0.6}
+                fillOpacity={0} // Changed from 0.6 to 0 to make fill transparent
               />
               <Area 
                 type="monotone"
@@ -283,7 +283,7 @@ export function PopulationRiskDistribution({
                 fill="#22c55e" 
                 stroke="#22c55e"
                 name="After Intervention"
-                fillOpacity={0.6}
+                fillOpacity={0} // Changed from 0.6 to 0 to make fill transparent
               />
             </AreaChart>
           )}
