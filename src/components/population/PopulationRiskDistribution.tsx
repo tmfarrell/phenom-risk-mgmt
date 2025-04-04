@@ -2,7 +2,7 @@
 import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
-import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, Legend } from 'recharts';
+import { AreaChart, Area, XAxis, YAxis, CartesianGrid, ReferenceLine, Legend } from 'recharts';
 import { ChartContainer } from '@/components/ui/chart';
 import { Label } from '@/components/ui/label';
 import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
@@ -53,6 +53,37 @@ export function PopulationRiskDistribution({
       return data;
     }
   });
+
+  // Calculate the mean value for the reference line
+  const calculateMean = () => {
+    if (!distributionData || distributionData.length === 0) return null;
+    
+    const totalPre = distributionData.reduce((sum, item) => sum + (item.pre || 0), 0);
+    const totalPatients = distributionData.reduce((sum, item) => sum + (item.pre || 0), 0);
+    
+    if (totalPatients === 0) return null;
+    
+    // Get the middle range value as a simple approximation of the mean
+    const sortedData = [...distributionData].sort((a, b) => {
+      const aValue = parseInt(a.range.split('-')[0]);
+      const bValue = parseInt(b.range.split('-')[0]);
+      return aValue - bValue;
+    });
+    
+    let cumulativeCount = 0;
+    for (const item of sortedData) {
+      cumulativeCount += (item.pre || 0);
+      if (cumulativeCount >= totalPre / 2) {
+        // Return the middle of this range
+        const [min, max] = item.range.split('-').map(v => parseInt(v));
+        return (min + max) / 2;
+      }
+    }
+    
+    return null;
+  };
+  
+  const meanValue = calculateMean();
 
   return (
     <div className="space-y-6">
@@ -157,11 +188,29 @@ export function PopulationRiskDistribution({
                   dx: -10
                 }} 
               />
-              <Tooltip 
-                formatter={(value: number) => [value, undefined]}
-                labelFormatter={(label) => `${label.split('-')[0]}%`}
+              {/* Removed Tooltip component */}
+              {/* Added meanValue ReferenceLine */}
+              {meanValue && (
+                <ReferenceLine 
+                  x={`${Math.round(meanValue)}%`} 
+                  stroke="#cccccc" 
+                  strokeWidth={1.5} 
+                  label={{ 
+                    value: 'Mean', 
+                    position: 'top', 
+                    fill: '#666666',
+                    fontSize: 12
+                  }} 
+                />
+              )}
+              <Legend 
+                verticalAlign="top" 
+                align="right"
+                wrapperStyle={{ 
+                  paddingTop: '10px',
+                  paddingRight: '10px'
+                }}
               />
-              <Legend />
               <Area 
                 type="monotone"
                 dataKey="pre" 
