@@ -99,6 +99,7 @@ export type Database = {
       phenom_risk_dist: {
         Row: {
           fact_type: string
+          intervention: string | null
           post: number | null
           pre: number | null
           range: string
@@ -106,6 +107,7 @@ export type Database = {
         }
         Insert: {
           fact_type: string
+          intervention?: string | null
           post?: number | null
           pre?: number | null
           range: string
@@ -113,6 +115,7 @@ export type Database = {
         }
         Update: {
           fact_type?: string
+          intervention?: string | null
           post?: number | null
           pre?: number | null
           range?: string

@@ -27,9 +27,10 @@ export function PopulationRiskDistribution({
 }: PopulationRiskDistributionProps) {
   const [selectedRiskFactor, setSelectedRiskFactor] = useState<string>(RISK_COLUMNS[0]);
   const [localTimeframe, setLocalTimeframe] = useState<string>(selectedTimeframe);
+  const [selectedIntervention, setSelectedIntervention] = useState<string>('None');
 
   const { data: distributionData, isLoading } = useQuery({
-    queryKey: ['risk-distribution', localTimeframe, selectedRiskType, selectedRiskFactor],
+    queryKey: ['risk-distribution', localTimeframe, selectedRiskType, selectedRiskFactor, selectedIntervention],
     queryFn: async () => {
       const dbRiskFactor = RISK_COLUMN_FIELD_MAP[selectedRiskFactor];
       console.log('Fetching risk distribution data with params:', {
@@ -37,13 +38,15 @@ export function PopulationRiskDistribution({
         riskType: selectedRiskType,
         riskFactor: selectedRiskFactor,
         dbRiskFactor: dbRiskFactor,
+        intervention: selectedIntervention
       });
 
       const { data, error } = await supabase
         .from('phenom_risk_dist')
         .select('*')
         .eq('time_period', parseInt(localTimeframe))
-        .eq('fact_type', dbRiskFactor);
+        .eq('fact_type', dbRiskFactor)
+        .eq('intervention', selectedIntervention);
 
       if (error) {
         console.error('Error fetching risk distribution:', error);
@@ -51,6 +54,24 @@ export function PopulationRiskDistribution({
       }
 
       return data;
+    }
+  });
+
+  // Query to get available interventions
+  const { data: interventions } = useQuery({
+    queryKey: ['interventions'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('phenom_risk_dist')
+        .select('intervention')
+        .distinct();
+      
+      if (error) {
+        console.error('Error fetching interventions:', error);
+        throw error;
+      }
+
+      return data.map(item => item.intervention).sort();
     }
   });
 
@@ -101,6 +122,25 @@ export function PopulationRiskDistribution({
               {RISK_COLUMNS.map((riskFactor) => (
                 <SelectItem key={riskFactor} value={riskFactor}>
                   {riskFactor}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+
+        <div className="w-[250px]">
+          <Label className="mb-2 block">Intervention</Label>
+          <Select
+            value={selectedIntervention}
+            onValueChange={setSelectedIntervention}
+          >
+            <SelectTrigger>
+              <SelectValue placeholder="Select intervention" />
+            </SelectTrigger>
+            <SelectContent>
+              {interventions?.map((intervention) => (
+                <SelectItem key={intervention} value={intervention}>
+                  {intervention}
                 </SelectItem>
               ))}
             </SelectContent>
