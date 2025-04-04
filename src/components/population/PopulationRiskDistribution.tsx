@@ -1,5 +1,5 @@
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, ReferenceLine, Legend } from 'recharts';
@@ -77,6 +77,13 @@ export function PopulationRiskDistribution({
     }
   });
 
+  // Set default intervention to the first one in the sorted list when interventions are loaded
+  useEffect(() => {
+    if (interventions && interventions.length > 0) {
+      setSelectedIntervention(interventions[0]);
+    }
+  }, [interventions]);
+
   // Calculate the mean value for the reference line
   const calculateMean = () => {
     if (!distributionData || distributionData.length === 0) return null;
@@ -130,7 +137,7 @@ export function PopulationRiskDistribution({
           </Select>
         </div>
 
-        <div className="w-[250px]">
+        <div className="w-[325px]"> {/* Increased width by 30% from 250px to 325px */}
           <Label className="mb-2 block">Intervention</Label>
           <Select
             value={selectedIntervention}
@@ -182,6 +189,7 @@ export function PopulationRiskDistribution({
       </div>
 
       <div className="h-[500px] w-full">
+        <h3 className="text-xl font-medium mb-2">{selectedRiskFactor} Risk Distribution - {selectedIntervention}</h3>
         <ChartContainer
           className="h-full"
           config={{
