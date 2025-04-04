@@ -21,16 +21,6 @@ interface PopulationRiskDistributionProps {
   selectedRiskType: 'relative' | 'absolute';
 }
 
-// Define risk categories
-type RiskCategory = 'Low' | 'Medium' | 'High';
-
-interface RiskDistributionData {
-  range: string;
-  pre: number;
-  post: number;
-  category?: RiskCategory;
-}
-
 export function PopulationRiskDistribution({ 
   selectedTimeframe,
   selectedRiskType,
@@ -38,7 +28,6 @@ export function PopulationRiskDistribution({
   const [selectedRiskFactor, setSelectedRiskFactor] = useState<string>(RISK_COLUMNS[0]);
   const [localTimeframe, setLocalTimeframe] = useState<string>(selectedTimeframe);
   const [selectedIntervention, setSelectedIntervention] = useState<string>('None');
-  const [categorizedData, setCategorizedData] = useState<RiskDistributionData[]>([]);
 
   const { data: distributionData, isLoading } = useQuery({
     queryKey: ['risk-distribution', localTimeframe, selectedRiskType, selectedRiskFactor, selectedIntervention],
@@ -72,6 +61,7 @@ export function PopulationRiskDistribution({
   const { data: interventions } = useQuery({
     queryKey: ['interventions'],
     queryFn: async () => {
+      // Fix: Use the proper syntax for selecting distinct values
       const { data, error } = await supabase
         .from('phenom_risk_dist')
         .select('intervention');
@@ -94,65 +84,36 @@ export function PopulationRiskDistribution({
     }
   }, [interventions]);
 
-  // Calculate the mean value and categorize data
-  useEffect(() => {
-    if (!distributionData || distributionData.length === 0) return;
+  // Calculate the mean value for the reference line
+  const calculateMean = () => {
+    if (!distributionData || distributionData.length === 0) return null;
     
-    // Sort data by risk value (low to high)
+    const totalPre = distributionData.reduce((sum, item) => sum + (item.pre || 0), 0);
+    const totalPatients = distributionData.reduce((sum, item) => sum + (item.pre || 0), 0);
+    
+    if (totalPatients === 0) return null;
+    
+    // Get the middle range value as a simple approximation of the mean
     const sortedData = [...distributionData].sort((a, b) => {
       const aValue = parseInt(a.range.split('-')[0]);
       const bValue = parseInt(b.range.split('-')[0]);
       return aValue - bValue;
     });
-
-    // Calculate total patients and cumulative sum for finding mean
-    const totalPre = sortedData.reduce((sum, item) => sum + (item.pre || 0), 0);
     
-    // Find the approximate mean value (simple approach)
-    let meanValue = 0;
     let cumulativeCount = 0;
     for (const item of sortedData) {
       cumulativeCount += (item.pre || 0);
       if (cumulativeCount >= totalPre / 2) {
-        // Get the middle of this range
+        // Return the middle of this range
         const [min, max] = item.range.split('-').map(v => parseInt(v));
-        meanValue = (min + max) / 2;
-        break;
+        return (min + max) / 2;
       }
     }
     
-    // Determine thresholds for categories
-    // Using simple approach: values below 2/3 of mean are 'Low', above 4/3 are 'High'
-    const lowThreshold = meanValue * 0.67;
-    const highThreshold = meanValue * 1.33;
-    
-    // Create categories based on thresholds
-    const categorized: { [key: string]: RiskDistributionData } = {
-      'Low': { range: 'Low', pre: 0, post: 0, category: 'Low' },
-      'Medium': { range: 'Medium', pre: 0, post: 0, category: 'Medium' },
-      'High': { range: 'High', pre: 0, post: 0, category: 'High' }
-    };
-    
-    // Aggregate data into categories
-    sortedData.forEach(item => {
-      const rangeValue = parseInt(item.range.split('-')[0]);
-      let category: RiskCategory;
-      
-      if (rangeValue < lowThreshold) {
-        category = 'Low';
-      } else if (rangeValue > highThreshold) {
-        category = 'High';
-      } else {
-        category = 'Medium';
-      }
-      
-      categorized[category].pre += item.pre || 0;
-      categorized[category].post += item.post || 0;
-    });
-    
-    // Convert back to array for chart use
-    setCategorizedData(Object.values(categorized));
-  }, [distributionData]);
+    return null;
+  };
+  
+  const meanValue = calculateMean();
 
   return (
     <div className="space-y-6">
@@ -246,7 +207,7 @@ export function PopulationRiskDistribution({
             </div>
           ) : (
             <AreaChart
-              data={categorizedData}
+              data={distributionData}
               margin={{
                 top: 20,
                 right: 20,
@@ -257,11 +218,12 @@ export function PopulationRiskDistribution({
               <CartesianGrid strokeDasharray="3 3" />
               <XAxis 
                 dataKey="range" 
-                angle={0} 
-                textAnchor="middle"
+                angle={-45} 
+                textAnchor="end"
                 height={60}
+                tickFormatter={(value) => `${value.split('-')[0]}%`}
                 label={{ 
-                  value: `${selectedRiskFactor} Risk Category`, 
+                  value: `Probability of ${selectedRiskFactor} (%)`, 
                   position: 'insideBottom',
                   offset: -15,
                   style: { 
@@ -270,7 +232,7 @@ export function PopulationRiskDistribution({
                     fontWeight: 500
                   }
                 }}
-                tick={{ fontSize: 14 }}
+                tick={{ fontSize: 12 }}
               />
               <YAxis 
                 label={{ 
@@ -286,6 +248,19 @@ export function PopulationRiskDistribution({
                 }}
                 tick={{ fontSize: 12 }} 
               />
+              {meanValue && (
+                <ReferenceLine 
+                  x={`${Math.round(meanValue)}%`} 
+                  stroke="#cccccc" 
+                  strokeWidth={1.5} 
+                  label={{ 
+                    value: 'Mean', 
+                    position: 'top', 
+                    fill: '#666666',
+                    fontSize: 12
+                  }} 
+                />
+              )}
               <Legend 
                 verticalAlign="top" 
                 align="right"
@@ -300,7 +275,7 @@ export function PopulationRiskDistribution({
                 fill="#ef4444" 
                 stroke="#ef4444"
                 name="Before Intervention"
-                fillOpacity={0} // Fill transparent
+                fillOpacity={0} // Changed from 0.6 to 0 to make fill transparent
               />
               <Area 
                 type="monotone"
@@ -308,7 +283,7 @@ export function PopulationRiskDistribution({
                 fill="#22c55e" 
                 stroke="#22c55e"
                 name="After Intervention"
-                fillOpacity={0} // Fill transparent
+                fillOpacity={0} // Changed from 0.6 to 0 to make fill transparent
               />
             </AreaChart>
           )}
