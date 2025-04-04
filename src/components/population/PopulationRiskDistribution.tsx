@@ -175,21 +175,29 @@ export function PopulationRiskDistribution({
                 label={{ 
                   value: `Probability of ${selectedRiskFactor} (%)`, 
                   position: 'insideBottom',
-                  offset: -35,
-                  style: { textAnchor: 'middle' }
+                  offset: -15,
+                  style: { 
+                    textAnchor: 'middle',
+                    fontSize: 14,
+                    fontWeight: 500
+                  }
                 }}
+                tick={{ fontSize: 12 }}
               />
               <YAxis 
                 label={{ 
                   value: 'Number of patients', 
                   angle: -90, 
                   position: 'insideLeft',
-                  style: { textAnchor: 'middle' },
+                  style: { 
+                    textAnchor: 'middle',
+                    fontSize: 14,
+                    fontWeight: 500
+                  },
                   dx: -10
-                }} 
+                }}
+                tick={{ fontSize: 12 }} 
               />
-              {/* Removed Tooltip component */}
-              {/* Added meanValue ReferenceLine */}
               {meanValue && (
                 <ReferenceLine 
                   x={`${Math.round(meanValue)}%`} 
