@@ -263,16 +263,16 @@ export function PopulationRiskDistribution({
                       <Area 
                         type="monotone"
                         dataKey="pre" 
-                        fill="#ef4444" 
-                        stroke="#ef4444"
+                        fill="#757575" 
+                        stroke="#757575"
                         name="Before Intervention"
                         fillOpacity={0} // Fill is transparent
                       />
                       <Area 
                         type="monotone"
                         dataKey="post" 
-                        fill="#22c55e" 
-                        stroke="#22c55e"
+                        fill="#1E88E5" 
+                        stroke="#1E88E5"
                         name="After Intervention"
                         fillOpacity={0} // Fill is transparent
                       />

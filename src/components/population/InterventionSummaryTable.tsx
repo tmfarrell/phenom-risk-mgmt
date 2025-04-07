@@ -161,9 +161,9 @@ export function InterventionSummaryTable({
         
         {/* New prominent banner for estimated savings */}
         <div className="bg-green-50 border-l-4 border-green-500 p-4 mb-6 rounded-md">
-          <p className="text-lg font-semibold text-gray-800">
+          <p className="text-lg text-gray-800">
             Your estimated savings after intervention is:{' '}
-            <span className={differenceIsNegative ? "text-green-700" : "text-red-700"}>
+            <span className={differenceIsNegative ? "text-green-700 font-semibold" : "text-red-700 font-semibold"}>
               ${formattedSavings}
             </span>
           </p>
