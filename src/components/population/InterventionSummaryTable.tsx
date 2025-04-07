@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
@@ -149,6 +150,7 @@ export function InterventionSummaryTable({
   const differenceIsNegative = parseFloat(summaryData.difference) < 0;
   const formattedDifference = `${differenceIsNegative ? '' : '+'}${summaryData.difference}`;
   const percentChangeDisplay = `(${differenceIsNegative ? '' : '+'}${summaryData.percentChange}%)`;
+  const formattedSavings = Math.abs(parseInt(summaryData.totalSavings)).toLocaleString();
 
   return (
     <Card className="mt-6">
@@ -156,19 +158,31 @@ export function InterventionSummaryTable({
         <CardTitle className="text-lg">Intervention Results (per 1000 patients)</CardTitle>
       </CardHeader>
       <CardContent>
-        <div className="flex flex-wrap items-center mb-4 gap-10">
-          <Label htmlFor="event-cost" className="w-[140px] whitespace-nowrap text-sm">Event Cost ($):</Label>
-          <div className="relative">
-            <Input 
-              id="event-cost"
-              type="number"
-              min="0"
-              step="1"
-              value={eventCost}
-              onChange={handleCostChange}
-              className="w-40"
-            />
+        <div className="flex flex-wrap items-start mb-4 gap-4">
+          <div className="flex items-center gap-3">
+            <Label htmlFor="event-cost" className="whitespace-nowrap min-w-[140px] text-sm">Est. Event Cost ($):</Label>
+            <div className="relative">
+              <Input 
+                id="event-cost"
+                type="number"
+                min="0"
+                step="1"
+                value={eventCost}
+                onChange={handleCostChange}
+                className="w-40"
+              />
+            </div>
           </div>
+        </div>
+        
+        {/* New prominent banner for estimated savings */}
+        <div className="bg-blue-100 border-l-4 border-blue-500 p-4 mb-6 rounded-md">
+          <p className="text-lg font-semibold text-gray-800">
+            Estimated savings from {selectedIntervention} after {selectedTimeframe} year{selectedTimeframe !== '1' ? 's' : ''}:{' '}
+            <span className={differenceIsNegative ? "text-green-700" : "text-red-700"}>
+              ${formattedSavings}
+            </span>
+          </p>
         </div>
         
         <Table className="border">
@@ -199,14 +213,14 @@ export function InterventionSummaryTable({
               </TableCell>
             </TableRow>
             <TableRow>
-              <TableCell className="border font-medium">
+              <TableCell className="border font-medium bg-green-100 text-black">
                 Difference after Intervention
               </TableCell>
-              <TableCell className={`border text-center ${differenceIsNegative ? 'text-green-600' : 'text-red-600'}`}>
+              <TableCell className={`border text-center font-bold text-black bg-green-100`}>
                 {formattedDifference} {percentChangeDisplay}
               </TableCell>
-              <TableCell className={`border text-center font-medium ${differenceIsNegative ? 'text-green-600' : 'text-red-600'}`}>
-                {differenceIsNegative ? '-' : '+'}${Math.abs(parseInt(summaryData.totalSavings)).toLocaleString()}
+              <TableCell className={`border text-center font-bold text-black bg-green-100`}>
+                {differenceIsNegative ? '-' : '+'}${formattedSavings}
               </TableCell>
             </TableRow>
           </TableBody>
