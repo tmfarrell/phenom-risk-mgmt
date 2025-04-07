@@ -54,70 +54,15 @@ export function PopulationRiskDistribution({
         throw error;
       }
 
-      // Transform data to use categorical risk levels
-      return transformToCategoricalRiskLevels(data);
+      // Return the data directly without transforming to categories
+      return data;
     }
   });
-
-  // Transform numerical ranges to categorical risk levels
-  const transformToCategoricalRiskLevels = (data: any[]) => {
-    if (!data || data.length === 0) return [];
-    
-    // Calculate mean to determine the medium risk category
-    const totalPre = data.reduce((sum, item) => sum + (item.pre || 0), 0);
-    let cumulativeCount = 0;
-    let medianRangeIndex = 0;
-    
-    // Find the median range
-    for (let i = 0; i < data.length; i++) {
-      cumulativeCount += (data[i].pre || 0);
-      if (cumulativeCount >= totalPre / 2) {
-        medianRangeIndex = i;
-        break;
-      }
-    }
-    
-    // Group data into three categories
-    const categoryData = [
-      {
-        category: "Low Risk",
-        pre: 0,
-        post: 0,
-      },
-      {
-        category: "Medium Risk",
-        pre: 0,
-        post: 0,
-      },
-      {
-        category: "High Risk",
-        pre: 0,
-        post: 0,
-      }
-    ];
-    
-    // Distribute data into categories
-    data.forEach((item, index) => {
-      if (index < medianRangeIndex - Math.floor(data.length / 6)) {
-        categoryData[0].pre += (item.pre || 0);
-        categoryData[0].post += (item.post || 0);
-      } else if (index > medianRangeIndex + Math.floor(data.length / 6)) {
-        categoryData[2].pre += (item.pre || 0);
-        categoryData[2].post += (item.post || 0);
-      } else {
-        categoryData[1].pre += (item.pre || 0);
-        categoryData[1].post += (item.post || 0);
-      }
-    });
-    
-    return categoryData;
-  };
 
   // Query to get available interventions
   const { data: interventions } = useQuery({
     queryKey: ['interventions'],
     queryFn: async () => {
-      // Fix: Use the proper syntax for selecting distinct values
       const { data, error } = await supabase
         .from('phenom_risk_dist')
         .select('intervention');
@@ -162,7 +107,7 @@ export function PopulationRiskDistribution({
           </Select>
         </div>
 
-        <div className="w-[325px]"> {/* Increased width by 30% from 250px to 325px */}
+        <div className="w-[325px]">
           <Label className="mb-2 block">Intervention</Label>
           <Select
             value={selectedIntervention}
@@ -213,6 +158,14 @@ export function PopulationRiskDistribution({
         </div>
       </div>
 
+      {/* Intervention Summary Table - Now placed above the risk distribution chart */}
+      <InterventionSummaryTable 
+        selectedRiskFactor={selectedRiskFactor}
+        selectedIntervention={selectedIntervention}
+        selectedTimeframe={localTimeframe}
+      />
+
+      {/* Risk Distribution Chart */}
       <div className="h-[500px] w-full">
         <h3 className="text-xl font-medium mb-2">{selectedRiskFactor} Risk Distribution - {selectedIntervention}</h3>
         <ChartContainer
@@ -242,7 +195,7 @@ export function PopulationRiskDistribution({
             >
               <CartesianGrid strokeDasharray="3 3" />
               <XAxis 
-                dataKey="category" 
+                dataKey="range" 
                 height={60}
                 label={{ 
                   value: `Risk Level for ${selectedRiskFactor}`, 
@@ -298,13 +251,6 @@ export function PopulationRiskDistribution({
           )}
         </ChartContainer>
       </div>
-
-      {/* Add the new Intervention Summary Table component */}
-      <InterventionSummaryTable 
-        selectedRiskFactor={selectedRiskFactor}
-        selectedIntervention={selectedIntervention}
-        selectedTimeframe={localTimeframe}
-      />
     </div>
   );
 }
