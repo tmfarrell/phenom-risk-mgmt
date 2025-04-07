@@ -10,6 +10,7 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
+import { RISK_COLUMNS, RISK_COLUMN_FIELD_MAP } from '../table/tableConstants';
 
 interface InterventionSummaryTableProps {
   selectedRiskFactor: string;
@@ -31,10 +32,13 @@ export function InterventionSummaryTable({
   // Query to get summary data for the selected intervention and risk factor
   const { data: riskDistributionData, isLoading } = useQuery({
     queryKey: ['intervention-summary', selectedRiskFactor, selectedIntervention, selectedTimeframe],
+    
     queryFn: async () => {
+      const dbRiskFactor = RISK_COLUMN_FIELD_MAP[selectedRiskFactor];
       console.log('Fetching risk distribution data with params (InterventionSummaryTable):', {
         timeframe: selectedTimeframe,
         riskFactor: selectedRiskFactor,
+        fact_type: dbRiskFactor,
         intervention: selectedIntervention
       });
 
@@ -42,7 +46,7 @@ export function InterventionSummaryTable({
         .from('phenom_risk_dist')
         .select('*')
         .eq('time_period', parseInt(selectedTimeframe))
-        .eq('fact_type', selectedRiskFactor)
+        .eq('fact_type', dbRiskFactor)
         .eq('intervention', selectedIntervention);
       
       if (error) {
