@@ -187,7 +187,8 @@ export function PopulationRiskDistribution({
       ) : (
         <>
           {/* Header for Intervention Summary Table */}
-          <h3 className="text-xl font-medium mt-6" style={{ color: '#002B71' }}>Predicted {selectedTimeframe} year {selectedRiskFactor}  Risk - {selectedIntervention}</h3>
+          <h3 className="text-2xl font-medium mt-6" style={{ color: '#002B71' }}>Predicted {selectedTimeframe} year {selectedRiskFactor}  Risk</h3>
+          <p>Before vs After {selectedIntervention}</p>
           
           {/* Tabs to separate Summary and Distribution */}
           <Tabs defaultValue="distribution" onValueChange={setActiveTab} className="w-full">
