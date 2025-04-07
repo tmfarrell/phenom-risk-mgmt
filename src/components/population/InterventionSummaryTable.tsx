@@ -12,6 +12,9 @@ import {
 } from '@/components/ui/table';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { RISK_COLUMNS, RISK_COLUMN_FIELD_MAP } from '../table/tableConstants';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { DollarSign } from 'lucide-react';
 
 interface InterventionSummaryTableProps {
   selectedRiskFactor: string;
@@ -30,6 +33,9 @@ export function InterventionSummaryTable({
   selectedIntervention,
   selectedTimeframe,
 }: InterventionSummaryTableProps) {
+  // Add state for event cost
+  const [eventCost, setEventCost] = useState<number>(2715);
+
   // Query to get summary data for the selected intervention and risk factor
   const { data: riskDistributionData, isLoading } = useQuery({
     queryKey: ['intervention-summary', selectedRiskFactor, selectedIntervention, selectedTimeframe],
@@ -72,6 +78,12 @@ export function InterventionSummaryTable({
     }
   }, [interventions]);
 
+  // Handle event cost change
+  const handleCostChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = parseFloat(e.target.value);
+    setEventCost(isNaN(value) ? 0 : value);
+  };
+
   // Calculate the expected patients with risk for pre and post intervention
   const calculateExpectedPatients = (riskDistData: RiskDistribution[] | undefined | null) => {
     if (!riskDistData || !Array.isArray(riskDistData) || riskDistData.length === 0) {
@@ -81,7 +93,6 @@ export function InterventionSummaryTable({
         expectedPostCount: "0",
         difference: "0",
         percentChange: "0",
-        costPerEvent: 2715,
         totalSavings: "0"
       };
     }
@@ -95,7 +106,6 @@ export function InterventionSummaryTable({
     
     riskDistData.forEach(item => {
       // Convert range to average risk percentage 
-      // For example: "0-2" becomes 1%, "3-5" becomes 4%, etc.
       const rangeParts = item.range.split('-');
       if (rangeParts.length === 2) {
         const lowerBound = parseFloat(rangeParts[0]);
@@ -103,7 +113,6 @@ export function InterventionSummaryTable({
         const averageRiskPercent = (lowerBound + upperBound) / 2;
         
         // Calculate contribution to expected patients
-        // percentage of population in this risk category * average risk percentage * total patient count
         const preContribution = (item.pre / 100) * (averageRiskPercent / 100) * patientCount;
         const postContribution = (item.post / 100) * (averageRiskPercent / 100) * patientCount;
         
@@ -115,9 +124,10 @@ export function InterventionSummaryTable({
     const difference = postTotal - preTotal;
     const percentChange = preTotal > 0 ? (difference / preTotal) * 100 : 0;
     
-    // Estimated cost and savings calculations
-    const costPerEvent = 2715; // Default cost per event in dollars
-    const totalSavings = -difference * costPerEvent;
+    // Use the current eventCost value for calculations
+    const totalSavings = -difference * eventCost;
+    const preCost = preTotal * eventCost;
+    const postCost = postTotal * eventCost;
 
     return {
       patientCount,
@@ -125,7 +135,8 @@ export function InterventionSummaryTable({
       expectedPostCount: postTotal.toFixed(1),
       difference: difference.toFixed(1),
       percentChange: percentChange.toFixed(1),
-      costPerEvent,
+      preCost: preCost.toFixed(0),
+      postCost: postCost.toFixed(0),
       totalSavings: totalSavings.toFixed(0)
     };
   };
@@ -147,49 +158,58 @@ export function InterventionSummaryTable({
         <CardTitle className="text-lg">Intervention Results (per 1000 patients)</CardTitle>
       </CardHeader>
       <CardContent>
+        <div className="flex items-center mb-4 space-x-2">
+          <Label htmlFor="event-cost" className="whitespace-nowrap">Est. Event Cost:</Label>
+          <div className="relative">
+            <DollarSign className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
+            <Input 
+              id="event-cost"
+              type="number"
+              min="0"
+              step="1"
+              value={eventCost}
+              onChange={handleCostChange}
+              className="pl-8 w-40"
+            />
+          </div>
+        </div>
+        
         <Table className="border">
           <TableHeader>
             <TableRow>
               <TableHead className="w-1/3"></TableHead>
-              <TableHead className="text-center border font-medium">Events</TableHead>
               <TableHead className="text-center border font-medium">ROI</TableHead>
+              <TableHead className="text-center border font-medium">Events</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             <TableRow>
               <TableCell className="border font-medium text-gray-600">Pre-intervention</TableCell>
               <TableCell className="border text-center text-gray-600">
-                {summaryData.expectedPreCount}
+                ${parseInt(summaryData.preCost).toLocaleString()}
               </TableCell>
-              <TableCell className="border text-center font-medium">
-                Est. Event Cost
+              <TableCell className="border text-center text-gray-600">
+                {summaryData.expectedPreCount}
               </TableCell>
             </TableRow>
             <TableRow>
               <TableCell className="border font-medium text-blue-600">Post-intervention</TableCell>
               <TableCell className="border text-center text-blue-600">
-                {summaryData.expectedPostCount}
+                ${parseInt(summaryData.postCost).toLocaleString()}
               </TableCell>
-              <TableCell className="border text-center">
-                ${summaryData.costPerEvent.toLocaleString()}
+              <TableCell className="border text-center text-blue-600">
+                {summaryData.expectedPostCount}
               </TableCell>
             </TableRow>
             <TableRow>
               <TableCell className="border font-medium">
                 Difference after Intervention
               </TableCell>
+              <TableCell className={`border text-center font-medium ${differenceIsNegative ? 'text-green-600' : 'text-red-600'}`}>
+                ${differenceIsNegative ? '-' : '+'}${Math.abs(parseInt(summaryData.totalSavings)).toLocaleString()}
+              </TableCell>
               <TableCell className={`border text-center ${differenceIsNegative ? 'text-green-600' : 'text-red-600'}`}>
                 {formattedDifference} {percentChangeDisplay}
-              </TableCell>
-              <TableCell className="border text-center font-medium">
-                Est. Savings
-              </TableCell>
-            </TableRow>
-            <TableRow>
-              <TableCell className="border"></TableCell>
-              <TableCell className="border"></TableCell>
-              <TableCell className="border text-center text-green-600 font-medium">
-                ${parseInt(summaryData.totalSavings).toLocaleString()}
               </TableCell>
             </TableRow>
           </TableBody>
