@@ -156,7 +156,7 @@ export function InterventionSummaryTable({
         <CardTitle className="text-lg">Intervention Results (per 1000 patients)</CardTitle>
       </CardHeader>
       <CardContent>
-        <div className="flex flex-wrap items-center mb-4 gap-3">
+        <div className="flex flex-wrap items-center mb-4 gap-10">
           <Label htmlFor="event-cost" className="w-[140px] whitespace-nowrap text-sm">Est. Event Cost ($):</Label>
           <div className="relative">
             <Input 
@@ -175,38 +175,38 @@ export function InterventionSummaryTable({
           <TableHeader>
             <TableRow>
               <TableHead className="w-1/3"></TableHead>
-              <TableHead className="text-center border font-medium">Cost</TableHead>
               <TableHead className="text-center border font-medium">Events</TableHead>
+              <TableHead className="text-center border font-medium">Cost</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             <TableRow>
               <TableCell className="border font-medium text-gray-600">Pre-intervention</TableCell>
               <TableCell className="border text-center text-gray-600">
-                ${parseInt(summaryData.preCost).toLocaleString()}
+                {summaryData.expectedPreCount}
               </TableCell>
               <TableCell className="border text-center text-gray-600">
-                {summaryData.expectedPreCount}
+                ${parseInt(summaryData.preCost).toLocaleString()}
               </TableCell>
             </TableRow>
             <TableRow>
               <TableCell className="border font-medium text-blue-600">Post-intervention</TableCell>
               <TableCell className="border text-center text-blue-600">
-                ${parseInt(summaryData.postCost).toLocaleString()}
+                {summaryData.expectedPostCount}
               </TableCell>
               <TableCell className="border text-center text-blue-600">
-                {summaryData.expectedPostCount}
+                ${parseInt(summaryData.postCost).toLocaleString()}
               </TableCell>
             </TableRow>
             <TableRow>
               <TableCell className="border font-medium">
                 Difference after Intervention
               </TableCell>
-              <TableCell className={`border text-center font-medium ${differenceIsNegative ? 'text-green-600' : 'text-red-600'}`}>
-                {differenceIsNegative ? '-' : '+'}${Math.abs(parseInt(summaryData.totalSavings)).toLocaleString()}
-              </TableCell>
               <TableCell className={`border text-center ${differenceIsNegative ? 'text-green-600' : 'text-red-600'}`}>
                 {formattedDifference} {percentChangeDisplay}
+              </TableCell>
+              <TableCell className={`border text-center font-medium ${differenceIsNegative ? 'text-green-600' : 'text-red-600'}`}>
+                {differenceIsNegative ? '-' : '+'}${Math.abs(parseInt(summaryData.totalSavings)).toLocaleString()}
               </TableCell>
             </TableRow>
           </TableBody>
