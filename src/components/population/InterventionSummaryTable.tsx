@@ -50,7 +50,19 @@ export function InterventionSummaryTable({
   });
 
   // Calculate the expected patients with risk for pre and post intervention
-  const calculateExpectedPatients = (riskDistData: RiskDistribution[] = []) => {
+  const calculateExpectedPatients = (riskDistData: RiskDistribution[] | undefined | null) => {
+    if (!riskDistData || !Array.isArray(riskDistData) || riskDistData.length === 0) {
+      return {
+        patientCount: 1000,
+        expectedPreCount: "0",
+        expectedPostCount: "0",
+        difference: "0",
+        percentChange: "0",
+        costPerEvent: 2715,
+        totalSavings: "0"
+      };
+    }
+    
     const patientCount = 1000; // Base patient count for calculations
     
     let preTotal = 0;
@@ -60,17 +72,19 @@ export function InterventionSummaryTable({
       // Convert range to average risk percentage 
       // For example: "0-2" becomes 1%, "3-5" becomes 4%, etc.
       const rangeParts = item.range.split('-');
-      const lowerBound = parseFloat(rangeParts[0]);
-      const upperBound = parseFloat(rangeParts[1]);
-      const averageRiskPercent = (lowerBound + upperBound) / 2;
-      
-      // Calculate contribution to expected patients
-      // percentage of population in this risk category * average risk percentage * total patient count
-      const preContribution = (item.pre / 100) * (averageRiskPercent / 100) * patientCount;
-      const postContribution = (item.post / 100) * (averageRiskPercent / 100) * patientCount;
-      
-      preTotal += preContribution;
-      postTotal += postContribution;
+      if (rangeParts.length === 2) {
+        const lowerBound = parseFloat(rangeParts[0]);
+        const upperBound = parseFloat(rangeParts[1]);
+        const averageRiskPercent = (lowerBound + upperBound) / 2;
+        
+        // Calculate contribution to expected patients
+        // percentage of population in this risk category * average risk percentage * total patient count
+        const preContribution = (item.pre / 100) * (averageRiskPercent / 100) * patientCount;
+        const postContribution = (item.post / 100) * (averageRiskPercent / 100) * patientCount;
+        
+        preTotal += preContribution;
+        postTotal += postContribution;
+      }
     });
     
     const difference = postTotal - preTotal;
