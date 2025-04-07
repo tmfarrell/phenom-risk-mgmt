@@ -158,6 +158,9 @@ export function PopulationRiskDistribution({
         </div>
       </div>
 
+      {/* Header for Intervention Summary Table */}
+      <h3 className="text-xl font-medium mt-6">{selectedRiskFactor} Risk - {selectedIntervention}</h3>
+      
       {/* Intervention Summary Table - Now placed above the risk distribution chart */}
       <InterventionSummaryTable 
         selectedRiskFactor={selectedRiskFactor}
@@ -167,7 +170,7 @@ export function PopulationRiskDistribution({
 
       {/* Risk Distribution Chart */}
       <div className="h-[500px] w-full">
-        <h3 className="text-xl font-medium mb-2">{selectedRiskFactor} Risk Distribution - {selectedIntervention}</h3>
+        <h3 className="text-xl font-medium mb-2">Risk Distribution</h3>
         <ChartContainer
           className="h-full"
           config={{
