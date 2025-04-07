@@ -15,6 +15,7 @@ import {
 } from '@/components/ui/select';
 import { RISK_COLUMNS, RISK_COLUMN_FIELD_MAP } from '../table/tableConstants';
 import { cn } from '@/lib/utils';
+import { InterventionSummaryTable } from './InterventionSummaryTable';
 
 interface PopulationRiskDistributionProps {
   selectedTimeframe: string;
@@ -53,9 +54,64 @@ export function PopulationRiskDistribution({
         throw error;
       }
 
-      return data;
+      // Transform data to use categorical risk levels
+      return transformToCategoricalRiskLevels(data);
     }
   });
+
+  // Transform numerical ranges to categorical risk levels
+  const transformToCategoricalRiskLevels = (data: any[]) => {
+    if (!data || data.length === 0) return [];
+    
+    // Calculate mean to determine the medium risk category
+    const totalPre = data.reduce((sum, item) => sum + (item.pre || 0), 0);
+    let cumulativeCount = 0;
+    let medianRangeIndex = 0;
+    
+    // Find the median range
+    for (let i = 0; i < data.length; i++) {
+      cumulativeCount += (data[i].pre || 0);
+      if (cumulativeCount >= totalPre / 2) {
+        medianRangeIndex = i;
+        break;
+      }
+    }
+    
+    // Group data into three categories
+    const categoryData = [
+      {
+        category: "Low Risk",
+        pre: 0,
+        post: 0,
+      },
+      {
+        category: "Medium Risk",
+        pre: 0,
+        post: 0,
+      },
+      {
+        category: "High Risk",
+        pre: 0,
+        post: 0,
+      }
+    ];
+    
+    // Distribute data into categories
+    data.forEach((item, index) => {
+      if (index < medianRangeIndex - Math.floor(data.length / 6)) {
+        categoryData[0].pre += (item.pre || 0);
+        categoryData[0].post += (item.post || 0);
+      } else if (index > medianRangeIndex + Math.floor(data.length / 6)) {
+        categoryData[2].pre += (item.pre || 0);
+        categoryData[2].post += (item.post || 0);
+      } else {
+        categoryData[1].pre += (item.pre || 0);
+        categoryData[1].post += (item.post || 0);
+      }
+    });
+    
+    return categoryData;
+  };
 
   // Query to get available interventions
   const { data: interventions } = useQuery({
@@ -83,37 +139,6 @@ export function PopulationRiskDistribution({
       setSelectedIntervention(interventions[0]);
     }
   }, [interventions]);
-
-  // Calculate the mean value for the reference line
-  const calculateMean = () => {
-    if (!distributionData || distributionData.length === 0) return null;
-    
-    const totalPre = distributionData.reduce((sum, item) => sum + (item.pre || 0), 0);
-    const totalPatients = distributionData.reduce((sum, item) => sum + (item.pre || 0), 0);
-    
-    if (totalPatients === 0) return null;
-    
-    // Get the middle range value as a simple approximation of the mean
-    const sortedData = [...distributionData].sort((a, b) => {
-      const aValue = parseInt(a.range.split('-')[0]);
-      const bValue = parseInt(b.range.split('-')[0]);
-      return aValue - bValue;
-    });
-    
-    let cumulativeCount = 0;
-    for (const item of sortedData) {
-      cumulativeCount += (item.pre || 0);
-      if (cumulativeCount >= totalPre / 2) {
-        // Return the middle of this range
-        const [min, max] = item.range.split('-').map(v => parseInt(v));
-        return (min + max) / 2;
-      }
-    }
-    
-    return null;
-  };
-  
-  const meanValue = calculateMean();
 
   return (
     <div className="space-y-6">
@@ -217,13 +242,10 @@ export function PopulationRiskDistribution({
             >
               <CartesianGrid strokeDasharray="3 3" />
               <XAxis 
-                dataKey="range" 
-                angle={-45} 
-                textAnchor="end"
+                dataKey="category" 
                 height={60}
-                tickFormatter={(value) => `${value.split('-')[0]}%`}
                 label={{ 
-                  value: `Probability of ${selectedRiskFactor} (%)`, 
+                  value: `Risk Level for ${selectedRiskFactor}`, 
                   position: 'insideBottom',
                   offset: -15,
                   style: { 
@@ -248,19 +270,6 @@ export function PopulationRiskDistribution({
                 }}
                 tick={{ fontSize: 12 }} 
               />
-              {meanValue && (
-                <ReferenceLine 
-                  x={`${Math.round(meanValue)}%`} 
-                  stroke="#cccccc" 
-                  strokeWidth={1.5} 
-                  label={{ 
-                    value: 'Mean', 
-                    position: 'top', 
-                    fill: '#666666',
-                    fontSize: 12
-                  }} 
-                />
-              )}
               <Legend 
                 verticalAlign="top" 
                 align="right"
@@ -275,7 +284,7 @@ export function PopulationRiskDistribution({
                 fill="#ef4444" 
                 stroke="#ef4444"
                 name="Before Intervention"
-                fillOpacity={0} // Changed from 0.6 to 0 to make fill transparent
+                fillOpacity={0} // Fill is transparent
               />
               <Area 
                 type="monotone"
@@ -283,12 +292,19 @@ export function PopulationRiskDistribution({
                 fill="#22c55e" 
                 stroke="#22c55e"
                 name="After Intervention"
-                fillOpacity={0} // Changed from 0.6 to 0 to make fill transparent
+                fillOpacity={0} // Fill is transparent
               />
             </AreaChart>
           )}
         </ChartContainer>
       </div>
+
+      {/* Add the new Intervention Summary Table component */}
+      <InterventionSummaryTable 
+        selectedRiskFactor={selectedRiskFactor}
+        selectedIntervention={selectedIntervention}
+        selectedTimeframe={localTimeframe}
+      />
     </div>
   );
 }
