@@ -1,4 +1,4 @@
-
+import { useState, useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import {
@@ -58,6 +58,9 @@ export function InterventionSummaryTable({
   });
 
   // Set default intervention to the first one in the sorted list when interventions are loaded
+  const [interventions, setInterventions] = useState<string[]>([]);
+  const [selectedInterventionState, setSelectedIntervention] = useState<string>('');
+
   useEffect(() => {
     if (interventions && interventions.length > 0) {
       setSelectedIntervention(interventions[0]);
