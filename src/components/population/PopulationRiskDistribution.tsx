@@ -190,10 +190,10 @@ export function PopulationRiskDistribution({
           <h3 className="text-xl font-medium mt-6" style={{ color: '#002B71' }}>Predicted {selectedTimeframe} year {selectedRiskFactor}  Risk - {selectedIntervention}</h3>
           
           {/* Tabs to separate Summary and Distribution */}
-          <Tabs defaultValue="summary" onValueChange={setActiveTab} className="w-full">
+          <Tabs defaultValue="distribution" onValueChange={setActiveTab} className="w-full">
             <TabsList className="grid grid-cols-2 w-60">
-              <TabsTrigger value="summary">Summary</TabsTrigger>
               <TabsTrigger value="distribution">Distribution</TabsTrigger>
+              <TabsTrigger value="summary">Summary</TabsTrigger>
             </TabsList>
             
             {/* Summary Table Tab */}
@@ -239,7 +239,7 @@ export function PopulationRiskDistribution({
                         dataKey="range" 
                         height={60}
                         label={{ 
-                          value: `Predicted ${selectedTimeframe} year ${selectedRiskFactor} Risk`, 
+                          value: `Predicted ${selectedTimeframe} year ${selectedRiskFactor} Risk (%)`, 
                           position: 'insideBottom',
                           offset: -15,
                           style: { 
