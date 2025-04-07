@@ -155,7 +155,7 @@ export function InterventionSummaryTable({
   return (
     <Card className="mt-6">
       <CardHeader className="pb-3">
-        <CardTitle className="text-lg"></CardTitle>
+        <CardTitle className="text-lg text-left">Intervention Results (per 1000 patients)</CardTitle>
       </CardHeader>
       <CardContent>
         
