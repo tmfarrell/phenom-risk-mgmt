@@ -65,7 +65,7 @@ export function PopulationRiskDistribution({
     queryKey: ['risk-distribution', localTimeframe, selectedRiskType, selectedRiskFactor, selectedIntervention],
     queryFn: async () => {
       const dbRiskFactor = RISK_COLUMN_FIELD_MAP[selectedRiskFactor];
-      console.log('Fetching risk distribution data with params:', {
+      console.log('Fetching risk distribution data with params (PopulationRiskDistribution):', {
         timeframe: localTimeframe,
         riskType: selectedRiskType,
         riskFactor: selectedRiskFactor,
@@ -85,6 +85,7 @@ export function PopulationRiskDistribution({
         throw error;
       }
 
+      console.log('risk distribution data (PopulationRiskDistribution): ', data); 
       return data;
     },
     enabled: !!selectedIntervention // Only run query when intervention is selected

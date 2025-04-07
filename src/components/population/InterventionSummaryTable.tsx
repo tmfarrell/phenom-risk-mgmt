@@ -32,6 +32,12 @@ export function InterventionSummaryTable({
   const { data: riskDistributionData, isLoading } = useQuery({
     queryKey: ['intervention-summary', selectedRiskFactor, selectedIntervention, selectedTimeframe],
     queryFn: async () => {
+      console.log('Fetching risk distribution data with params (InterventionSummaryTable):', {
+        timeframe: selectedTimeframe,
+        riskFactor: selectedRiskFactor,
+        intervention: selectedIntervention
+      });
+
       const { data, error } = await supabase
         .from('phenom_risk_dist')
         .select('*')
@@ -44,10 +50,19 @@ export function InterventionSummaryTable({
         throw error;
       }
 
+      console.log('risk distribution data (InterventionSummaryTable): ', data); 
+
       return data || [];
     },
     enabled: !!selectedRiskFactor && !!selectedIntervention && selectedIntervention !== ''
   });
+
+  // Set default intervention to the first one in the sorted list when interventions are loaded
+  useEffect(() => {
+    if (interventions && interventions.length > 0) {
+      setSelectedIntervention(interventions[0]);
+    }
+  }, [interventions]);
 
   // Calculate the expected patients with risk for pre and post intervention
   const calculateExpectedPatients = (riskDistData: RiskDistribution[] | undefined | null) => {
@@ -67,6 +82,8 @@ export function InterventionSummaryTable({
     
     let preTotal = 0;
     let postTotal = 0;
+
+    console.log('risk distribution data: ', riskDistData) ; 
     
     riskDistData.forEach(item => {
       // Convert range to average risk percentage 
@@ -105,6 +122,7 @@ export function InterventionSummaryTable({
     };
   };
 
+  console.log('Calculate summary stats...'); 
   const summaryData = calculateExpectedPatients(riskDistributionData);
 
   if (isLoading || !selectedIntervention) {

@@ -68,7 +68,7 @@ export const usePatientDataLatest = () => {
 
         // Return an entry for each unique risk type and timeframe combination
         return patientLatestRisks.map((risk: any) => {
-          console.log('Processing latest risk record:', risk); // Debug log
+          //console.log('Processing latest risk record:', risk); // Debug log
           return {
             ...patient,
             ED: risk.EMERGENCY_VISIT || null,
