@@ -1,3 +1,4 @@
+
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import {
@@ -16,13 +17,19 @@ interface InterventionSummaryTableProps {
   selectedTimeframe: string;
 }
 
+interface RiskDistribution {
+  range: string;
+  pre: number;
+  post: number;
+}
+
 export function InterventionSummaryTable({ 
   selectedRiskFactor,
   selectedIntervention,
   selectedTimeframe,
 }: InterventionSummaryTableProps) {
   // Query to get summary data for the selected intervention and risk factor
-  const { data: summaryData, isLoading } = useQuery({
+  const { data: riskDistributionData, isLoading } = useQuery({
     queryKey: ['intervention-summary', selectedRiskFactor, selectedIntervention, selectedTimeframe],
     queryFn: async () => {
       const { data, error } = await supabase
@@ -37,32 +44,54 @@ export function InterventionSummaryTable({
         throw error;
       }
 
-      // Calculate the totals for pre and post intervention
-      const totalPre = data.reduce((sum, item) => sum + (item.pre || 0), 0);
-      const totalPost = data.reduce((sum, item) => sum + (item.post || 0), 0);
-      const patientCount = 200; // Default patient count
-      
-      const expectedPreCount = (totalPre / 100) * patientCount;
-      const expectedPostCount = (totalPost / 100) * patientCount;
-      const difference = expectedPostCount - expectedPreCount;
-      const percentChange = (difference / expectedPreCount) * 100;
-      
-      // Estimated cost and savings calculations
-      const costPerEvent = 2715; // Default cost per event in dollars
-      const totalSavings = -difference * costPerEvent;
-
-      return {
-        patientCount,
-        expectedPreCount: expectedPreCount.toFixed(1),
-        expectedPostCount: expectedPostCount.toFixed(1),
-        difference: difference.toFixed(1),
-        percentChange: percentChange.toFixed(1),
-        costPerEvent,
-        totalSavings: totalSavings.toFixed(0)
-      };
+      return data || [];
     },
     enabled: !!selectedRiskFactor && !!selectedIntervention
   });
+
+  // Calculate the expected patients with risk for pre and post intervention
+  const calculateExpectedPatients = (riskDistData: RiskDistribution[] = []) => {
+    const patientCount = 1000; // Base patient count for calculations
+    
+    let preTotal = 0;
+    let postTotal = 0;
+    
+    riskDistData.forEach(item => {
+      // Convert range to average risk percentage 
+      // For example: "0-2" becomes 1%, "3-5" becomes 4%, etc.
+      const rangeParts = item.range.split('-');
+      const lowerBound = parseFloat(rangeParts[0]);
+      const upperBound = parseFloat(rangeParts[1]);
+      const averageRiskPercent = (lowerBound + upperBound) / 2;
+      
+      // Calculate contribution to expected patients
+      // percentage of population in this risk category * average risk percentage * total patient count
+      const preContribution = (item.pre / 100) * (averageRiskPercent / 100) * patientCount;
+      const postContribution = (item.post / 100) * (averageRiskPercent / 100) * patientCount;
+      
+      preTotal += preContribution;
+      postTotal += postContribution;
+    });
+    
+    const difference = postTotal - preTotal;
+    const percentChange = preTotal > 0 ? (difference / preTotal) * 100 : 0;
+    
+    // Estimated cost and savings calculations
+    const costPerEvent = 2715; // Default cost per event in dollars
+    const totalSavings = -difference * costPerEvent;
+
+    return {
+      patientCount,
+      expectedPreCount: preTotal.toFixed(1),
+      expectedPostCount: postTotal.toFixed(1),
+      difference: difference.toFixed(1),
+      percentChange: percentChange.toFixed(1),
+      costPerEvent,
+      totalSavings: totalSavings.toFixed(0)
+    };
+  };
+
+  const summaryData = calculateExpectedPatients(riskDistributionData);
 
   if (isLoading) {
     return <div className="text-center py-4">Loading summary data...</div>;
@@ -94,16 +123,16 @@ export function InterventionSummaryTable({
           <TableBody>
             <TableRow>
               <TableCell className="border text-center font-medium">
-                {summaryData?.patientCount}
+                {summaryData.patientCount}
               </TableCell>
               <TableCell className="border text-center text-gray-600">
-                {summaryData?.expectedPreCount}
+                {summaryData.expectedPreCount}
               </TableCell>
               <TableCell className="border text-center text-blue-600">
-                {summaryData?.expectedPostCount}
+                {summaryData.expectedPostCount}
               </TableCell>
               <TableCell className="border text-center">
-                {summaryData?.difference} ({summaryData?.percentChange}%)
+                {summaryData.difference} ({summaryData.percentChange}%)
               </TableCell>
             </TableRow>
           </TableBody>
@@ -125,10 +154,10 @@ export function InterventionSummaryTable({
             <TableBody>
               <TableRow>
                 <TableCell className="border text-center">
-                  ${summaryData?.costPerEvent.toLocaleString()}
+                  ${summaryData.costPerEvent.toLocaleString()}
                 </TableCell>
                 <TableCell className="border text-center">
-                  ${(parseFloat(summaryData?.totalSavings || '0') / summaryData?.patientCount * 1000).toLocaleString()}
+                  ${(parseFloat(summaryData.totalSavings) / summaryData.patientCount * 1000).toLocaleString()}
                 </TableCell>
               </TableRow>
             </TableBody>
