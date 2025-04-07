@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
@@ -170,7 +169,7 @@ export function PopulationRiskDistribution({
 
       {/* Risk Distribution Chart */}
       <div className="h-[500px] w-full">
-        <h3 className="text-xl font-medium mb-2">Risk Distribution</h3>
+        <h3 className="text-lg font-medium mb-2">Risk Distribution</h3>
         <ChartContainer
           className="h-full"
           config={{

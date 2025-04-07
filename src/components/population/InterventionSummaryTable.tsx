@@ -1,4 +1,3 @@
-
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import {
@@ -71,8 +70,8 @@ export function InterventionSummaryTable({
 
   return (
     <Card className="mt-6">
-      <CardHeader>
-        <CardTitle className="text-xl">Intervention Results</CardTitle>
+      <CardHeader className="pb-3">
+        <CardTitle className="text-lg">Intervention Results</CardTitle>
       </CardHeader>
       <CardContent>
         <Table className="border">
@@ -111,7 +110,7 @@ export function InterventionSummaryTable({
         </Table>
 
         <div className="mt-6">
-          <h3 className="text-xl font-semibold mb-3">ROI</h3>
+          <h3 className="text-lg font-medium mb-3">ROI</h3>
           <Table className="border">
             <TableHeader>
               <TableRow>
