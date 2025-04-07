@@ -46,7 +46,7 @@ export function InterventionSummaryTable({
 
       return data || [];
     },
-    enabled: !!selectedRiskFactor && !!selectedIntervention
+    enabled: !!selectedRiskFactor && !!selectedIntervention && selectedIntervention !== ''
   });
 
   // Calculate the expected patients with risk for pre and post intervention
@@ -107,7 +107,7 @@ export function InterventionSummaryTable({
 
   const summaryData = calculateExpectedPatients(riskDistributionData);
 
-  if (isLoading) {
+  if (isLoading || !selectedIntervention) {
     return <div className="text-center py-4">Loading summary data...</div>;
   }
 

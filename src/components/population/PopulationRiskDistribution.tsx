@@ -29,10 +29,39 @@ export function PopulationRiskDistribution({
 }: PopulationRiskDistributionProps) {
   const [selectedRiskFactor, setSelectedRiskFactor] = useState<string>(RISK_COLUMNS[0]);
   const [localTimeframe, setLocalTimeframe] = useState<string>(selectedTimeframe);
-  const [selectedIntervention, setSelectedIntervention] = useState<string>('None');
+  const [selectedIntervention, setSelectedIntervention] = useState<string>('');
   const [activeTab, setActiveTab] = useState<string>("summary");
+  const [isInterventionLoaded, setIsInterventionLoaded] = useState<boolean>(false);
 
-  const { data: distributionData, isLoading } = useQuery({
+  // Query to get available interventions
+  const { data: interventions, isLoading: isInterventionsLoading } = useQuery({
+    queryKey: ['interventions'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('phenom_risk_dist')
+        .select('intervention');
+      
+      if (error) {
+        console.error('Error fetching interventions:', error);
+        throw error;
+      }
+
+      // Process the data to get unique interventions
+      const uniqueInterventions = [...new Set(data.map(item => item.intervention))].filter(Boolean).sort();
+      return uniqueInterventions;
+    }
+  });
+
+  // Set default intervention when interventions are loaded
+  useEffect(() => {
+    if (interventions && interventions.length > 0 && !isInterventionLoaded) {
+      setSelectedIntervention(interventions[0]);
+      setIsInterventionLoaded(true);
+    }
+  }, [interventions, isInterventionLoaded]);
+
+  // Query to get distribution data - only enabled when intervention is selected
+  const { data: distributionData, isLoading: isDistributionLoading } = useQuery({
     queryKey: ['risk-distribution', localTimeframe, selectedRiskType, selectedRiskFactor, selectedIntervention],
     queryFn: async () => {
       const dbRiskFactor = RISK_COLUMN_FIELD_MAP[selectedRiskFactor];
@@ -56,36 +85,12 @@ export function PopulationRiskDistribution({
         throw error;
       }
 
-      // Return the data directly without transforming to categories
       return data;
-    }
+    },
+    enabled: !!selectedIntervention // Only run query when intervention is selected
   });
 
-  // Query to get available interventions
-  const { data: interventions } = useQuery({
-    queryKey: ['interventions'],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from('phenom_risk_dist')
-        .select('intervention');
-      
-      if (error) {
-        console.error('Error fetching interventions:', error);
-        throw error;
-      }
-
-      // Process the data to get unique interventions
-      const uniqueInterventions = [...new Set(data.map(item => item.intervention))].filter(Boolean).sort();
-      return uniqueInterventions;
-    }
-  });
-
-  // Set default intervention to the first one in the sorted list when interventions are loaded
-  useEffect(() => {
-    if (interventions && interventions.length > 0) {
-      setSelectedIntervention(interventions[0]);
-    }
-  }, [interventions]);
+  const isLoading = isInterventionsLoading || isDistributionLoading || !isInterventionLoaded;
 
   return (
     <div className="space-y-6">
@@ -114,9 +119,10 @@ export function PopulationRiskDistribution({
           <Select
             value={selectedIntervention}
             onValueChange={setSelectedIntervention}
+            disabled={isInterventionsLoading}
           >
             <SelectTrigger>
-              <SelectValue placeholder="Select intervention" />
+              <SelectValue placeholder={isInterventionsLoading ? "Loading..." : "Select intervention"} />
             </SelectTrigger>
             <SelectContent>
               {interventions?.map((intervention) => (
@@ -160,114 +166,123 @@ export function PopulationRiskDistribution({
         </div>
       </div>
 
-      {/* Header for Intervention Summary Table */}
-      <h3 className="text-xl font-medium mt-6" style={{ color: '#002B71' }}>{selectedRiskFactor} Risk - {selectedIntervention}</h3>
-      
-      {/* Tabs to separate Summary and Distribution */}
-      <Tabs defaultValue="summary" onValueChange={setActiveTab} className="w-full">
-        <TabsList className="grid grid-cols-2 w-60">
-          <TabsTrigger value="summary">Summary</TabsTrigger>
-          <TabsTrigger value="distribution">Distribution</TabsTrigger>
-        </TabsList>
-        
-        {/* Summary Table Tab */}
-        <TabsContent value="summary">
-          <InterventionSummaryTable 
-            selectedRiskFactor={selectedRiskFactor}
-            selectedIntervention={selectedIntervention}
-            selectedTimeframe={localTimeframe}
-          />
-        </TabsContent>
-        
-        {/* Risk Distribution Chart Tab */}
-        <TabsContent value="distribution">
-          <div className="h-[500px] w-full">
-            <h3 className="text-lg font-medium mb-2">Risk Distribution</h3>
-            <ChartContainer
-              className="h-full"
-              config={{
-                primary: {
-                  theme: {
-                    light: "hsl(var(--primary))",
-                    dark: "hsl(var(--primary))",
-                  },
-                },
-              }}
-            >
-              {isLoading ? (
-                <div className="flex items-center justify-center h-full">
-                  <p>Loading...</p>
-                </div>
-              ) : (
-                <AreaChart
-                  data={distributionData}
-                  margin={{
-                    top: 20,
-                    right: 20,
-                    bottom: 60,
-                    left: 40,
+      {/* Display loading state when interventions are being loaded */}
+      {isLoading ? (
+        <div className="flex items-center justify-center h-40">
+          <p>Loading intervention data...</p>
+        </div>
+      ) : (
+        <>
+          {/* Header for Intervention Summary Table */}
+          <h3 className="text-xl font-medium mt-6" style={{ color: '#002B71' }}>{selectedRiskFactor} Risk - {selectedIntervention}</h3>
+          
+          {/* Tabs to separate Summary and Distribution */}
+          <Tabs defaultValue="summary" onValueChange={setActiveTab} className="w-full">
+            <TabsList className="grid grid-cols-2 w-60">
+              <TabsTrigger value="summary">Summary</TabsTrigger>
+              <TabsTrigger value="distribution">Distribution</TabsTrigger>
+            </TabsList>
+            
+            {/* Summary Table Tab */}
+            <TabsContent value="summary">
+              <InterventionSummaryTable 
+                selectedRiskFactor={selectedRiskFactor}
+                selectedIntervention={selectedIntervention}
+                selectedTimeframe={localTimeframe}
+              />
+            </TabsContent>
+            
+            {/* Risk Distribution Chart Tab */}
+            <TabsContent value="distribution">
+              <div className="h-[500px] w-full">
+                <h3 className="text-lg font-medium mb-2">Risk Distribution</h3>
+                <ChartContainer
+                  className="h-full"
+                  config={{
+                    primary: {
+                      theme: {
+                        light: "hsl(var(--primary))",
+                        dark: "hsl(var(--primary))",
+                      },
+                    },
                   }}
                 >
-                  <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis 
-                    dataKey="range" 
-                    height={60}
-                    label={{ 
-                      value: `Risk Level for ${selectedRiskFactor}`, 
-                      position: 'insideBottom',
-                      offset: -15,
-                      style: { 
-                        textAnchor: 'middle',
-                        fontSize: 14,
-                        fontWeight: 500
-                      }
-                    }}
-                    tick={{ fontSize: 12 }}
-                  />
-                  <YAxis 
-                    label={{ 
-                      value: 'Number of patients', 
-                      angle: -90, 
-                      position: 'insideLeft',
-                      style: { 
-                        textAnchor: 'middle',
-                        fontSize: 14,
-                        fontWeight: 500
-                      },
-                      dx: -10
-                    }}
-                    tick={{ fontSize: 12 }} 
-                  />
-                  <Legend 
-                    verticalAlign="top" 
-                    align="right"
-                    wrapperStyle={{ 
-                      paddingTop: '10px',
-                      paddingRight: '10px'
-                    }}
-                  />
-                  <Area 
-                    type="monotone"
-                    dataKey="pre" 
-                    fill="#ef4444" 
-                    stroke="#ef4444"
-                    name="Before Intervention"
-                    fillOpacity={0} // Fill is transparent
-                  />
-                  <Area 
-                    type="monotone"
-                    dataKey="post" 
-                    fill="#22c55e" 
-                    stroke="#22c55e"
-                    name="After Intervention"
-                    fillOpacity={0} // Fill is transparent
-                  />
-                </AreaChart>
-              )}
-            </ChartContainer>
-          </div>
-        </TabsContent>
-      </Tabs>
+                  {isDistributionLoading ? (
+                    <div className="flex items-center justify-center h-full">
+                      <p>Loading...</p>
+                    </div>
+                  ) : (
+                    <AreaChart
+                      data={distributionData}
+                      margin={{
+                        top: 20,
+                        right: 20,
+                        bottom: 60,
+                        left: 40,
+                      }}
+                    >
+                      <CartesianGrid strokeDasharray="3 3" />
+                      <XAxis 
+                        dataKey="range" 
+                        height={60}
+                        label={{ 
+                          value: `Risk Level for ${selectedRiskFactor}`, 
+                          position: 'insideBottom',
+                          offset: -15,
+                          style: { 
+                            textAnchor: 'middle',
+                            fontSize: 14,
+                            fontWeight: 500
+                          }
+                        }}
+                        tick={{ fontSize: 12 }}
+                      />
+                      <YAxis 
+                        label={{ 
+                          value: 'Number of patients', 
+                          angle: -90, 
+                          position: 'insideLeft',
+                          style: { 
+                            textAnchor: 'middle',
+                            fontSize: 14,
+                            fontWeight: 500
+                          },
+                          dx: -10
+                        }}
+                        tick={{ fontSize: 12 }} 
+                      />
+                      <Legend 
+                        verticalAlign="top" 
+                        align="right"
+                        wrapperStyle={{ 
+                          paddingTop: '10px',
+                          paddingRight: '10px'
+                        }}
+                      />
+                      <Area 
+                        type="monotone"
+                        dataKey="pre" 
+                        fill="#ef4444" 
+                        stroke="#ef4444"
+                        name="Before Intervention"
+                        fillOpacity={0} // Fill is transparent
+                      />
+                      <Area 
+                        type="monotone"
+                        dataKey="post" 
+                        fill="#22c55e" 
+                        stroke="#22c55e"
+                        name="After Intervention"
+                        fillOpacity={0} // Fill is transparent
+                      />
+                    </AreaChart>
+                  )}
+                </ChartContainer>
+              </div>
+            </TabsContent>
+          </Tabs>
+        </>
+      )}
     </div>
   );
 }
