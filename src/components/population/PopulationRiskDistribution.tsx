@@ -175,7 +175,7 @@ export function PopulationRiskDistribution({
       ) : (
         <>
           {/* Header for Intervention Summary Table */}
-          <h3 className="text-xl font-medium mt-6" style={{ color: '#002B71' }}>{selectedRiskFactor} Risk - {selectedIntervention}</h3>
+          <h3 className="text-xl font-medium mt-6" style={{ color: '#002B71' }}>Predicted {selectedTimeframe} year {selectedRiskFactor}  Risk - {selectedIntervention}</h3>
           
           {/* Tabs to separate Summary and Distribution */}
           <Tabs defaultValue="summary" onValueChange={setActiveTab} className="w-full">
@@ -227,7 +227,7 @@ export function PopulationRiskDistribution({
                         dataKey="range" 
                         height={60}
                         label={{ 
-                          value: `Risk Level for ${selectedRiskFactor}`, 
+                          value: `Predicted ${selectedTimeframe} year ${selectedRiskFactor} Risk`, 
                           position: 'insideBottom',
                           offset: -15,
                           style: { 

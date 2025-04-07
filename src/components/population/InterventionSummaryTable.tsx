@@ -157,7 +157,7 @@ export function InterventionSummaryTable({
       </CardHeader>
       <CardContent>
         <div className="flex flex-wrap items-center mb-4 gap-10">
-          <Label htmlFor="event-cost" className="w-[140px] whitespace-nowrap text-sm">Est. Event Cost ($):</Label>
+          <Label htmlFor="event-cost" className="w-[140px] whitespace-nowrap text-sm">Event Cost ($):</Label>
           <div className="relative">
             <Input 
               id="event-cost"
@@ -175,8 +175,8 @@ export function InterventionSummaryTable({
           <TableHeader>
             <TableRow>
               <TableHead className="w-1/3"></TableHead>
-              <TableHead className="text-center border font-medium">Events</TableHead>
-              <TableHead className="text-center border font-medium">Cost</TableHead>
+              <TableHead className="text-center border font-medium">Predicted {selectedRiskFactor} Events ({selectedTimeframe} year)</TableHead>
+              <TableHead className="text-center border font-medium">Cost ({selectedTimeframe} year)</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
