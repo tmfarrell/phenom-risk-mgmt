@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
@@ -15,6 +16,7 @@ import {
 import { RISK_COLUMNS, RISK_COLUMN_FIELD_MAP } from '../table/tableConstants';
 import { cn } from '@/lib/utils';
 import { InterventionSummaryTable } from './InterventionSummaryTable';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
 interface PopulationRiskDistributionProps {
   selectedTimeframe: string;
@@ -28,6 +30,7 @@ export function PopulationRiskDistribution({
   const [selectedRiskFactor, setSelectedRiskFactor] = useState<string>(RISK_COLUMNS[0]);
   const [localTimeframe, setLocalTimeframe] = useState<string>(selectedTimeframe);
   const [selectedIntervention, setSelectedIntervention] = useState<string>('None');
+  const [activeTab, setActiveTab] = useState<string>("summary");
 
   const { data: distributionData, isLoading } = useQuery({
     queryKey: ['risk-distribution', localTimeframe, selectedRiskType, selectedRiskFactor, selectedIntervention],
@@ -160,99 +163,111 @@ export function PopulationRiskDistribution({
       {/* Header for Intervention Summary Table */}
       <h3 className="text-xl font-medium mt-6" style={{ color: '#002B71' }}>{selectedRiskFactor} Risk - {selectedIntervention}</h3>
       
-      {/* Intervention Summary Table - Now placed above the risk distribution chart */}
-      <InterventionSummaryTable 
-        selectedRiskFactor={selectedRiskFactor}
-        selectedIntervention={selectedIntervention}
-        selectedTimeframe={localTimeframe}
-      />
-
-      {/* Risk Distribution Chart */}
-      <div className="h-[500px] w-full">
-        <h3 className="text-lg font-medium mb-2">Risk Distribution</h3>
-        <ChartContainer
-          className="h-full"
-          config={{
-            primary: {
-              theme: {
-                light: "hsl(var(--primary))",
-                dark: "hsl(var(--primary))",
-              },
-            },
-          }}
-        >
-          {isLoading ? (
-            <div className="flex items-center justify-center h-full">
-              <p>Loading...</p>
-            </div>
-          ) : (
-            <AreaChart
-              data={distributionData}
-              margin={{
-                top: 20,
-                right: 20,
-                bottom: 60,
-                left: 40,
+      {/* Tabs to separate Summary and Distribution */}
+      <Tabs defaultValue="summary" onValueChange={setActiveTab} className="w-full">
+        <TabsList className="grid grid-cols-2 w-60">
+          <TabsTrigger value="summary">Summary</TabsTrigger>
+          <TabsTrigger value="distribution">Distribution</TabsTrigger>
+        </TabsList>
+        
+        {/* Summary Table Tab */}
+        <TabsContent value="summary">
+          <InterventionSummaryTable 
+            selectedRiskFactor={selectedRiskFactor}
+            selectedIntervention={selectedIntervention}
+            selectedTimeframe={localTimeframe}
+          />
+        </TabsContent>
+        
+        {/* Risk Distribution Chart Tab */}
+        <TabsContent value="distribution">
+          <div className="h-[500px] w-full">
+            <h3 className="text-lg font-medium mb-2">Risk Distribution</h3>
+            <ChartContainer
+              className="h-full"
+              config={{
+                primary: {
+                  theme: {
+                    light: "hsl(var(--primary))",
+                    dark: "hsl(var(--primary))",
+                  },
+                },
               }}
             >
-              <CartesianGrid strokeDasharray="3 3" />
-              <XAxis 
-                dataKey="range" 
-                height={60}
-                label={{ 
-                  value: `Risk Level for ${selectedRiskFactor}`, 
-                  position: 'insideBottom',
-                  offset: -15,
-                  style: { 
-                    textAnchor: 'middle',
-                    fontSize: 14,
-                    fontWeight: 500
-                  }
-                }}
-                tick={{ fontSize: 12 }}
-              />
-              <YAxis 
-                label={{ 
-                  value: 'Number of patients', 
-                  angle: -90, 
-                  position: 'insideLeft',
-                  style: { 
-                    textAnchor: 'middle',
-                    fontSize: 14,
-                    fontWeight: 500
-                  },
-                  dx: -10
-                }}
-                tick={{ fontSize: 12 }} 
-              />
-              <Legend 
-                verticalAlign="top" 
-                align="right"
-                wrapperStyle={{ 
-                  paddingTop: '10px',
-                  paddingRight: '10px'
-                }}
-              />
-              <Area 
-                type="monotone"
-                dataKey="pre" 
-                fill="#ef4444" 
-                stroke="#ef4444"
-                name="Before Intervention"
-                fillOpacity={0} // Fill is transparent
-              />
-              <Area 
-                type="monotone"
-                dataKey="post" 
-                fill="#22c55e" 
-                stroke="#22c55e"
-                name="After Intervention"
-                fillOpacity={0} // Fill is transparent
-              />
-            </AreaChart>
-          )}
-        </ChartContainer>
-      </div>
+              {isLoading ? (
+                <div className="flex items-center justify-center h-full">
+                  <p>Loading...</p>
+                </div>
+              ) : (
+                <AreaChart
+                  data={distributionData}
+                  margin={{
+                    top: 20,
+                    right: 20,
+                    bottom: 60,
+                    left: 40,
+                  }}
+                >
+                  <CartesianGrid strokeDasharray="3 3" />
+                  <XAxis 
+                    dataKey="range" 
+                    height={60}
+                    label={{ 
+                      value: `Risk Level for ${selectedRiskFactor}`, 
+                      position: 'insideBottom',
+                      offset: -15,
+                      style: { 
+                        textAnchor: 'middle',
+                        fontSize: 14,
+                        fontWeight: 500
+                      }
+                    }}
+                    tick={{ fontSize: 12 }}
+                  />
+                  <YAxis 
+                    label={{ 
+                      value: 'Number of patients', 
+                      angle: -90, 
+                      position: 'insideLeft',
+                      style: { 
+                        textAnchor: 'middle',
+                        fontSize: 14,
+                        fontWeight: 500
+                      },
+                      dx: -10
+                    }}
+                    tick={{ fontSize: 12 }} 
+                  />
+                  <Legend 
+                    verticalAlign="top" 
+                    align="right"
+                    wrapperStyle={{ 
+                      paddingTop: '10px',
+                      paddingRight: '10px'
+                    }}
+                  />
+                  <Area 
+                    type="monotone"
+                    dataKey="pre" 
+                    fill="#ef4444" 
+                    stroke="#ef4444"
+                    name="Before Intervention"
+                    fillOpacity={0} // Fill is transparent
+                  />
+                  <Area 
+                    type="monotone"
+                    dataKey="post" 
+                    fill="#22c55e" 
+                    stroke="#22c55e"
+                    name="After Intervention"
+                    fillOpacity={0} // Fill is transparent
+                  />
+                </AreaChart>
+              )}
+            </ChartContainer>
+          </div>
+        </TabsContent>
+      </Tabs>
     </div>
   );
 }
