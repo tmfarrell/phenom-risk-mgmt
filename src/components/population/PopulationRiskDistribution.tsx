@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
@@ -186,9 +187,11 @@ export function PopulationRiskDistribution({
         </div>
       ) : (
         <>
-          {/* Header for Intervention Summary Table */}
-          <h3 className="text-2xl font-medium mt-6" style={{ color: '#002B71' }}>Predicted {selectedTimeframe} year {selectedRiskFactor}  Risk</h3>
-          <p>Before vs After {selectedIntervention}</p>
+          {/* Header for Intervention Summary Table - reduced space between title and subtitle */}
+          <div className="space-y-0.5">
+            <h3 className="text-2xl font-medium" style={{ color: '#002B71' }}>Predicted {selectedTimeframe} year {selectedRiskFactor}  Risk</h3>
+            <p>Before vs After {selectedIntervention}</p>
+          </div>
           
           {/* Tabs to separate Summary and Distribution */}
           <Tabs defaultValue="distribution" onValueChange={setActiveTab} className="w-full">
