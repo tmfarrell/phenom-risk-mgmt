@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
@@ -33,6 +32,17 @@ export function PopulationRiskDistribution({
   const [activeTab, setActiveTab] = useState<string>("summary");
   const [isInterventionLoaded, setIsInterventionLoaded] = useState<boolean>(false);
 
+  // Function to sort risk ranges properly
+  const sortRiskRanges = (data: any[]) => {
+    if (!data || data.length === 0) return [];
+    
+    return [...data].sort((a, b) => {
+      const aStart = parseInt(a.range.split('-')[0]);
+      const bStart = parseInt(b.range.split('-')[0]);
+      return aStart - bStart;
+    });
+  };
+
   // Query to get available interventions
   const { data: interventions, isLoading: isInterventionsLoading } = useQuery({
     queryKey: ['interventions'],
@@ -46,7 +56,6 @@ export function PopulationRiskDistribution({
         throw error;
       }
 
-      // Process the data to get unique interventions
       const uniqueInterventions = [...new Set(data.map(item => item.intervention))].filter(Boolean).sort();
       return uniqueInterventions;
     }
@@ -86,12 +95,15 @@ export function PopulationRiskDistribution({
       }
 
       console.log('risk distribution data (PopulationRiskDistribution): ', data); 
-      return data;
+      return sortRiskRanges(data);
     },
     enabled: !!selectedIntervention // Only run query when intervention is selected
   });
 
   const isLoading = isInterventionsLoading || isDistributionLoading || !isInterventionLoaded;
+
+  // Get properly sorted distribution data
+  const sortedDistributionData = distributionData ? sortRiskRanges(distributionData) : [];
 
   return (
     <div className="space-y-6">
@@ -214,7 +226,7 @@ export function PopulationRiskDistribution({
                     </div>
                   ) : (
                     <AreaChart
-                      data={distributionData}
+                      data={sortedDistributionData}
                       margin={{
                         top: 20,
                         right: 20,
