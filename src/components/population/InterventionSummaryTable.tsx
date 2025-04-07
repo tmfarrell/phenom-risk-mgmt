@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
@@ -14,7 +13,6 @@ import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { RISK_COLUMNS, RISK_COLUMN_FIELD_MAP } from '../table/tableConstants';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { DollarSign } from 'lucide-react';
 
 interface InterventionSummaryTableProps {
   selectedRiskFactor: string;
@@ -159,9 +157,8 @@ export function InterventionSummaryTable({
       </CardHeader>
       <CardContent>
         <div className="flex flex-wrap items-center mb-4 gap-3">
-          <Label htmlFor="event-cost" className="min-w-[120px] whitespace-normal text-sm">Est. Event Cost ($):</Label>
+          <Label htmlFor="event-cost" className="w-[140px] whitespace-nowrap text-sm">Est. Event Cost ($):</Label>
           <div className="relative">
-            <DollarSign className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
             <Input 
               id="event-cost"
               type="number"
@@ -169,7 +166,7 @@ export function InterventionSummaryTable({
               step="1"
               value={eventCost}
               onChange={handleCostChange}
-              className="pl-8 w-40"
+              className="w-40"
             />
           </div>
         </div>
