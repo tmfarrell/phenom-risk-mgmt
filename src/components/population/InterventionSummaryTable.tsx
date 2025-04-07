@@ -155,9 +155,20 @@ export function InterventionSummaryTable({
   return (
     <Card className="mt-6">
       <CardHeader className="pb-3">
-        <CardTitle className="text-lg">Intervention Results (per 1000 patients)</CardTitle>
+        <CardTitle className="text-lg"></CardTitle>
       </CardHeader>
       <CardContent>
+        
+        {/* New prominent banner for estimated savings */}
+        <div className="bg-green-50 border-l-4 border-green-500 p-4 mb-6 rounded-md">
+          <p className="text-lg font-semibold text-gray-800">
+            Your estimated savings after intervention is:{' '}
+            <span className={differenceIsNegative ? "text-green-700" : "text-red-700"}>
+              ${formattedSavings}
+            </span>
+          </p>
+        </div>
+
         <div className="flex flex-wrap items-start mb-4 gap-4">
           <div className="flex items-center gap-3">
             <Label htmlFor="event-cost" className="whitespace-nowrap min-w-[140px] text-sm">Est. Event Cost ($):</Label>
@@ -175,15 +186,7 @@ export function InterventionSummaryTable({
           </div>
         </div>
         
-        {/* New prominent banner for estimated savings */}
-        <div className="bg-blue-100 border-l-4 border-blue-500 p-4 mb-6 rounded-md">
-          <p className="text-lg font-semibold text-gray-800">
-            Estimated savings from {selectedIntervention} after {selectedTimeframe} year{selectedTimeframe !== '1' ? 's' : ''}:{' '}
-            <span className={differenceIsNegative ? "text-green-700" : "text-red-700"}>
-              ${formattedSavings}
-            </span>
-          </p>
-        </div>
+        
         
         <Table className="border">
           <TableHeader>
@@ -213,13 +216,13 @@ export function InterventionSummaryTable({
               </TableCell>
             </TableRow>
             <TableRow>
-              <TableCell className="border font-medium bg-green-100 text-black">
+              <TableCell className="border font-medium text-black">
                 Difference after Intervention
               </TableCell>
-              <TableCell className={`border text-center font-bold text-black bg-green-100`}>
+              <TableCell className={`border text-center font-bold text-black bg-green-50`}>
                 {formattedDifference} {percentChangeDisplay}
               </TableCell>
-              <TableCell className={`border text-center font-bold text-black bg-green-100`}>
+              <TableCell className={`border text-center font-bold text-black bg-green-50`}>
                 {differenceIsNegative ? '-' : '+'}${formattedSavings}
               </TableCell>
             </TableRow>
