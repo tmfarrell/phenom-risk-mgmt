@@ -158,7 +158,7 @@ export function PopulationRiskDistribution({
       </div>
 
       {/* Header for Intervention Summary Table */}
-      <h3 className="text-xl font-medium mt-6">{selectedRiskFactor} Risk - {selectedIntervention}</h3>
+      <h3 className="text-xl font-medium mt-6" style={{ color: '#002B71' }}>{selectedRiskFactor} Risk - {selectedIntervention}</h3>
       
       {/* Intervention Summary Table - Now placed above the risk distribution chart */}
       <InterventionSummaryTable 
