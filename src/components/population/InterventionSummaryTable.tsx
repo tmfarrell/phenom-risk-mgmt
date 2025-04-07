@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
@@ -136,72 +137,63 @@ export function InterventionSummaryTable({
     return <div className="text-center py-4">Loading summary data...</div>;
   }
 
+  const differenceIsNegative = parseFloat(summaryData.difference) < 0;
+  const formattedDifference = `${differenceIsNegative ? '' : '+'}${summaryData.difference}`;
+  const percentChangeDisplay = `(${differenceIsNegative ? '' : '+'}${summaryData.percentChange}%)`;
+
   return (
     <Card className="mt-6">
       <CardHeader className="pb-3">
-        <CardTitle className="text-lg">Intervention Results</CardTitle>
+        <CardTitle className="text-lg">Intervention Results (per 1000 patients)</CardTitle>
       </CardHeader>
       <CardContent>
         <Table className="border">
           <TableHeader>
             <TableRow>
-              <TableHead rowSpan={2} className="border">N</TableHead>
-              <TableHead className="text-center border text-gray-600">
-                Expected # of patients with {selectedRiskFactor} Visit
-                <br />(Pre Intervention)
-              </TableHead>
-              <TableHead className="text-center border text-blue-600">
-                Expected # of patients with {selectedRiskFactor} Visit
-                <br />(Post Intervention)
-              </TableHead>
-              <TableHead rowSpan={2} className="text-center border">
-                Difference after<br />Intervention
-              </TableHead>
+              <TableHead className="w-1/3"></TableHead>
+              <TableHead className="text-center border font-medium">Events</TableHead>
+              <TableHead className="text-center border font-medium">ROI</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             <TableRow>
-              <TableCell className="border text-center font-medium">
-                {summaryData.patientCount}
-              </TableCell>
+              <TableCell className="border font-medium text-gray-600">Pre-intervention</TableCell>
               <TableCell className="border text-center text-gray-600">
                 {summaryData.expectedPreCount}
               </TableCell>
+              <TableCell className="border text-center font-medium">
+                Est. Event Cost
+              </TableCell>
+            </TableRow>
+            <TableRow>
+              <TableCell className="border font-medium text-blue-600">Post-intervention</TableCell>
               <TableCell className="border text-center text-blue-600">
                 {summaryData.expectedPostCount}
               </TableCell>
               <TableCell className="border text-center">
-                {summaryData.difference} ({summaryData.percentChange}%)
+                ${summaryData.costPerEvent.toLocaleString()}
+              </TableCell>
+            </TableRow>
+            <TableRow>
+              <TableCell className="border font-medium">
+                Difference after Intervention
+              </TableCell>
+              <TableCell className={`border text-center ${differenceIsNegative ? 'text-green-600' : 'text-red-600'}`}>
+                {formattedDifference} {percentChangeDisplay}
+              </TableCell>
+              <TableCell className="border text-center font-medium">
+                Est. Savings
+              </TableCell>
+            </TableRow>
+            <TableRow>
+              <TableCell className="border"></TableCell>
+              <TableCell className="border"></TableCell>
+              <TableCell className="border text-center text-green-600 font-medium">
+                ${parseInt(summaryData.totalSavings).toLocaleString()}
               </TableCell>
             </TableRow>
           </TableBody>
         </Table>
-
-        <div className="mt-6">
-          <h3 className="text-lg font-medium mb-3">ROI</h3>
-          <Table className="border">
-            <TableHeader>
-              <TableRow>
-                <TableHead className="text-center border">
-                  Estimated Cost of Event
-                </TableHead>
-                <TableHead className="text-center border">
-                  Estimated Savings<br />(per thousand patients)
-                </TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              <TableRow>
-                <TableCell className="border text-center">
-                  ${summaryData.costPerEvent.toLocaleString()}
-                </TableCell>
-                <TableCell className="border text-center">
-                  ${(parseFloat(summaryData.totalSavings) / summaryData.patientCount * 1000).toLocaleString()}
-                </TableCell>
-              </TableRow>
-            </TableBody>
-          </Table>
-        </div>
       </CardContent>
     </Card>
   );
