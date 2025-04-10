@@ -2,10 +2,12 @@
 import React, { useState, useEffect, useContext } from 'react';
 import { Header } from '@/components/Header';
 import { AuthContext } from '@/App';
-import { Navigate } from 'react-router-dom';
+import { Navigate, useNavigate } from 'react-router-dom';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { useToast } from '@/components/ui/use-toast';
+import { Button } from '@/components/ui/button';
+import { ArrowLeft } from 'lucide-react';
 
 type AppVersion = 'patient' | 'safety' | 'cohort';
 
@@ -13,6 +15,7 @@ export const Settings = () => {
   const { isAdmin } = useContext(AuthContext);
   const [selectedVersion, setSelectedVersion] = useState<AppVersion>('patient');
   const { toast } = useToast();
+  const navigate = useNavigate();
 
   // Load saved preference from localStorage on component mount
   useEffect(() => {
@@ -55,6 +58,18 @@ export const Settings = () => {
     <div className="flex flex-col min-h-screen">
       <Header />
       <main className="flex-1 container max-w-4xl mx-auto py-8 px-4">
+        <div className="flex items-center mb-6">
+          <Button 
+            variant="ghost" 
+            size="sm" 
+            className="mr-2"
+            onClick={() => navigate('/')}
+          >
+            <ArrowLeft className="h-4 w-4 mr-2" />
+            Back to Dashboard
+          </Button>
+        </div>
+        
         <h1 className="text-3xl font-bold mb-8">Settings</h1>
         
         <Card className="mb-8">
