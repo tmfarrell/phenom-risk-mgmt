@@ -6,6 +6,7 @@ import { Session } from '@supabase/supabase-js';
 import { Login } from './pages/Login';
 import Index from './pages/Index';
 import { PatientDetails } from './pages/PatientDetails';
+import Settings from './pages/Settings';
 import { useAdminStatus } from './hooks/useAdminStatus';
 import './App.css';
 
@@ -82,6 +83,14 @@ function App() {
           element={
             <ProtectedRoute>
               <PatientDetails />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/settings"
+          element={
+            <ProtectedRoute>
+              <Settings />
             </ProtectedRoute>
           }
         />
