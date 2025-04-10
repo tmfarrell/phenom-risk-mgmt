@@ -1,13 +1,16 @@
-import React from 'react';
+
+import React, { useContext } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from './ui/button';
-import { LogOut } from 'lucide-react';
+import { LogOut, Shield } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useToast } from './ui/use-toast';
+import { AuthContext } from '@/App';
 
 export const Header = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { isAdmin } = useContext(AuthContext);
 
   const handleLogout = async () => {
     try {
@@ -39,6 +42,12 @@ export const Header = () => {
           alt="OM1 Logo" 
           className="h-8"
         />
+        {isAdmin && (
+          <div className="ml-3 flex items-center text-blue-700">
+            <Shield className="h-4 w-4 mr-1" />
+            <span className="text-sm font-medium">Admin</span>
+          </div>
+        )}
       </div>
       <Button
         variant="ghost"

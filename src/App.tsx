@@ -1,15 +1,29 @@
+
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, createContext } from 'react';
 import { supabase } from './integrations/supabase/client';
 import { Session } from '@supabase/supabase-js';
 import { Login } from './pages/Login';
 import Index from './pages/Index';
 import { PatientDetails } from './pages/PatientDetails';
+import { useAdminStatus } from './hooks/useAdminStatus';
 import './App.css';
+
+// Create a context to share auth and admin status
+export const AuthContext = createContext<{
+  session: Session | null;
+  loading: boolean;
+  isAdmin: boolean;
+}>({
+  session: null,
+  loading: true,
+  isAdmin: false,
+});
 
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(true);
+  const { isAdmin, loading: adminLoading } = useAdminStatus();
 
   useEffect(() => {
     // Get initial session
@@ -31,7 +45,7 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
     return () => subscription.unsubscribe();
   }, []);
 
-  if (loading) {
+  if (loading || adminLoading) {
     return <div>Loading...</div>;
   }
 
@@ -40,7 +54,11 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
     return <Navigate to="/login" />;
   }
 
-  return <>{children}</>;
+  return (
+    <AuthContext.Provider value={{ session, loading: loading || adminLoading, isAdmin }}>
+      {children}
+    </AuthContext.Provider>
+  );
 };
 
 function App() {
