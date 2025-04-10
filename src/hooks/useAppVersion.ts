@@ -11,6 +11,9 @@ export const useAppVersion = () => {
     const savedVersion = localStorage.getItem('appVersion') as AppVersion | null;
     if (savedVersion) {
       setAppVersion(savedVersion);
+    } else {
+      // Set default to 'patient' if no version is saved
+      localStorage.setItem('appVersion', 'patient');
     }
     
     // Listen for storage events to update the state if changed in another tab

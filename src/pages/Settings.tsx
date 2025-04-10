@@ -8,22 +8,15 @@ import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { useToast } from '@/components/ui/use-toast';
 import { Button } from '@/components/ui/button';
 import { ArrowLeft } from 'lucide-react';
+import { useAppVersion } from '@/hooks/useAppVersion';
 
 type AppVersion = 'patient' | 'safety' | 'cohort';
 
 export const Settings = () => {
   const { isAdmin } = useContext(AuthContext);
-  const [selectedVersion, setSelectedVersion] = useState<AppVersion>('patient');
+  const { appVersion, updateAppVersion } = useAppVersion();
   const { toast } = useToast();
   const navigate = useNavigate();
-
-  // Load saved preference from localStorage on component mount
-  useEffect(() => {
-    const savedVersion = localStorage.getItem('appVersion') as AppVersion | null;
-    if (savedVersion) {
-      setSelectedVersion(savedVersion);
-    }
-  }, []);
 
   // If not admin, redirect to homepage
   if (!isAdmin) {
@@ -31,8 +24,7 @@ export const Settings = () => {
   }
 
   const handleVersionChange = (value: AppVersion) => {
-    setSelectedVersion(value);
-    localStorage.setItem('appVersion', value);
+    updateAppVersion(value);
     
     toast({
       title: "Settings updated",
@@ -82,7 +74,7 @@ export const Settings = () => {
                 Select which version of the application to use across the platform.
               </p>
               <Select 
-                value={selectedVersion} 
+                value={appVersion} 
                 onValueChange={(value) => handleVersionChange(value as AppVersion)}
               >
                 <SelectTrigger>
