@@ -6,28 +6,13 @@ import { LogOut, Settings } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useToast } from './ui/use-toast';
 import { AuthContext } from '@/App';
-import { useAppVersion } from '@/hooks/useAppVersion';
 
 export const Header = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
   const { isAdmin } = useContext(AuthContext);
-  const { appVersion } = useAppVersion();
   
   console.log('Is admin in Header:', isAdmin); // Keep logging for debugging
-
-  const getVersionDisplayName = (version: string): string => {
-    switch (version) {
-      case 'patient':
-        return 'Patient Risk Panel';
-      case 'safety':
-        return 'Safety Risk Panel';
-      case 'cohort':
-        return 'Cohort Risk Panel';
-      default:
-        return 'Patient Risk Panel';
-    }
-  };
 
   const handleLogout = async () => {
     try {
@@ -59,9 +44,6 @@ export const Header = () => {
           alt="OM1 Logo" 
           className="h-8"
         />
-        <span className="ml-2 text-sm font-medium text-gray-700">
-          | {getVersionDisplayName(appVersion)}
-        </span>
       </div>
       <div className="flex items-center space-x-2">
         {isAdmin && (
