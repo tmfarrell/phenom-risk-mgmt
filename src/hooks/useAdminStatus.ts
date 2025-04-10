@@ -25,18 +25,12 @@ export const useAdminStatus = () => {
         
         console.log('Checking admin status for user:', session.user.id);
         
-        // Check if the user ID exists in the roles table with role 'admin'
+        // Use a direct query without RLS filtering to avoid the infinite recursion
+        // By using 'select * from roles' we avoid triggering RLS on the roles table
         const { data, error } = await supabase
-          .from('roles')
-          .select('role')
-          .eq('id', session.user.id)
-          .eq('role', 'admin')
-          .single() as unknown as { 
-            data: { role: string } | null, 
-            error: PostgrestError | null 
-          };
+          .rpc('check_admin_role', { user_uuid: session.user.id });
         
-        if (error && error.code !== 'PGRST116') { // PGRST116 is "No rows returned" error
+        if (error) {
           console.error('Error checking admin status:', error);
           setError(new Error(error.message));
           setIsAdmin(false);
