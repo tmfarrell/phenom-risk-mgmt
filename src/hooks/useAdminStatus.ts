@@ -1,7 +1,6 @@
 
 import { useEffect, useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
-import { PostgrestError } from '@supabase/supabase-js';
 
 export const useAdminStatus = () => {
   const [isAdmin, setIsAdmin] = useState<boolean>(false);
