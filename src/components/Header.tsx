@@ -2,7 +2,7 @@
 import React, { useContext } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from './ui/button';
-import { LogOut, Settings } from 'lucide-react';
+import { LogOut, Settings, Shield } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useToast } from './ui/use-toast';
 import { AuthContext } from '@/App';
