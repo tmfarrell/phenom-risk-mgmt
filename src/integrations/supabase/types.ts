@@ -197,7 +197,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      check_admin_role: {
+        Args: { user_uuid: string }
+        Returns: boolean
+      }
     }
     Enums: {
       risk_type: "relative" | "absolute"

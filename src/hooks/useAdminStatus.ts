@@ -25,8 +25,7 @@ export const useAdminStatus = () => {
         
         console.log('Checking admin status for user:', session.user.id);
         
-        // Use a direct query without RLS filtering to avoid the infinite recursion
-        // By using 'select * from roles' we avoid triggering RLS on the roles table
+        // Use the RPC function to check admin role without triggering RLS
         const { data, error } = await supabase
           .rpc('check_admin_role', { user_uuid: session.user.id });
         
