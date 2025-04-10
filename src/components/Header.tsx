@@ -11,6 +11,8 @@ export const Header = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
   const { isAdmin } = useContext(AuthContext);
+  
+  console.log('Is admin in Header:', isAdmin); // Add logging to debug admin status
 
   const handleLogout = async () => {
     try {

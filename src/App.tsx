@@ -45,6 +45,9 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
     return () => subscription.unsubscribe();
   }, []);
 
+  // Add a console log to debug isAdmin status
+  console.log('Protected Route - isAdmin:', isAdmin, 'loading:', loading, 'adminLoading:', adminLoading);
+
   if (loading || adminLoading) {
     return <div>Loading...</div>;
   }

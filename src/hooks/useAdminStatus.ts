@@ -17,12 +17,15 @@ export const useAdminStatus = () => {
         const { data: { session } } = await supabase.auth.getSession();
         
         if (!session) {
+          console.log('No session found');
           setIsAdmin(false);
+          setLoading(false);
           return;
         }
         
+        console.log('Checking admin status for user:', session.user.id);
+        
         // Check if the user ID exists in the roles table with role 'admin'
-        // Use a more generic query approach to avoid TypeScript errors
         const { data, error } = await supabase
           .from('roles')
           .select('role')
@@ -38,7 +41,9 @@ export const useAdminStatus = () => {
           setError(new Error(error.message));
           setIsAdmin(false);
         } else {
-          setIsAdmin(!!data);
+          const adminStatus = !!data;
+          console.log('Admin status result:', adminStatus, data);
+          setIsAdmin(adminStatus);
         }
       } catch (err) {
         console.error('Unexpected error checking admin status:', err);
