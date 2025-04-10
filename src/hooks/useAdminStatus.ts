@@ -1,6 +1,7 @@
 
 import { useEffect, useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
+import { PostgrestError } from '@supabase/supabase-js';
 
 export const useAdminStatus = () => {
   const [isAdmin, setIsAdmin] = useState<boolean>(false);
@@ -29,12 +30,12 @@ export const useAdminStatus = () => {
           .eq('role', 'admin')
           .single() as unknown as { 
             data: { role: string } | null, 
-            error: Error | null 
+            error: PostgrestError | null 
           };
         
         if (error && error.code !== 'PGRST116') { // PGRST116 is "No rows returned" error
           console.error('Error checking admin status:', error);
-          setError(error instanceof Error ? error : new Error(String(error)));
+          setError(new Error(error.message));
           setIsAdmin(false);
         } else {
           setIsAdmin(!!data);
