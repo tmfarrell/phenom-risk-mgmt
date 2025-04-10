@@ -2,7 +2,7 @@
 import React, { useContext } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from './ui/button';
-import { LogOut, Shield } from 'lucide-react';
+import { LogOut, Settings } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useToast } from './ui/use-toast';
 import { AuthContext } from '@/App';
@@ -49,14 +49,28 @@ export const Header = () => {
           </div>
         )}
       </div>
-      <Button
-        variant="ghost"
-        size="icon"
-        className="text-gray-600 hover:text-gray-800"
-        onClick={handleLogout}
-      >
-        <LogOut className="h-5 w-5" />
-      </Button>
+      <div className="flex items-center space-x-2">
+        {isAdmin && (
+          <Button
+            variant="ghost"
+            size="icon"
+            className="text-gray-600 hover:text-gray-800"
+            onClick={() => navigate('/settings')}
+            aria-label="Settings"
+          >
+            <Settings className="h-5 w-5" />
+          </Button>
+        )}
+        <Button
+          variant="ghost"
+          size="icon"
+          className="text-gray-600 hover:text-gray-800"
+          onClick={handleLogout}
+          aria-label="Logout"
+        >
+          <LogOut className="h-5 w-5" />
+        </Button>
+      </div>
     </div>
   );
 };
