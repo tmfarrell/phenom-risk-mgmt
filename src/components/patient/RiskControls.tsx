@@ -1,8 +1,6 @@
-
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
-import { Label } from '../ui/label';
+import { cn } from '@/lib/utils';
 import { ToggleGroup, ToggleGroupItem } from '../ui/toggle-group';
-import { useVersionLabels } from '@/hooks/useVersionLabels';
+import { Label } from '../ui/label';
 
 interface RiskControlsProps {
   selectedTimeframe: string;
@@ -15,55 +13,70 @@ export const RiskControls = ({
   selectedTimeframe,
   selectedRiskType,
   onTimeframeChange,
-  onRiskTypeChange
+  onRiskTypeChange,
 }: RiskControlsProps) => {
-  const { formatTimePeriodWithUnit } = useVersionLabels();
-  
   return (
-    <div className="flex justify-between items-center mb-4">
-      <div className="flex items-center gap-4">
-        <div>
-          <Label htmlFor="prediction-timeframe" className="mb-2 block">Prediction Timeframe</Label>
-          <Select 
-            value={selectedTimeframe} 
-            onValueChange={onTimeframeChange}
+    <div className="flex justify-start items-center gap-8 mb-4">
+      <div className="flex flex-col gap-2">
+        <Label className="text-sm text-gray-600 text-center mx-auto">Risk Type</Label>
+        <ToggleGroup 
+          type="single" 
+          value={selectedRiskType}
+          onValueChange={(value) => {
+            if (value) onRiskTypeChange(value as 'relative' | 'absolute');
+          }}
+          className="flex gap-2"
+        >
+          <ToggleGroupItem 
+            value="relative" 
+            className={cn(
+              "px-4 py-2 rounded-md",
+              selectedRiskType === 'relative' ? "bg-blue-100 hover:bg-blue-200" : "hover:bg-gray-100"
+            )}
           >
-            <SelectTrigger className="w-[180px]" id="prediction-timeframe">
-              <SelectValue placeholder="Select timeframe" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="0.5">{formatTimePeriodWithUnit(0.5)}</SelectItem>
-              <SelectItem value="1">{formatTimePeriodWithUnit(1)}</SelectItem>
-              <SelectItem value="3">{formatTimePeriodWithUnit(3)}</SelectItem>
-              <SelectItem value="5">{formatTimePeriodWithUnit(5)}</SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
-        
-        <div>
-          <Label className="mb-2 block">Risk View</Label>
-          <ToggleGroup 
-            type="single" 
-            value={selectedRiskType}
-            onValueChange={(value) => {
-              if (value) onRiskTypeChange(value as 'relative' | 'absolute');
-            }}
-            className="border rounded-md"
+            Relative
+          </ToggleGroupItem>
+          <ToggleGroupItem 
+            value="absolute"
+            className={cn(
+              "px-4 py-2 rounded-md",
+              selectedRiskType === 'absolute' ? "bg-blue-100 hover:bg-blue-200" : "hover:bg-gray-100"
+            )}
           >
-            <ToggleGroupItem 
-              value="relative" 
-              className="px-4 bg-white data-[state=on]:bg-blue-100"
-            >
-              Relative
-            </ToggleGroupItem>
-            <ToggleGroupItem 
-              value="absolute"
-              className="px-4 bg-white data-[state=on]:bg-blue-100"
-            >
-              Absolute
-            </ToggleGroupItem>
-          </ToggleGroup>
-        </div>
+            Absolute
+          </ToggleGroupItem>
+        </ToggleGroup>
+      </div>
+
+      <div className="flex flex-col gap-2">
+        <Label className="text-sm text-gray-600 text-center mx-auto">Time Period</Label>
+        <ToggleGroup 
+          type="single" 
+          value={selectedTimeframe}
+          onValueChange={(value) => {
+            if (value) onTimeframeChange(value);
+          }}
+          className="flex gap-2"
+        >
+          <ToggleGroupItem 
+            value="1" 
+            className={cn(
+              "px-4 py-2 rounded-md",
+              selectedTimeframe === '1' ? "bg-blue-100 hover:bg-blue-200" : "hover:bg-gray-100"
+            )}
+          >
+            1 Year
+          </ToggleGroupItem>
+          <ToggleGroupItem 
+            value="5"
+            className={cn(
+              "px-4 py-2 rounded-md",
+              selectedTimeframe === '5' ? "bg-blue-100 hover:bg-blue-200" : "hover:bg-gray-100"
+            )}
+          >
+            5 Years
+          </ToggleGroupItem>
+        </ToggleGroup>
       </div>
     </div>
   );

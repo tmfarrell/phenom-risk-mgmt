@@ -17,7 +17,6 @@ import { RISK_COLUMNS, RISK_COLUMN_FIELD_MAP } from '../table/tableConstants';
 import { cn } from '@/lib/utils';
 import { InterventionSummaryTable } from './InterventionSummaryTable';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { useVersionLabels } from '@/hooks/useVersionLabels';
 
 interface PopulationRiskDistributionProps {
   selectedTimeframe: string;
@@ -33,7 +32,6 @@ export function PopulationRiskDistribution({
   const [selectedIntervention, setSelectedIntervention] = useState<string>('');
   const [activeTab, setActiveTab] = useState<string>("summary");
   const [isInterventionLoaded, setIsInterventionLoaded] = useState<boolean>(false);
-  const { getTimePeriodLabel, interventionLabel, formatTimePeriodWithUnit } = useVersionLabels();
 
   // Function to sort risk ranges properly
   const sortRiskRanges = (data: any[]) => {
@@ -131,14 +129,14 @@ export function PopulationRiskDistribution({
         </div>
 
         <div className="w-[325px]">
-          <Label className="mb-2 block">{interventionLabel}</Label>
+          <Label className="mb-2 block">Intervention</Label>
           <Select
             value={selectedIntervention}
             onValueChange={setSelectedIntervention}
             disabled={isInterventionsLoading}
           >
             <SelectTrigger>
-              <SelectValue placeholder={isInterventionsLoading ? "Loading..." : `Select ${interventionLabel.toLowerCase()}`} />
+              <SelectValue placeholder={isInterventionsLoading ? "Loading..." : "Select intervention"} />
             </SelectTrigger>
             <SelectContent>
               {interventions?.map((intervention) => (
@@ -167,7 +165,7 @@ export function PopulationRiskDistribution({
                 localTimeframe === '1' ? "bg-blue-100 hover:bg-blue-200" : "hover:bg-gray-100"
               )}
             >
-              {formatTimePeriodWithUnit(1)}
+              1 Year
             </ToggleGroupItem>
             <ToggleGroupItem 
               value="5"
@@ -176,7 +174,7 @@ export function PopulationRiskDistribution({
                 localTimeframe === '5' ? "bg-blue-100 hover:bg-blue-200" : "hover:bg-gray-100"
               )}
             >
-              {formatTimePeriodWithUnit(5)}
+              5 Years
             </ToggleGroupItem>
           </ToggleGroup>
         </div>
@@ -185,13 +183,13 @@ export function PopulationRiskDistribution({
       {/* Display loading state when interventions are being loaded */}
       {isLoading ? (
         <div className="flex items-center justify-center h-40">
-          <p>Loading {interventionLabel.toLowerCase()} data...</p>
+          <p>Loading intervention data...</p>
         </div>
       ) : (
         <>
           {/* Header for Intervention Summary Table - reduced space between title and subtitle */}
           <div className="space-y-0.5">
-            <h3 className="text-2xl font-medium" style={{ color: '#002B71' }}>Predicted {getTimePeriodLabel(selectedTimeframe)} {selectedRiskFactor} Risk</h3>
+            <h3 className="text-2xl font-medium" style={{ color: '#002B71' }}>Predicted {selectedTimeframe} year {selectedRiskFactor}  Risk</h3>
             <p>Before vs After {selectedIntervention}</p>
           </div>
           
@@ -245,7 +243,7 @@ export function PopulationRiskDistribution({
                         dataKey="range" 
                         height={60}
                         label={{ 
-                          value: `Predicted ${getTimePeriodLabel(selectedTimeframe)} ${selectedRiskFactor} Risk (%)`, 
+                          value: `Predicted ${selectedTimeframe} year ${selectedRiskFactor} Risk (%)`, 
                           position: 'insideBottom',
                           offset: -15,
                           style: { 

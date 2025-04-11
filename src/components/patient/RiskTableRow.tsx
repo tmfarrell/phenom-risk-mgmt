@@ -23,7 +23,6 @@ interface RiskTableRowProps {
   averageRisk: string;
   yAxisDomain: [number, number];
   summary: string | null;
-  timePeriodFormatter?: (period: string | number) => string;
 }
 
 const riskDetails: Record<string, { fullName: string; description: string }> = {
@@ -56,8 +55,7 @@ export const RiskTableRow = ({
   allRisks,
   averageRisk,
   yAxisDomain,
-  summary,
-  timePeriodFormatter = (period) => `${period} year${Number(period) !== 1 ? 's' : ''}`
+  summary
 }: RiskTableRowProps) => {
   const [isExpanded, setIsExpanded] = useState(false);
   const details = riskDetails[risk];

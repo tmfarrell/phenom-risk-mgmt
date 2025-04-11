@@ -1,10 +1,8 @@
-
 import { Person } from '@/types/population';
 import { Table, TableBody, TableHead, TableHeader, TableRow } from '../ui/table';
 import { usePatientData } from '@/hooks/usePatientData';
 import { RiskTableRow } from './RiskTableRow';
 import { RiskSummary } from '@/hooks/useRiskSummaries';
-import { useVersionLabels } from '@/hooks/useVersionLabels';
 
 interface RiskTableProps {
   currentRisks: Person | undefined;
@@ -16,7 +14,6 @@ interface RiskTableProps {
 export const RiskTable = ({ currentRisks, selectedRiskType, allRisks, riskSummaries = [] }: RiskTableProps) => {
   const riskFactors = ['ED', 'Hospitalization', 'Fall', 'Stroke', 'MI'];
   const { data: patientData } = usePatientData();
-  const { getTimePeriodLabel } = useVersionLabels();
 
   // Set y-axis domain based on risk type
   const yAxisDomain: [number, number] = selectedRiskType === 'relative' 
@@ -91,7 +88,6 @@ export const RiskTable = ({ currentRisks, selectedRiskType, allRisks, riskSummar
               averageRisk={calculateAverageRisk(risk, currentRisks?.prediction_timeframe_yrs)}
               yAxisDomain={yAxisDomain}
               summary={getSummary(risk)}
-              timePeriodFormatter={getTimePeriodLabel}
             />
           ))}
         </TableBody>
