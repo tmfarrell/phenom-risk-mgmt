@@ -14,6 +14,7 @@ import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { RISK_COLUMNS, RISK_COLUMN_FIELD_MAP } from '../table/tableConstants';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { useVersionLabels } from '@/hooks/useVersionLabels';
 
 interface InterventionSummaryTableProps {
   selectedRiskFactor: string;
@@ -34,6 +35,7 @@ export function InterventionSummaryTable({
 }: InterventionSummaryTableProps) {
   // Add state for event cost
   const [eventCost, setEventCost] = useState<number>(2715);
+  const { interventionLabel, getTimePeriodLabel } = useVersionLabels();
 
   // Query to get summary data for the selected intervention and risk factor
   const { data: riskDistributionData, isLoading } = useQuery({
@@ -155,14 +157,14 @@ export function InterventionSummaryTable({
   return (
     <Card className="mt-6">
       <CardHeader className="pb-3">
-        <CardTitle className="text-lg text-left">Intervention Results (per 1000 patients)</CardTitle>
+        <CardTitle className="text-lg text-left">{interventionLabel} Results (per 1000 patients)</CardTitle>
       </CardHeader>
       <CardContent>
         
         {/* New prominent banner for estimated savings */}
         <div className="bg-green-50 border-l-4 border-green-500 p-4 mb-6 rounded-md">
           <p className="text-lg text-gray-800">
-            Your estimated savings after intervention is:{' '}
+            Your estimated savings after {interventionLabel.toLowerCase()} is:{' '}
             <span className={differenceIsNegative ? "text-green-700 font-semibold" : "text-red-700 font-semibold"}>
               ${formattedSavings}
             </span>
@@ -186,19 +188,17 @@ export function InterventionSummaryTable({
           </div>
         </div>
         
-        
-        
         <Table className="border">
           <TableHeader>
             <TableRow>
               <TableHead className="w-1/3"></TableHead>
-              <TableHead className="text-center border font-medium">Predicted {selectedRiskFactor} Events ({selectedTimeframe} year)</TableHead>
-              <TableHead className="text-center border font-medium">Cost ({selectedTimeframe} year)</TableHead>
+              <TableHead className="text-center border font-medium">Predicted {selectedRiskFactor} Events ({getTimePeriodLabel(selectedTimeframe)})</TableHead>
+              <TableHead className="text-center border font-medium">Cost ({getTimePeriodLabel(selectedTimeframe)})</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             <TableRow>
-              <TableCell className="border font-medium text-gray-600">Pre-intervention</TableCell>
+              <TableCell className="border font-medium text-gray-600">Pre-{interventionLabel.toLowerCase()}</TableCell>
               <TableCell className="border text-center text-gray-600">
                 {summaryData.expectedPreCount}
               </TableCell>
@@ -207,7 +207,7 @@ export function InterventionSummaryTable({
               </TableCell>
             </TableRow>
             <TableRow>
-              <TableCell className="border font-medium text-blue-600">Post-intervention</TableCell>
+              <TableCell className="border font-medium text-blue-600">Post-{interventionLabel.toLowerCase()}</TableCell>
               <TableCell className="border text-center text-blue-600">
                 {summaryData.expectedPostCount}
               </TableCell>
@@ -217,7 +217,7 @@ export function InterventionSummaryTable({
             </TableRow>
             <TableRow>
               <TableCell className="border font-medium text-black">
-                Difference after Intervention
+                Difference after {interventionLabel}
               </TableCell>
               <TableCell className={`border text-center font-bold text-black bg-green-50`}>
                 {formattedDifference} {percentChangeDisplay}

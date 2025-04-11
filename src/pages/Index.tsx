@@ -1,3 +1,4 @@
+
 import { ResultsTable } from '@/components/ResultsTable';
 import { Header } from '@/components/Header';
 import { TitleSection } from '@/components/TitleSection';
@@ -11,6 +12,7 @@ import { Label } from '@/components/ui/label';
 import { calculateAverageRisks } from '@/components/table/utils/riskCalculations';
 import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
 import { PopulationRiskDistribution } from '@/components/population/PopulationRiskDistribution';
+import { useVersionLabels } from '@/hooks/useVersionLabels';
 
 export default function Index() {
   const { data: patientData, isLoading, error } = usePatientDataLatest();
@@ -27,6 +29,7 @@ export default function Index() {
   const [selectedPatients, setSelectedPatients] = useState<Person[]>([]);
   const [showSelectedOnly, setShowSelectedOnly] = useState(false);
   const [viewMode, setViewMode] = useState<'patient' | 'population'>('patient');
+  const { interventionLabel } = useVersionLabels();
 
   // Calculate average risks from the full dataset
   const averageRisks = patientData ? calculateAverageRisks(patientData) : {};
