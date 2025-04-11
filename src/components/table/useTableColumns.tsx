@@ -2,8 +2,8 @@
 import { ColumnDef } from "@tanstack/react-table";
 import { Person } from "@/types/population";
 import { Checkbox } from "@/components/ui/checkbox";
-import { baseColumns } from './columns/baseColumns';
-import { riskColumns } from './columns/riskColumns';
+import { getBaseColumns } from './columns/baseColumns';
+import { getRiskColumns } from './columns/riskColumns';
 import { useAppVersion } from '@/hooks/useAppVersion';
 import { useVersionLabels } from '@/hooks/useVersionLabels';
 
@@ -61,10 +61,10 @@ export const useTableColumns = (
   ];
 
   // Filter risk columns based on visible ones and include average risk values
-  const filteredRiskColumns = riskColumns({
+  const filteredRiskColumns = getRiskColumns(
     visibleRiskColumns,
     averageRisks,
-  });
+  );
 
   // Combine base and risk columns
   return [...modifiedBaseColumns, ...filteredRiskColumns];
