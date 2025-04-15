@@ -1,9 +1,10 @@
+
 import { ResultsTable } from '@/components/ResultsTable';
 import { Header } from '@/components/Header';
 import { TitleSection } from '@/components/TitleSection';
 import { usePatientDataLatest } from '@/hooks/usePatientDataLatest';
 import { Skeleton } from '@/components/ui/skeleton';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Person } from '@/types/population';
 import { TableControls } from '@/components/table/TableControls';
 import { Switch } from '@/components/ui/switch';
@@ -27,8 +28,20 @@ export default function Index() {
   const [showSelectedOnly, setShowSelectedOnly] = useState(false);
   const [viewMode, setViewMode] = useState<'patient' | 'population'>('patient');
 
-  const timePeriods = patientData ? [... new Set(patientData.map((p) => p.prediction_timeframe_yrs))] : [];
-  const [selectedTimeframe, setSelectedTimeframe] = useState<string>(timePeriods[0].toString());
+  // Get unique time periods from the data, ensuring we have default values if data isn't loaded yet
+  const timePeriods = patientData 
+    ? [...new Set(patientData.filter(p => p.prediction_timeframe_yrs !== null).map(p => p.prediction_timeframe_yrs))]
+    : [1, 5]; // Default time periods if data is not loaded
+  
+  // Make sure we have a valid initial timeframe selection
+  const [selectedTimeframe, setSelectedTimeframe] = useState<string>('1');
+  
+  // Set the timeframe once data is loaded
+  useEffect(() => {
+    if (patientData && patientData.length > 0 && timePeriods.length > 0) {
+      setSelectedTimeframe(timePeriods[0]?.toString() || '1');
+    }
+  }, [patientData]);
 
   // Calculate average risks from the full dataset
   const averageRisks = patientData ? calculateAverageRisks(patientData) : {};
@@ -104,7 +117,7 @@ export default function Index() {
                       onTimeframeChange={setSelectedTimeframe}
                       selectedRiskColumns={selectedRiskColumns}
                       onRiskColumnsChange={setSelectedRiskColumns}
-                      timeframes={timePeriods}
+                      timeframes={timePeriods.length > 0 ? timePeriods as number[] : [1, 5]}
                       selectedRiskType={selectedRiskType}
                       onRiskTypeChange={setSelectedRiskType}
                     />
