@@ -205,7 +205,7 @@ export const TableControls = ({
           <Input
             id="search"
             type="text"
-            placeholder="Name or MRN"
+            placeholder="Name or ID"
             value={searchQuery}
             onChange={(e) => onSearchChange(e.target.value)}
             className="pl-9"

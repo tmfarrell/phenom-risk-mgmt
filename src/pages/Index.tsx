@@ -15,7 +15,6 @@ import { PopulationRiskDistribution } from '@/components/population/PopulationRi
 export default function Index() {
   const { data: patientData, isLoading, error } = usePatientDataLatest();
   const [searchQuery, setSearchQuery] = useState('');
-  const [selectedTimeframe, setSelectedTimeframe] = useState<string>('1');
   const [selectedRiskType, setSelectedRiskType] = useState<'relative' | 'absolute'>('relative');
   const [selectedRiskColumns, setSelectedRiskColumns] = useState<string[]>([
     'ED',
@@ -27,6 +26,9 @@ export default function Index() {
   const [selectedPatients, setSelectedPatients] = useState<Person[]>([]);
   const [showSelectedOnly, setShowSelectedOnly] = useState(false);
   const [viewMode, setViewMode] = useState<'patient' | 'population'>('patient');
+
+  const timePeriods = patientData ? [... new Set(patientData.map((p) => p.prediction_timeframe_yrs))] : [];
+  const [selectedTimeframe, setSelectedTimeframe] = useState<string>(timePeriods[0].toString());
 
   // Calculate average risks from the full dataset
   const averageRisks = patientData ? calculateAverageRisks(patientData) : {};
@@ -102,7 +104,7 @@ export default function Index() {
                       onTimeframeChange={setSelectedTimeframe}
                       selectedRiskColumns={selectedRiskColumns}
                       onRiskColumnsChange={setSelectedRiskColumns}
-                      timeframes={[1, 5]}
+                      timeframes={timePeriods}
                       selectedRiskType={selectedRiskType}
                       onRiskTypeChange={setSelectedRiskType}
                     />
