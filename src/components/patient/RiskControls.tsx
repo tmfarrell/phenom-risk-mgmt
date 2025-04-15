@@ -9,6 +9,7 @@ interface RiskControlsProps {
   selectedRiskType: 'relative' | 'absolute';
   onTimeframeChange: (value: string) => void;
   onRiskTypeChange: (value: 'relative' | 'absolute') => void;
+  timeframes?: number[];
 }
 
 export const RiskControls = ({
@@ -16,6 +17,7 @@ export const RiskControls = ({
   selectedRiskType,
   onTimeframeChange,
   onRiskTypeChange,
+  timeframes = [1, 2]
 }: RiskControlsProps) => {
   const { appVersion } = useAppVersion();
   
@@ -76,24 +78,18 @@ export const RiskControls = ({
           }}
           className="flex gap-2"
         >
-          <ToggleGroupItem 
-            value="1" 
-            className={cn(
-              "px-4 py-2 rounded-md",
-              selectedTimeframe === '1' ? "bg-blue-100 hover:bg-blue-200" : "hover:bg-gray-100"
-            )}
-          >
-            {getTimeframeDisplay('1')}
-          </ToggleGroupItem>
-          <ToggleGroupItem 
-            value="5"
-            className={cn(
-              "px-4 py-2 rounded-md",
-              selectedTimeframe === '5' ? "bg-blue-100 hover:bg-blue-200" : "hover:bg-gray-100"
-            )}
-          >
-            {getTimeframeDisplay('5')}
-          </ToggleGroupItem>
+          {timeframes.map((timeframe) => (
+            <ToggleGroupItem 
+              key={timeframe}
+              value={timeframe.toString()} 
+              className={cn(
+                "px-4 py-2 rounded-md",
+                selectedTimeframe === timeframe.toString() ? "bg-blue-100 hover:bg-blue-200" : "hover:bg-gray-100"
+              )}
+            >
+              {getTimeframeDisplay(timeframe.toString())}
+            </ToggleGroupItem>
+          ))}
         </ToggleGroup>
       </div>
     </div>
