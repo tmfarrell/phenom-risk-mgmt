@@ -2,18 +2,18 @@
 import { useState, useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from '@/components/ui/table';
-import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
-import { RISK_COLUMNS, RISK_COLUMN_FIELD_MAP } from '../table/tableConstants';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { RISK_COLUMN_FIELD_MAP } from '../table/tableConstants';
+import { Badge } from '@/components/ui/badge';
+
+type RiskDistribution = {
+  range: string;
+  cohort: string;
+  value: number;
+  fact_type: string;
+  time_period: number;
+};
 
 interface InterventionSummaryTableProps {
   selectedRiskFactor: string;
@@ -21,214 +21,188 @@ interface InterventionSummaryTableProps {
   selectedTimeframe: string;
 }
 
-interface RiskDistribution {
-  range: string;
-  pre: number;
-  post: number;
-}
-
-export function InterventionSummaryTable({ 
+export function InterventionSummaryTable({
   selectedRiskFactor,
   selectedIntervention,
   selectedTimeframe,
 }: InterventionSummaryTableProps) {
-  // Add state for event cost
-  const [eventCost, setEventCost] = useState<number>(2715);
+  const [localIntervention, setLocalIntervention] = useState<string>(selectedIntervention || '');
 
-  // Query to get summary data for the selected intervention and risk factor
-  const { data: riskDistributionData, isLoading } = useQuery({
-    queryKey: ['intervention-summary', selectedRiskFactor, selectedIntervention, selectedTimeframe],
-    
+  useEffect(() => {
+    if (selectedIntervention && selectedIntervention !== localIntervention) {
+      setLocalIntervention(selectedIntervention);
+    }
+  }, [selectedIntervention]);
+
+  // Fetch available cohorts
+  const { data: cohorts, isLoading: isCohortsLoading } = useQuery({
+    queryKey: ['summary-cohorts'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('phenom_risk_dist')
+        .select('cohort')
+        .not('cohort', 'is', null);
+      
+      if (error) {
+        console.error('Error fetching cohorts:', error);
+        throw error;
+      }
+
+      const uniqueCohorts = [...new Set(data.map(item => item.cohort))].filter(Boolean).sort();
+      return uniqueCohorts;
+    }
+  });
+
+  // Set the first available cohort if none is selected
+  useEffect(() => {
+    if (cohorts && cohorts.length > 0 && !localIntervention) {
+      setLocalIntervention(cohorts[0]);
+    }
+  }, [cohorts, localIntervention]);
+
+  // Fetch distribution data for the intervention
+  const { data: distributionData, isLoading: isDistributionLoading } = useQuery({
+    queryKey: ['intervention-summary', selectedRiskFactor, localIntervention, selectedTimeframe],
     queryFn: async () => {
       const dbRiskFactor = RISK_COLUMN_FIELD_MAP[selectedRiskFactor];
-      console.log('Fetching risk distribution data with params (InterventionSummaryTable):', {
-        timeframe: selectedTimeframe,
-        riskFactor: selectedRiskFactor,
-        fact_type: dbRiskFactor,
-        intervention: selectedIntervention
-      });
-
+      
       const { data, error } = await supabase
         .from('phenom_risk_dist')
         .select('*')
         .eq('time_period', parseInt(selectedTimeframe))
         .eq('fact_type', dbRiskFactor)
-        .eq('intervention', selectedIntervention);
+        .eq('cohort', localIntervention);
       
       if (error) {
-        console.error('Error fetching intervention summary:', error);
+        console.error('Error fetching risk distribution:', error);
         throw error;
       }
-
-      console.log('risk distribution data (InterventionSummaryTable): ', data); 
-
-      return data || [];
+      
+      return data as RiskDistribution[];
     },
-    enabled: !!selectedRiskFactor && !!selectedIntervention && selectedIntervention !== ''
+    enabled: !!localIntervention && !!selectedTimeframe
   });
 
-  // Set default intervention to the first one in the sorted list when interventions are loaded
-  const [interventions, setInterventions] = useState<string[]>([]);
-  const [selectedInterventionState, setSelectedIntervention] = useState<string>('');
-
-  useEffect(() => {
-    if (interventions && interventions.length > 0) {
-      setSelectedIntervention(interventions[0]);
-    }
-  }, [interventions]);
-
-  // Handle event cost change
-  const handleCostChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = parseFloat(e.target.value);
-    setEventCost(isNaN(value) ? 0 : value);
-  };
-
-  // Calculate the expected patients with risk for pre and post intervention
-  const calculateExpectedPatients = (riskDistData: RiskDistribution[] | undefined | null) => {
-    if (!riskDistData || !Array.isArray(riskDistData) || riskDistData.length === 0) {
+  // Calculate stats from distribution data
+  const calculateStats = (data: RiskDistribution[] | undefined) => {
+    if (!data || data.length === 0) return { mean: 0, median: 0, standardDeviation: 0 };
+    
+    // Assuming each range represents a bucket with values at the middle of the range
+    const weightedValues = data.map(item => {
+      const range = item.range;
+      const rangeParts = range.split('-');
+      const rangeStart = parseFloat(rangeParts[0]);
+      const rangeEnd = parseFloat(rangeParts[1] || rangeStart.toString());
+      const midpoint = (rangeStart + rangeEnd) / 2;
+      
       return {
-        patientCount: 1000,
-        expectedPreCount: "0",
-        expectedPostCount: "0",
-        difference: "0",
-        percentChange: "0",
-        totalSavings: "0"
+        midpoint,
+        count: item.value
       };
-    }
-    
-    const patientCount = 1000; // Base patient count for calculations
-    
-    let preTotal = 0;
-    let postTotal = 0;
-
-    console.log('risk distribution data: ', riskDistData) ; 
-    
-    riskDistData.forEach(item => {
-      // Convert range to average risk percentage 
-      const rangeParts = item.range.split('-');
-      if (rangeParts.length === 2) {
-        const lowerBound = parseFloat(rangeParts[0]);
-        const upperBound = parseFloat(rangeParts[1]);
-        const averageRiskPercent = (lowerBound + upperBound) / 2;
-        
-        // Calculate contribution to expected patients
-        const preContribution = (item.pre / 100) * (averageRiskPercent / 100) * patientCount;
-        const postContribution = (item.post / 100) * (averageRiskPercent / 100) * patientCount;
-        
-        preTotal += preContribution;
-        postTotal += postContribution;
-      }
     });
     
-    const difference = postTotal - preTotal;
-    const percentChange = preTotal > 0 ? (difference / preTotal) * 100 : 0;
+    // Calculate total patients
+    const totalPatients = weightedValues.reduce((sum, item) => sum + item.count, 0);
     
-    // Use the current eventCost value for calculations
-    const totalSavings = -difference * eventCost;
-    const preCost = preTotal * eventCost;
-    const postCost = postTotal * eventCost;
-
+    // Calculate mean
+    const sum = weightedValues.reduce((sum, item) => sum + (item.midpoint * item.count), 0);
+    const mean = totalPatients > 0 ? sum / totalPatients : 0;
+    
+    // Sort values for median calculation
+    const sortedValues: number[] = [];
+    weightedValues.forEach(item => {
+      for (let i = 0; i < item.count; i++) {
+        sortedValues.push(item.midpoint);
+      }
+    });
+    sortedValues.sort((a, b) => a - b);
+    
+    // Calculate median
+    const middleIndex = Math.floor(sortedValues.length / 2);
+    const median = sortedValues.length % 2 === 0
+      ? (sortedValues[middleIndex - 1] + sortedValues[middleIndex]) / 2
+      : sortedValues[middleIndex];
+    
+    // Calculate standard deviation
+    const squaredDiffs = weightedValues.reduce((sum, item) => {
+      return sum + (Math.pow(item.midpoint - mean, 2) * item.count);
+    }, 0);
+    const variance = totalPatients > 0 ? squaredDiffs / totalPatients : 0;
+    const standardDeviation = Math.sqrt(variance);
+    
     return {
-      patientCount,
-      expectedPreCount: preTotal.toFixed(1),
-      expectedPostCount: postTotal.toFixed(1),
-      difference: difference.toFixed(1),
-      percentChange: percentChange.toFixed(1),
-      preCost: preCost.toFixed(0),
-      postCost: postCost.toFixed(0),
-      totalSavings: totalSavings.toFixed(0)
+      mean: parseFloat(mean.toFixed(2)),
+      median: parseFloat(median.toFixed(2)),
+      standardDeviation: parseFloat(standardDeviation.toFixed(2))
     };
   };
 
-  console.log('Calculate summary stats...'); 
-  const summaryData = calculateExpectedPatients(riskDistributionData);
-
-  if (isLoading || !selectedIntervention) {
-    return <div className="text-center py-4">Loading summary data...</div>;
-  }
-
-  const differenceIsNegative = parseFloat(summaryData.difference) < 0;
-  const formattedDifference = `${differenceIsNegative ? '' : '+'}${summaryData.difference}`;
-  const percentChangeDisplay = `(${differenceIsNegative ? '' : '+'}${summaryData.percentChange}%)`;
-  const formattedSavings = Math.abs(parseInt(summaryData.totalSavings)).toLocaleString();
+  const stats = calculateStats(distributionData);
+  const isLoading = isCohortsLoading || isDistributionLoading;
 
   return (
-    <Card className="mt-6">
-      <CardHeader className="pb-3">
-        <CardTitle className="text-lg text-left">Intervention Results (per 1000 patients)</CardTitle>
-      </CardHeader>
-      <CardContent>
-        
-        {/* New prominent banner for estimated savings */}
-        <div className="bg-green-50 border-l-4 border-green-500 p-4 mb-6 rounded-md">
-          <p className="text-lg text-gray-800">
-            Your estimated savings after intervention is:{' '}
-            <span className={differenceIsNegative ? "text-green-700 font-semibold" : "text-red-700 font-semibold"}>
-              ${formattedSavings}
-            </span>
-          </p>
+    <div className="space-y-6">
+      <div className="flex justify-between items-center">
+        <h3 className="text-lg font-medium">Risk Summary</h3>
+        <div className="w-64">
+          <Select
+            value={localIntervention}
+            onValueChange={setLocalIntervention}
+            disabled={isCohortsLoading}
+          >
+            <SelectTrigger>
+              <SelectValue placeholder="Select cohort" />
+            </SelectTrigger>
+            <SelectContent>
+              {cohorts?.map((cohort) => (
+                <SelectItem key={cohort} value={cohort}>
+                  {cohort}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
         </div>
+      </div>
 
-        <div className="flex flex-wrap items-start mb-4 gap-4">
-          <div className="flex items-center gap-3">
-            <Label htmlFor="event-cost" className="whitespace-nowrap min-w-[140px] text-sm">Est. Event Cost ($):</Label>
-            <div className="relative">
-              <Input 
-                id="event-cost"
-                type="number"
-                min="0"
-                step="1"
-                value={eventCost}
-                onChange={handleCostChange}
-                className="w-40"
-              />
-            </div>
-          </div>
+      {isLoading ? (
+        <div className="flex items-center justify-center h-32">
+          <p>Loading...</p>
         </div>
-        
-        
-        
-        <Table className="border">
-          <TableHeader>
-            <TableRow>
-              <TableHead className="w-1/3"></TableHead>
-              <TableHead className="text-center border font-medium">Predicted {selectedRiskFactor} Events ({selectedTimeframe} year)</TableHead>
-              <TableHead className="text-center border font-medium">Cost ({selectedTimeframe} year)</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            <TableRow>
-              <TableCell className="border font-medium text-gray-600">Pre-intervention</TableCell>
-              <TableCell className="border text-center text-gray-600">
-                {summaryData.expectedPreCount}
-              </TableCell>
-              <TableCell className="border text-center text-gray-600">
-                ${parseInt(summaryData.preCost).toLocaleString()}
-              </TableCell>
-            </TableRow>
-            <TableRow>
-              <TableCell className="border font-medium text-blue-600">Post-intervention</TableCell>
-              <TableCell className="border text-center text-blue-600">
-                {summaryData.expectedPostCount}
-              </TableCell>
-              <TableCell className="border text-center text-blue-600">
-                ${parseInt(summaryData.postCost).toLocaleString()}
-              </TableCell>
-            </TableRow>
-            <TableRow>
-              <TableCell className="border font-medium text-black">
-                Difference after Intervention
-              </TableCell>
-              <TableCell className={`border text-center font-bold text-black bg-green-50`}>
-                {formattedDifference} {percentChangeDisplay}
-              </TableCell>
-              <TableCell className={`border text-center font-bold text-black bg-green-50`}>
-                {differenceIsNegative ? '-' : '+'}${formattedSavings}
-              </TableCell>
-            </TableRow>
-          </TableBody>
-        </Table>
-      </CardContent>
-    </Card>
+      ) : (
+        <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
+          <StatCard
+            title="Mean Risk"
+            value={`${stats.mean}%`}
+            description="Average risk across population"
+          />
+          <StatCard
+            title="Median Risk"
+            value={`${stats.median}%`}
+            description="Middle value in risk distribution"
+          />
+          <StatCard
+            title="Risk Spread"
+            value={`±${stats.standardDeviation}%`}
+            description="Standard deviation of risk"
+          />
+        </div>
+      )}
+    </div>
+  );
+}
+
+function StatCard({ title, value, description }: { title: string; value: string; description: string }) {
+  return (
+    <div className="rounded-lg border bg-card text-card-foreground shadow-sm p-6">
+      <div className="flex flex-col space-y-1.5">
+        <h3 className="text-xl font-semibold">{title}</h3>
+        <p className="text-sm text-muted-foreground">{description}</p>
+      </div>
+      <div className="mt-4">
+        <Badge variant="outline" className="px-3 py-1.5 text-xl font-bold">
+          {value}
+        </Badge>
+      </div>
+    </div>
   );
 }

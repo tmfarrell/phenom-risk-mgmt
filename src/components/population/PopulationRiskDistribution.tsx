@@ -110,12 +110,48 @@ export function PopulationRiskDistribution({
     }
   });
 
-  // Set initial selected cohort when cohorts are loaded
+  // Default selection logic when cohorts are loaded
   useEffect(() => {
     if (cohorts && cohorts.length > 0 && selectedCohorts.length === 0) {
-      setSelectedCohorts([cohorts[0]]);
+      // Find "General Population" in the cohorts
+      const generalPopulationIndex = cohorts.findIndex(cohort => 
+        cohort.toLowerCase() === "general population");
+      
+      if (generalPopulationIndex !== -1) {
+        // If "General Population" exists, select it and the next cohort (or first if it's the last one)
+        const secondCohortIndex = generalPopulationIndex === cohorts.length - 1 ? 0 : generalPopulationIndex + 1;
+        // Make sure we don't select the same cohort twice
+        if (generalPopulationIndex !== secondCohortIndex) {
+          setSelectedCohorts([cohorts[generalPopulationIndex], cohorts[secondCohortIndex]]);
+        } else if (cohorts.length > 1) {
+          // If we somehow got the same cohort, find another one
+          const altIndex = (generalPopulationIndex + 1) % cohorts.length;
+          setSelectedCohorts([cohorts[generalPopulationIndex], cohorts[altIndex]]);
+        } else {
+          // If there's only one cohort, just select it
+          setSelectedCohorts([cohorts[generalPopulationIndex]]);
+        }
+      } else if (cohorts.length >= 2) {
+        // If "General Population" doesn't exist but we have at least 2 cohorts, select the first two
+        setSelectedCohorts([cohorts[0], cohorts[1]]);
+      } else if (cohorts.length === 1) {
+        // If there's only one cohort, select it
+        setSelectedCohorts([cohorts[0]]);
+      }
     }
   }, [cohorts, selectedCohorts.length]);
+
+  // Ensure "General Population" is always selected if it exists
+  useEffect(() => {
+    if (cohorts && cohorts.length > 0 && selectedCohorts.length > 0) {
+      const generalPopulationCohort = cohorts.find(cohort => 
+        cohort.toLowerCase() === "general population");
+      
+      if (generalPopulationCohort && !selectedCohorts.includes(generalPopulationCohort)) {
+        setSelectedCohorts(prev => [generalPopulationCohort, ...prev]);
+      }
+    }
+  }, [cohorts, selectedCohorts]);
 
   const { data: distributionData, isLoading: isDistributionLoading } = useQuery({
     queryKey: ['risk-distribution', localTimeframe, selectedRiskType, selectedRiskFactor, selectedCohorts],
@@ -254,27 +290,41 @@ export function PopulationRiskDistribution({
                   <CommandList>
                     <CommandEmpty>No cohorts found.</CommandEmpty>
                     <CommandGroup>
-                      {cohorts?.map((cohort) => (
-                        <CommandItem
-                          key={cohort}
-                          value={cohort}
-                          onSelect={() => {
-                            setSelectedCohorts(prev => 
-                              prev.includes(cohort)
-                                ? prev.filter(c => c !== cohort)
-                                : [...prev, cohort]
-                            );
-                          }}
-                        >
-                          <Check
-                            className={cn(
-                              "mr-2 h-4 w-4",
-                              selectedCohorts.includes(cohort) ? "opacity-100" : "opacity-0"
+                      {cohorts?.map((cohort) => {
+                        // Check if this is the General Population cohort
+                        const isGeneralPopulation = cohort.toLowerCase() === "general population";
+                        
+                        return (
+                          <CommandItem
+                            key={cohort}
+                            value={cohort}
+                            onSelect={() => {
+                              // If it's General Population and trying to deselect, prevent removal
+                              if (isGeneralPopulation && selectedCohorts.includes(cohort)) {
+                                return; // Don't allow deselection of General Population
+                              }
+                              
+                              setSelectedCohorts(prev => 
+                                prev.includes(cohort)
+                                  ? prev.filter(c => c !== cohort)
+                                  : [...prev, cohort]
+                              );
+                            }}
+                            disabled={isGeneralPopulation && selectedCohorts.includes(cohort)}
+                          >
+                            <Check
+                              className={cn(
+                                "mr-2 h-4 w-4",
+                                selectedCohorts.includes(cohort) ? "opacity-100" : "opacity-0"
+                              )}
+                            />
+                            {cohort}
+                            {isGeneralPopulation && selectedCohorts.includes(cohort) && (
+                              <span className="ml-auto text-xs text-muted-foreground">(always selected)</span>
                             )}
-                          />
-                          {cohort}
-                        </CommandItem>
-                      ))}
+                          </CommandItem>
+                        );
+                      })}
                     </CommandGroup>
                   </CommandList>
                 </Command>
@@ -284,20 +334,26 @@ export function PopulationRiskDistribution({
             {/* Display selected cohorts as badges */}
             {selectedCohorts.length > 0 && (
               <div className="flex flex-wrap gap-1 mt-2">
-                {selectedCohorts.map((cohort, index) => (
-                  <Badge 
-                    key={cohort} 
-                    variant="secondary"
-                    className="flex items-center gap-1"
-                    style={{ backgroundColor: `${COHORT_COLORS[index % COHORT_COLORS.length]}20` }}
-                  >
-                    {cohort}
-                    <X 
-                      className="h-3 w-3 cursor-pointer" 
-                      onClick={() => setSelectedCohorts(prev => prev.filter(c => c !== cohort))}
-                    />
-                  </Badge>
-                ))}
+                {selectedCohorts.map((cohort, index) => {
+                  const isGeneralPopulation = cohort.toLowerCase() === "general population";
+                  
+                  return (
+                    <Badge 
+                      key={cohort} 
+                      variant="secondary"
+                      className="flex items-center gap-1"
+                      style={{ backgroundColor: `${COHORT_COLORS[index % COHORT_COLORS.length]}20` }}
+                    >
+                      {cohort}
+                      {!isGeneralPopulation && (
+                        <X 
+                          className="h-3 w-3 cursor-pointer" 
+                          onClick={() => setSelectedCohorts(prev => prev.filter(c => c !== cohort))}
+                        />
+                      )}
+                    </Badge>
+                  );
+                })}
               </div>
             )}
           </div>
