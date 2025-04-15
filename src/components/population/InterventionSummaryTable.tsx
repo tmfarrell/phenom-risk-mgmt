@@ -7,6 +7,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { RISK_COLUMN_FIELD_MAP } from '../table/tableConstants';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
+import { Input } from '@/components/ui/input';
 
 type RiskDistribution = {
   range: string;
@@ -23,15 +24,8 @@ interface InterventionSummaryTableProps {
   selectedCohorts: string[];
 }
 
-// Cost constants - these would be configured somewhere in a real application
-const COST_PER_VISIT = 250; // example cost per hospital visit in dollars
-const COST_MULTIPLIERS: Record<string, number> = {
-  'ED': 1.0,
-  'Hospitalization': 2.5,
-  'Fall': 1.2,
-  'Stroke': 4.0,
-  'MI': 3.8
-};
+// Default cost constant
+const DEFAULT_COST_PER_EVENT = 250; // default cost per event in dollars
 
 export function InterventionSummaryTable({
   selectedRiskFactor,
@@ -39,6 +33,7 @@ export function InterventionSummaryTable({
   selectedTimeframe,
   selectedCohorts = [],
 }: InterventionSummaryTableProps) {
+  const [costPerEvent, setCostPerEvent] = useState(DEFAULT_COST_PER_EVENT);
   const generalPopulationCohort = "General Population";
   const isGeneralPopulationSelected = selectedCohorts.some(
     cohort => cohort.toLowerCase() === generalPopulationCohort.toLowerCase()
@@ -78,7 +73,7 @@ export function InterventionSummaryTable({
 
   // Calculate stats from distribution data for a specific cohort
   const calculateStats = (data: RiskDistribution[] | undefined) => {
-    if (!data || data.length === 0) return { mean: 0, median: 0, standardDeviation: 0, estimatedVisits: 0, estimatedCost: 0 };
+    if (!data || data.length === 0) return { mean: 0, median: 0, standardDeviation: 0, eventsPerThousand: 0, estimatedCost: 0 };
     
     // Assuming each range represents a bucket with values at the middle of the range
     const weightedValues = data.map(item => {
@@ -123,18 +118,17 @@ export function InterventionSummaryTable({
     const variance = totalPatients > 0 ? squaredDiffs / totalPatients : 0;
     const standardDeviation = Math.sqrt(variance);
     
-    // Estimate number of visits based on risk
-    const estimatedVisits = totalPatients * (mean / 100);
+    // Estimate number of events per 1000 patients based on risk
+    const eventsPerThousand = 1000 * (mean / 100);
     
-    // Estimate cost based on visits and risk type
-    const costMultiplier = COST_MULTIPLIERS[selectedRiskFactor] || 1.0;
-    const estimatedCost = estimatedVisits * COST_PER_VISIT * costMultiplier;
+    // Estimate cost based on events and user-defined cost per event
+    const estimatedCost = eventsPerThousand * costPerEvent;
     
     return {
       mean: parseFloat(mean.toFixed(2)),
       median: parseFloat(median.toFixed(2)),
       standardDeviation: parseFloat(standardDeviation.toFixed(2)),
-      estimatedVisits: Math.round(estimatedVisits),
+      eventsPerThousand: Math.round(eventsPerThousand),
       estimatedCost: Math.round(estimatedCost)
     };
   };
@@ -155,10 +149,32 @@ export function InterventionSummaryTable({
   const generalPopStats = getGeneralPopulationStats();
   const isLoading = isDistributionLoading || !distributionData;
 
+  // Handle cost per event input change
+  const handleCostChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    const numericValue = parseFloat(value);
+    
+    if (!isNaN(numericValue) && numericValue >= 0) {
+      setCostPerEvent(numericValue);
+    } else if (value === '') {
+      setCostPerEvent(0);
+    }
+  };
+
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
         <h3 className="text-lg font-medium">Cohort Risk Summary</h3>
+        <div className="flex items-center space-x-2">
+          <span className="text-sm text-muted-foreground">Cost per event ($):</span>
+          <Input
+            type="number"
+            value={costPerEvent}
+            onChange={handleCostChange}
+            className="w-24 h-8"
+            min="0"
+          />
+        </div>
       </div>
 
       {isLoading ? (
@@ -225,7 +241,7 @@ export function InterventionSummaryTable({
                   })}
                 </TableRow>
                 <TableRow>
-                  <TableCell className="font-medium">Estimated Visits</TableCell>
+                  <TableCell className="font-medium">Events per 1,000 patients</TableCell>
                   {distributionData?.map(({ cohort, data }) => {
                     const stats = calculateStats(data);
                     const isGeneralPop = cohort.toLowerCase() === generalPopulationCohort.toLowerCase();
@@ -233,11 +249,11 @@ export function InterventionSummaryTable({
                     return (
                       <TableCell key={`${cohort}-visits`}>
                         <div className="flex items-center gap-2">
-                          <span className="font-semibold">{stats.estimatedVisits.toLocaleString()}</span>
+                          <span className="font-semibold">{stats.eventsPerThousand.toLocaleString()}</span>
                           {!isGeneralPop && generalPopStats && (
                             <ComparisonBadge 
-                              value={stats.estimatedVisits} 
-                              baseline={generalPopStats.estimatedVisits}
+                              value={stats.eventsPerThousand} 
+                              baseline={generalPopStats.eventsPerThousand}
                               higherIsBetter={false}
                             />
                           )}
@@ -247,7 +263,7 @@ export function InterventionSummaryTable({
                   })}
                 </TableRow>
                 <TableRow>
-                  <TableCell className="font-medium">Estimated Cost</TableCell>
+                  <TableCell className="font-medium">Estimated Cost per 1,000 patients</TableCell>
                   {distributionData?.map(({ cohort, data }) => {
                     const stats = calculateStats(data);
                     const isGeneralPop = cohort.toLowerCase() === generalPopulationCohort.toLowerCase();
@@ -273,7 +289,8 @@ export function InterventionSummaryTable({
           </div>
           
           <div className="text-sm text-muted-foreground">
-            <p>* Cost estimates are based on average values and may not reflect actual costs.</p>
+            <p>* Estimates are based on risk values and may vary from actual outcomes.</p>
+            <p>* Cost estimates are calculated by multiplying events per 1,000 patients by the cost per event (${costPerEvent}).</p>
           </div>
         </>
       )}
