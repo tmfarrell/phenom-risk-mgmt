@@ -98,28 +98,25 @@ export type Database = {
       }
       phenom_risk_dist: {
         Row: {
+          cohort: string | null
           fact_type: string
-          intervention: string | null
-          post: number | null
-          pre: number | null
           range: string
           time_period: number
+          value: number | null
         }
         Insert: {
+          cohort?: string | null
           fact_type: string
-          intervention?: string | null
-          post?: number | null
-          pre?: number | null
           range: string
           time_period: number
+          value?: number | null
         }
         Update: {
+          cohort?: string | null
           fact_type?: string
-          intervention?: string | null
-          post?: number | null
-          pre?: number | null
           range?: string
           time_period?: number
+          value?: number | null
         }
         Relationships: []
       }

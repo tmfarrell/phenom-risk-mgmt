@@ -18,6 +18,22 @@ import { cn } from '@/lib/utils';
 import { InterventionSummaryTable } from './InterventionSummaryTable';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useAppVersion } from '@/hooks/useAppVersion';
+import { Badge } from '@/components/ui/badge';
+import { Check, ChevronsUpDown, X } from 'lucide-react';
+import {
+  Command,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+  CommandList,
+} from '@/components/ui/command';
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from '@/components/ui/popover';
+import { Button } from '@/components/ui/button';
 
 interface PopulationRiskDistributionProps {
   selectedTimeframe: string;
@@ -30,9 +46,9 @@ export function PopulationRiskDistribution({
 }: PopulationRiskDistributionProps) {
   const [selectedRiskFactor, setSelectedRiskFactor] = useState<string>(RISK_COLUMNS[0]);
   const [localTimeframe, setLocalTimeframe] = useState<string>(selectedTimeframe);
-  const [selectedIntervention, setSelectedIntervention] = useState<string>('');
+  const [selectedCohorts, setSelectedCohorts] = useState<string[]>([]);
+  const [cohortsPopoverOpen, setCohortsPopoverOpen] = useState<boolean>(false);
   const [activeTab, setActiveTab] = useState<string>("summary");
-  const [isInterventionLoaded, setIsInterventionLoaded] = useState<boolean>(false);
   const { appVersion } = useAppVersion();
   
   const useMonthsForTimeframe = appVersion !== 'patient';
@@ -75,63 +91,98 @@ export function PopulationRiskDistribution({
     });
   };
 
-  const { data: interventions, isLoading: isInterventionsLoading } = useQuery({
-    queryKey: ['interventions'],
+  // Fetch available cohorts from the database
+  const { data: cohorts, isLoading: isCohortsLoading } = useQuery({
+    queryKey: ['cohorts'],
     queryFn: async () => {
       const { data, error } = await supabase
         .from('phenom_risk_dist')
-        .select('intervention');
+        .select('cohort')
+        .not('cohort', 'is', null);
       
       if (error) {
-        console.error('Error fetching interventions:', error);
+        console.error('Error fetching cohorts:', error);
         throw error;
       }
 
-      const uniqueInterventions = [...new Set(data.map(item => item.intervention))].filter(Boolean).sort();
-      return uniqueInterventions;
+      const uniqueCohorts = [...new Set(data.map(item => item.cohort))].filter(Boolean).sort();
+      return uniqueCohorts;
     }
   });
 
+  // Set initial selected cohort when cohorts are loaded
   useEffect(() => {
-    if (interventions && interventions.length > 0 && !isInterventionLoaded) {
-      setSelectedIntervention(interventions[0]);
-      setIsInterventionLoaded(true);
+    if (cohorts && cohorts.length > 0 && selectedCohorts.length === 0) {
+      setSelectedCohorts([cohorts[0]]);
     }
-  }, [interventions, isInterventionLoaded]);
+  }, [cohorts, selectedCohorts.length]);
 
   const { data: distributionData, isLoading: isDistributionLoading } = useQuery({
-    queryKey: ['risk-distribution', localTimeframe, selectedRiskType, selectedRiskFactor, selectedIntervention],
+    queryKey: ['risk-distribution', localTimeframe, selectedRiskType, selectedRiskFactor, selectedCohorts],
     queryFn: async () => {
       const dbRiskFactor = RISK_COLUMN_FIELD_MAP[selectedRiskFactor];
-      console.log('Fetching risk distribution data with params (PopulationRiskDistribution):', {
+      console.log('Fetching risk distribution data with params:', {
         timeframe: localTimeframe,
         riskType: selectedRiskType,
         riskFactor: selectedRiskFactor,
         dbRiskFactor: dbRiskFactor,
-        intervention: selectedIntervention
+        cohorts: selectedCohorts
       });
 
-      const { data, error } = await supabase
-        .from('phenom_risk_dist')
-        .select('*')
-        .eq('time_period', parseInt(localTimeframe))
-        .eq('fact_type', dbRiskFactor)
-        .eq('intervention', selectedIntervention);
+      if (!selectedCohorts.length) return [];
 
-      if (error) {
-        console.error('Error fetching risk distribution:', error);
-        throw error;
-      }
+      // Fetch data for each selected cohort
+      const promises = selectedCohorts.map(async (cohort) => {
+        const { data, error } = await supabase
+          .from('phenom_risk_dist')
+          .select('*')
+          .eq('time_period', parseInt(localTimeframe))
+          .eq('fact_type', dbRiskFactor)
+          .eq('cohort', cohort);
 
-      console.log('risk distribution data (PopulationRiskDistribution): ', data); 
-      return sortRiskRanges(data);
+        if (error) {
+          console.error(`Error fetching risk distribution for cohort ${cohort}:`, error);
+          return [];
+        }
+
+        return data;
+      });
+
+      const results = await Promise.all(promises);
+      
+      // Combine and process all cohort data
+      const allRanges = new Set<string>();
+      const cohortData: Record<string, Record<string, number>> = {};
+      
+      // First pass: collect all risk ranges and organize by cohort
+      results.forEach((cohortResults, index) => {
+        const cohortName = selectedCohorts[index];
+        cohortData[cohortName] = {};
+        
+        cohortResults.forEach(result => {
+          allRanges.add(result.range);
+          cohortData[cohortName][result.range] = result.value;
+        });
+      });
+      
+      // Second pass: create combined dataset with all ranges for all cohorts
+      const combinedData = Array.from(allRanges).map(range => {
+        const entry: any = { range };
+        
+        selectedCohorts.forEach(cohort => {
+          entry[cohort] = cohortData[cohort][range] || 0;
+        });
+        
+        return entry;
+      });
+
+      console.log('Combined distribution data:', combinedData);
+      return sortRiskRanges(combinedData);
     },
-    enabled: !!selectedIntervention
+    enabled: selectedCohorts.length > 0
   });
 
-  const isLoading = isInterventionsLoading || isDistributionLoading || !isInterventionLoaded || isTimePeriodsLoading;
-
-  const sortedDistributionData = distributionData ? sortRiskRanges(distributionData) : [];
+  const isLoading = isCohortsLoading || isDistributionLoading || isTimePeriodsLoading || selectedCohorts.length === 0;
 
   const getTimeUnitLabel = (timeframe: string) => {
     const numericTimeframe = parseInt(timeframe);
@@ -143,87 +194,162 @@ export function PopulationRiskDistribution({
     }
   };
 
+  // Generate colors for each cohort
+  const COHORT_COLORS = [
+    '#1E88E5', // Blue
+    '#F44336', // Red
+    '#4CAF50', // Green
+    '#FF9800', // Orange
+    '#9C27B0', // Purple
+    '#795548', // Brown
+    '#607D8B', // Blue Grey
+    '#E91E63', // Pink
+  ];
+
   return (
     <div className="space-y-6">
       <div className="flex justify-end items-center space-x-8">
-        <div className="w-[200px]">
-          <Label className="mb-2 block">Risk</Label>
-          <Select
-            value={selectedRiskFactor}
-            onValueChange={setSelectedRiskFactor}
-          >
-            <SelectTrigger>
-              <SelectValue placeholder="Select risk factor" />
-            </SelectTrigger>
-            <SelectContent>
-              {RISK_COLUMNS.map((riskFactor) => (
-                <SelectItem key={riskFactor} value={riskFactor}>
-                  {riskFactor}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
+        <div className="grid grid-cols-3 gap-8 flex-1 mr-8">
+          <div className="flex flex-col gap-2">
+            <Label className="mb-2 block">Risk</Label>
+            <Select
+              value={selectedRiskFactor}
+              onValueChange={setSelectedRiskFactor}
+            >
+              <SelectTrigger>
+                <SelectValue placeholder="Select risk factor" />
+              </SelectTrigger>
+              <SelectContent>
+                {RISK_COLUMNS.map((riskFactor) => (
+                  <SelectItem key={riskFactor} value={riskFactor}>
+                    {riskFactor}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
 
-        <div className="w-[325px]">
-          <Label className="mb-2 block">Intervention</Label>
-          <Select
-            value={selectedIntervention}
-            onValueChange={setSelectedIntervention}
-            disabled={isInterventionsLoading}
-          >
-            <SelectTrigger>
-              <SelectValue placeholder={isInterventionsLoading ? "Loading..." : "Select intervention"} />
-            </SelectTrigger>
-            <SelectContent>
-              {interventions?.map((intervention) => (
-                <SelectItem key={intervention} value={intervention}>
-                  {intervention}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
-
-        <div className="flex flex-col gap-2">
-          <Label className="text-sm text-gray-600 text-center mx-auto">Time Period</Label>
-          <ToggleGroup 
-            type="single" 
-            value={localTimeframe}
-            onValueChange={(value) => {
-              if (value) setLocalTimeframe(value);
-            }}
-            className="flex gap-2"
-          >
-            {isTimePeriodsLoading ? (
-              <div className="px-4 py-2">Loading...</div>
-            ) : (
-              timePeriods?.map((period: number) => (
-                <ToggleGroupItem 
-                  key={period}
-                  value={period.toString()}
-                  className={cn(
-                    "px-4 py-2 rounded-md",
-                    localTimeframe === period.toString() ? "bg-blue-100 hover:bg-blue-200" : "hover:bg-gray-100"
-                  )}
+          <div className="w-full">
+            <Label className="mb-2 block">Cohort</Label>
+            <Popover open={cohortsPopoverOpen} onOpenChange={setCohortsPopoverOpen}>
+              <PopoverTrigger asChild>
+                <Button
+                  variant="outline"
+                  role="combobox"
+                  aria-expanded={cohortsPopoverOpen}
+                  className="w-full justify-between"
+                  disabled={isCohortsLoading}
                 >
-                  {getTimeUnitLabel(period.toString())}
-                </ToggleGroupItem>
-              ))
+                  {selectedCohorts.length > 0 
+                    ? `${selectedCohorts.length} selected`
+                    : isCohortsLoading 
+                      ? "Loading..." 
+                      : "Select cohorts"}
+                  <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-full p-0">
+                <Command>
+                  <CommandInput placeholder="Search cohorts..." />
+                  <CommandList>
+                    <CommandEmpty>No cohorts found.</CommandEmpty>
+                    <CommandGroup>
+                      {cohorts?.map((cohort) => (
+                        <CommandItem
+                          key={cohort}
+                          value={cohort}
+                          onSelect={() => {
+                            setSelectedCohorts(prev => 
+                              prev.includes(cohort)
+                                ? prev.filter(c => c !== cohort)
+                                : [...prev, cohort]
+                            );
+                          }}
+                        >
+                          <Check
+                            className={cn(
+                              "mr-2 h-4 w-4",
+                              selectedCohorts.includes(cohort) ? "opacity-100" : "opacity-0"
+                            )}
+                          />
+                          {cohort}
+                        </CommandItem>
+                      ))}
+                    </CommandGroup>
+                  </CommandList>
+                </Command>
+              </PopoverContent>
+            </Popover>
+            
+            {/* Display selected cohorts as badges */}
+            {selectedCohorts.length > 0 && (
+              <div className="flex flex-wrap gap-1 mt-2">
+                {selectedCohorts.map((cohort, index) => (
+                  <Badge 
+                    key={cohort} 
+                    variant="secondary"
+                    className="flex items-center gap-1"
+                    style={{ backgroundColor: `${COHORT_COLORS[index % COHORT_COLORS.length]}20` }}
+                  >
+                    {cohort}
+                    <X 
+                      className="h-3 w-3 cursor-pointer" 
+                      onClick={() => setSelectedCohorts(prev => prev.filter(c => c !== cohort))}
+                    />
+                  </Badge>
+                ))}
+              </div>
             )}
-          </ToggleGroup>
+          </div>
+
+          <div className="flex flex-col gap-2">
+            <Label className="text-sm text-gray-600 text-center mx-auto">Time Period</Label>
+            <ToggleGroup 
+              type="single" 
+              value={localTimeframe}
+              onValueChange={(value) => {
+                if (value) setLocalTimeframe(value);
+              }}
+              className="flex gap-2"
+            >
+              {isTimePeriodsLoading ? (
+                <div className="px-4 py-2">Loading...</div>
+              ) : (
+                timePeriods?.map((period: number) => (
+                  <ToggleGroupItem 
+                    key={period}
+                    value={period.toString()}
+                    className={cn(
+                      "px-4 py-2 rounded-md",
+                      localTimeframe === period.toString() ? "bg-blue-100 hover:bg-blue-200" : "hover:bg-gray-100"
+                    )}
+                  >
+                    {getTimeUnitLabel(period.toString())}
+                  </ToggleGroupItem>
+                ))
+              )}
+            </ToggleGroup>
+          </div>
         </div>
       </div>
 
       {isLoading ? (
         <div className="flex items-center justify-center h-40">
-          <p>Loading intervention data...</p>
+          <p>Loading cohort data...</p>
         </div>
       ) : (
         <>
           <div className="space-y-0.5">
-            <h3 className="text-2xl font-medium" style={{ color: '#002B71' }}>Predicted {useMonthsForTimeframe ? (parseInt(selectedTimeframe) * 12) + ' month' : selectedTimeframe + ' year'} {selectedRiskFactor} Risk</h3>
-            <p>Before vs After {selectedIntervention}</p>
+            <h3 className="text-2xl font-medium" style={{ color: '#002B71' }}>
+              Predicted {useMonthsForTimeframe ? (parseInt(selectedTimeframe) * 12) + ' month' : selectedTimeframe + ' year'} {selectedRiskFactor} Risk
+            </h3>
+            <p>
+              {selectedCohorts.length > 1 
+                ? `Comparing ${selectedCohorts.length} cohorts` 
+                : selectedCohorts.length === 1 
+                  ? `Cohort: ${selectedCohorts[0]}`
+                  : "Select at least one cohort"}
+            </p>
           </div>
           
           <Tabs defaultValue="distribution" onValueChange={setActiveTab} className="w-full">
@@ -235,7 +361,7 @@ export function PopulationRiskDistribution({
             <TabsContent value="summary">
               <InterventionSummaryTable 
                 selectedRiskFactor={selectedRiskFactor}
-                selectedIntervention={selectedIntervention}
+                selectedIntervention={selectedCohorts[0] || ""}
                 selectedTimeframe={localTimeframe}
               />
             </TabsContent>
@@ -260,7 +386,7 @@ export function PopulationRiskDistribution({
                     </div>
                   ) : (
                     <AreaChart
-                      data={sortedDistributionData}
+                      data={distributionData}
                       margin={{
                         top: 20,
                         right: 20,
@@ -306,22 +432,19 @@ export function PopulationRiskDistribution({
                           paddingRight: '10px'
                         }}
                       />
-                      <Area 
-                        type="monotone"
-                        dataKey="pre" 
-                        fill="#757575" 
-                        stroke="#757575"
-                        name="Before Intervention"
-                        fillOpacity={0} // Fill is transparent
-                      />
-                      <Area 
-                        type="monotone"
-                        dataKey="post" 
-                        fill="#1E88E5" 
-                        stroke="#1E88E5"
-                        name="After Intervention"
-                        fillOpacity={0} // Fill is transparent
-                      />
+                      
+                      {/* Render an Area component for each selected cohort */}
+                      {selectedCohorts.map((cohort, index) => (
+                        <Area 
+                          key={cohort}
+                          type="monotone"
+                          dataKey={cohort} 
+                          name={cohort}
+                          fill={COHORT_COLORS[index % COHORT_COLORS.length]}
+                          stroke={COHORT_COLORS[index % COHORT_COLORS.length]}
+                          fillOpacity={0.1}
+                        />
+                      ))}
                     </AreaChart>
                   )}
                 </ChartContainer>
