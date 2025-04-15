@@ -98,28 +98,25 @@ export type Database = {
       }
       phenom_risk_dist: {
         Row: {
+          cohort: string | null
           fact_type: string
-          intervention: string | null
-          post: number | null
-          pre: number | null
           range: string
           time_period: number
+          value: number | null
         }
         Insert: {
+          cohort?: string | null
           fact_type: string
-          intervention?: string | null
-          post?: number | null
-          pre?: number | null
           range: string
           time_period: number
+          value?: number | null
         }
         Update: {
+          cohort?: string | null
           fact_type?: string
-          intervention?: string | null
-          post?: number | null
-          pre?: number | null
           range?: string
           time_period?: number
+          value?: number | null
         }
         Relationships: []
       }
@@ -177,12 +174,30 @@ export type Database = {
         }
         Relationships: []
       }
+      roles: {
+        Row: {
+          id: string
+          role: string
+        }
+        Insert: {
+          id: string
+          role: string
+        }
+        Update: {
+          id?: string
+          role?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      check_admin_role: {
+        Args: { user_uuid: string }
+        Returns: boolean
+      }
     }
     Enums: {
       risk_type: "relative" | "absolute"

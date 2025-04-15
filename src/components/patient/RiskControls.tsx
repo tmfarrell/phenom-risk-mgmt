@@ -1,12 +1,15 @@
+
 import { cn } from '@/lib/utils';
 import { ToggleGroup, ToggleGroupItem } from '../ui/toggle-group';
 import { Label } from '../ui/label';
+import { useAppVersion } from '@/hooks/useAppVersion';
 
 interface RiskControlsProps {
   selectedTimeframe: string;
   selectedRiskType: 'relative' | 'absolute';
   onTimeframeChange: (value: string) => void;
   onRiskTypeChange: (value: 'relative' | 'absolute') => void;
+  timeframes?: number[];
 }
 
 export const RiskControls = ({
@@ -14,7 +17,24 @@ export const RiskControls = ({
   selectedRiskType,
   onTimeframeChange,
   onRiskTypeChange,
+  timeframes = [1, 2]
 }: RiskControlsProps) => {
+  const { appVersion } = useAppVersion();
+  
+  // Determine if we should show time periods in months
+  const useMonthsForTimeframe = appVersion !== 'patient';
+  
+  // Calculate display values for timeframes
+  const getTimeframeDisplay = (timeframe: string) => {
+    const numericTimeframe = parseInt(timeframe);
+    if (useMonthsForTimeframe) {
+      const months = numericTimeframe * 12;
+      return `${months} Month${months !== 1 ? 's' : ''}`;
+    } else {
+      return `${numericTimeframe} Year${numericTimeframe !== 1 ? 's' : ''}`;
+    }
+  };
+  
   return (
     <div className="flex justify-start items-center gap-8 mb-4">
       <div className="flex flex-col gap-2">
@@ -58,24 +78,18 @@ export const RiskControls = ({
           }}
           className="flex gap-2"
         >
-          <ToggleGroupItem 
-            value="1" 
-            className={cn(
-              "px-4 py-2 rounded-md",
-              selectedTimeframe === '1' ? "bg-blue-100 hover:bg-blue-200" : "hover:bg-gray-100"
-            )}
-          >
-            1 Year
-          </ToggleGroupItem>
-          <ToggleGroupItem 
-            value="5"
-            className={cn(
-              "px-4 py-2 rounded-md",
-              selectedTimeframe === '5' ? "bg-blue-100 hover:bg-blue-200" : "hover:bg-gray-100"
-            )}
-          >
-            5 Years
-          </ToggleGroupItem>
+          {timeframes.map((timeframe) => (
+            <ToggleGroupItem 
+              key={timeframe}
+              value={timeframe.toString()} 
+              className={cn(
+                "px-4 py-2 rounded-md",
+                selectedTimeframe === timeframe.toString() ? "bg-blue-100 hover:bg-blue-200" : "hover:bg-gray-100"
+              )}
+            >
+              {getTimeframeDisplay(timeframe.toString())}
+            </ToggleGroupItem>
+          ))}
         </ToggleGroup>
       </div>
     </div>

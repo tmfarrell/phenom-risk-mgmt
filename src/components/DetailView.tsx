@@ -2,11 +2,13 @@
 import { Person } from '../types/population';
 import { Card } from './ui/card';
 import { usePatientData } from '@/hooks/usePatientData';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { PatientHeader } from './patient/PatientHeader';
 import { RiskControls } from './patient/RiskControls';
 import { RiskTable } from './patient/RiskTable';
 import { useRiskSummaries } from '@/hooks/useRiskSummaries';
+import { useQuery } from '@tanstack/react-query';
+import { supabase } from '@/integrations/supabase/client';
 
 interface DetailViewProps {
   person: Person | null;
@@ -15,6 +17,53 @@ interface DetailViewProps {
 export const DetailView = ({ person }: DetailViewProps) => {
   const [selectedRiskType, setSelectedRiskType] = useState<'relative' | 'absolute'>('relative');
   const [selectedTimeframe, setSelectedTimeframe] = useState<string>('1');
+
+  // Fetch available time periods from the database
+  const { data: fetchedTimePeriods, isLoading: isTimePeriodsLoading } = useQuery({
+    queryKey: ['detail-time-periods', person?.patient_id],
+    queryFn: async () => {
+      // Fetch from both tables to ensure we have all possible time periods
+      const [riskDistResponse, patientRiskResponse] = await Promise.all([
+        supabase.from('phenom_risk_dist').select('time_period').order('time_period'),
+        supabase.from('phenom_risk').select('time_period').order('time_period')
+      ]);
+      
+      if (riskDistResponse.error) {
+        console.error('Error fetching risk_dist time periods:', riskDistResponse.error);
+      }
+      
+      if (patientRiskResponse.error) {
+        console.error('Error fetching patient risk time periods:', patientRiskResponse.error);
+      }
+      
+      // Combine time periods from both tables
+      const allTimePeriods = [
+        ...(riskDistResponse.data || []).map(item => item.time_period),
+        ...(patientRiskResponse.data || []).map(item => item.time_period)
+      ];
+      
+      // Get unique values and sort
+      const uniqueTimePeriods = [...new Set(allTimePeriods)].filter(Boolean).sort();
+      console.log('Unique time periods for Detail page:', uniqueTimePeriods);
+      
+      return uniqueTimePeriods.length > 0 ? uniqueTimePeriods : [1, 2]; // Default if empty
+    }
+  });
+  
+  // Get time periods from fetched data or patient data as fallback
+  const timePeriods = fetchedTimePeriods || [1, 2]; 
+  
+  // Update selected timeframe when time periods are loaded
+  useEffect(() => {
+    if (timePeriods && timePeriods.length > 0) {
+      // Check if the current selection exists in the new options
+      const exists = timePeriods.includes(parseInt(selectedTimeframe));
+      if (!exists) {
+        // If not, select the first available option
+        setSelectedTimeframe(timePeriods[0]?.toString() || '1');
+      }
+    }
+  }, [timePeriods]);
 
   if (!person) {
     return (
@@ -62,6 +111,7 @@ export const DetailView = ({ person }: DetailViewProps) => {
           selectedRiskType={selectedRiskType}
           onTimeframeChange={setSelectedTimeframe}
           onRiskTypeChange={setSelectedRiskType}
+          timeframes={isTimePeriodsLoading ? [1, 2] : timePeriods}
         />
 
         {isLoadingSummaries ? (

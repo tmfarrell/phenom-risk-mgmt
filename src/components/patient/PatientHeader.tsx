@@ -1,10 +1,17 @@
+
 import { Person } from '@/types/population';
+import { useAppVersion } from '@/hooks/useAppVersion';
 
 interface PatientHeaderProps {
   person: Person;
 }
 
 export const PatientHeader = ({ person }: PatientHeaderProps) => {
+  const { appVersion } = useAppVersion();
+  
+  // Determine if the MRN field should be labeled as MRN or Subject ID
+  const mrnLabel = appVersion === 'patient' ? 'MRN' : 'Subject ID';
+  
   const ageGenderString = person.age && person.gender 
     ? ` (${person.age}${person.gender?.[0]})`
     : '';
@@ -17,7 +24,7 @@ export const PatientHeader = ({ person }: PatientHeaderProps) => {
       </h2>
       <div className="grid grid-cols-5 gap-4 text-sm">
         <div>
-          <p className="text-gray-500 font-medium mb-0.5">MRN</p>
+          <p className="text-gray-500 font-medium mb-0.5">{mrnLabel}</p>
           <p>{person.mrn || 'N/A'}</p>
         </div>
         <div>
