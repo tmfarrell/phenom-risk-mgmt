@@ -343,13 +343,6 @@ export function PopulationRiskDistribution({
             <h3 className="text-2xl font-medium" style={{ color: '#002B71' }}>
               Predicted {useMonthsForTimeframe ? (parseInt(selectedTimeframe) * 12) + ' month' : selectedTimeframe + ' year'} {selectedRiskFactor} Risk
             </h3>
-            <p>
-              {selectedCohorts.length > 1 
-                ? `Comparing ${selectedCohorts.length} cohorts` 
-                : selectedCohorts.length === 1 
-                  ? `Cohort: ${selectedCohorts[0]}`
-                  : "Select at least one cohort"}
-            </p>
           </div>
           
           <Tabs defaultValue="distribution" onValueChange={setActiveTab} className="w-full">
