@@ -12,6 +12,8 @@ import { Label } from '@/components/ui/label';
 import { calculateAverageRisks } from '@/components/table/utils/riskCalculations';
 import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
 import { PopulationRiskDistribution } from '@/components/population/PopulationRiskDistribution';
+import { useQuery } from '@tanstack/react-query';
+import { supabase } from '@/integrations/supabase/client';
 
 export default function Index() {
   const { data: patientData, isLoading, error } = usePatientDataLatest();
@@ -28,20 +30,58 @@ export default function Index() {
   const [showSelectedOnly, setShowSelectedOnly] = useState(false);
   const [viewMode, setViewMode] = useState<'patient' | 'population'>('patient');
 
-  // Get unique time periods from the data, ensuring we have default values if data isn't loaded yet
-  const timePeriods = patientData 
-    ? [...new Set(patientData.filter(p => p.prediction_timeframe_yrs !== null).map(p => p.prediction_timeframe_yrs))]
-    : [1, 5]; // Default time periods if data is not loaded
+  // Fetch available time periods from the database
+  const { data: fetchedTimePeriods, isLoading: isTimePeriodsLoading } = useQuery({
+    queryKey: ['index-time-periods'],
+    queryFn: async () => {
+      // Fetch from both tables to ensure we have all possible time periods
+      const [riskDistResponse, patientRiskResponse] = await Promise.all([
+        supabase.from('phenom_risk_dist').select('time_period').order('time_period'),
+        supabase.from('phenom_risk').select('time_period').order('time_period')
+      ]);
+      
+      if (riskDistResponse.error) {
+        console.error('Error fetching risk_dist time periods:', riskDistResponse.error);
+      }
+      
+      if (patientRiskResponse.error) {
+        console.error('Error fetching patient risk time periods:', patientRiskResponse.error);
+      }
+      
+      // Combine time periods from both tables
+      const allTimePeriods = [
+        ...(riskDistResponse.data || []).map(item => item.time_period),
+        ...(patientRiskResponse.data || []).map(item => item.time_period)
+      ];
+      
+      // Get unique values and sort
+      const uniqueTimePeriods = [...new Set(allTimePeriods)].filter(Boolean).sort();
+      console.log('Unique time periods for Index page:', uniqueTimePeriods);
+      
+      return uniqueTimePeriods.length > 0 ? uniqueTimePeriods : [1, 2]; // Default if empty
+    }
+  });
   
+  // Get time periods from fetched data or patient data as fallback
+  const timePeriods = fetchedTimePeriods || 
+    (patientData 
+      ? [...new Set(patientData.filter(p => p.prediction_timeframe_yrs !== null).map(p => p.prediction_timeframe_yrs))]
+      : [1, 2]); // Default if nothing is available
+
   // Make sure we have a valid initial timeframe selection
   const [selectedTimeframe, setSelectedTimeframe] = useState<string>('1');
   
   // Set the timeframe once data is loaded
   useEffect(() => {
-    if (patientData && patientData.length > 0 && timePeriods.length > 0) {
-      setSelectedTimeframe(timePeriods[0]?.toString() || '1');
+    if (timePeriods && timePeriods.length > 0) {
+      // Check if the current selection exists in the new options
+      const exists = timePeriods.includes(parseInt(selectedTimeframe));
+      if (!exists) {
+        // If not, select the first available option
+        setSelectedTimeframe(timePeriods[0]?.toString() || '1');
+      }
     }
-  }, [patientData]);
+  }, [timePeriods]);
 
   // Calculate average risks from the full dataset
   const averageRisks = patientData ? calculateAverageRisks(patientData) : {};
@@ -117,7 +157,7 @@ export default function Index() {
                       onTimeframeChange={setSelectedTimeframe}
                       selectedRiskColumns={selectedRiskColumns}
                       onRiskColumnsChange={setSelectedRiskColumns}
-                      timeframes={timePeriods.length > 0 ? timePeriods as number[] : [1, 5]}
+                      timeframes={isTimePeriodsLoading ? [1, 2] : timePeriods as number[]}
                       selectedRiskType={selectedRiskType}
                       onRiskTypeChange={setSelectedRiskType}
                     />

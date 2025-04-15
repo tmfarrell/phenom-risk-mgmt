@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
@@ -35,6 +36,34 @@ export function PopulationRiskDistribution({
   const { appVersion } = useAppVersion();
   
   const useMonthsForTimeframe = appVersion !== 'patient';
+
+  // Fetch available time periods from the database
+  const { data: timePeriods, isLoading: isTimePeriodsLoading } = useQuery({
+    queryKey: ['time-periods'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('phenom_risk_dist')
+        .select('time_period')
+        .order('time_period');
+      
+      if (error) {
+        console.error('Error fetching time periods:', error);
+        throw error;
+      }
+
+      // Get unique time periods
+      const uniqueTimePeriods = [...new Set(data.map(item => item.time_period))].filter(Boolean).sort();
+      console.log('Unique time periods from DB:', uniqueTimePeriods);
+      return uniqueTimePeriods;
+    }
+  });
+
+  // Set local timeframe when available time periods are loaded
+  useEffect(() => {
+    if (timePeriods && timePeriods.length > 0 && (!localTimeframe || !timePeriods.includes(parseInt(localTimeframe)))) {
+      setLocalTimeframe(timePeriods[0].toString());
+    }
+  }, [timePeriods, localTimeframe]);
 
   const sortRiskRanges = (data: any[]) => {
     if (!data || data.length === 0) return [];
@@ -100,7 +129,7 @@ export function PopulationRiskDistribution({
     enabled: !!selectedIntervention
   });
 
-  const isLoading = isInterventionsLoading || isDistributionLoading || !isInterventionLoaded;
+  const isLoading = isInterventionsLoading || isDistributionLoading || !isInterventionLoaded || isTimePeriodsLoading;
 
   const sortedDistributionData = distributionData ? sortRiskRanges(distributionData) : [];
 
@@ -166,24 +195,22 @@ export function PopulationRiskDistribution({
             }}
             className="flex gap-2"
           >
-            <ToggleGroupItem 
-              value="1" 
-              className={cn(
-                "px-4 py-2 rounded-md",
-                localTimeframe === '1' ? "bg-blue-100 hover:bg-blue-200" : "hover:bg-gray-100"
-              )}
-            >
-              {getTimeUnitLabel('1')}
-            </ToggleGroupItem>
-            <ToggleGroupItem 
-              value="5"
-              className={cn(
-                "px-4 py-2 rounded-md",
-                localTimeframe === '5' ? "bg-blue-100 hover:bg-blue-200" : "hover:bg-gray-100"
-              )}
-            >
-              {getTimeUnitLabel('5')}
-            </ToggleGroupItem>
+            {isTimePeriodsLoading ? (
+              <div className="px-4 py-2">Loading...</div>
+            ) : (
+              timePeriods?.map((period: number) => (
+                <ToggleGroupItem 
+                  key={period}
+                  value={period.toString()}
+                  className={cn(
+                    "px-4 py-2 rounded-md",
+                    localTimeframe === period.toString() ? "bg-blue-100 hover:bg-blue-200" : "hover:bg-gray-100"
+                  )}
+                >
+                  {getTimeUnitLabel(period.toString())}
+                </ToggleGroupItem>
+              ))
+            )}
           </ToggleGroup>
         </div>
       </div>
