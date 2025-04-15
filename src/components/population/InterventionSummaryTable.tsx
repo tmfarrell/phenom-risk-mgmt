@@ -6,6 +6,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { RISK_COLUMN_FIELD_MAP } from '../table/tableConstants';
 import { Badge } from '@/components/ui/badge';
+import { Skeleton } from '@/components/ui/skeleton';
 
 type RiskDistribution = {
   range: string;
@@ -19,73 +20,65 @@ interface InterventionSummaryTableProps {
   selectedRiskFactor: string;
   selectedIntervention: string;
   selectedTimeframe: string;
+  selectedCohorts: string[];
 }
+
+// Cost constants - these would be configured somewhere in a real application
+const COST_PER_VISIT = 250; // example cost per hospital visit in dollars
+const COST_MULTIPLIERS: Record<string, number> = {
+  'ED': 1.0,
+  'Hospitalization': 2.5,
+  'Fall': 1.2,
+  'Stroke': 4.0,
+  'MI': 3.8
+};
 
 export function InterventionSummaryTable({
   selectedRiskFactor,
   selectedIntervention,
   selectedTimeframe,
+  selectedCohorts = [],
 }: InterventionSummaryTableProps) {
-  const [localIntervention, setLocalIntervention] = useState<string>(selectedIntervention || '');
+  const generalPopulationCohort = "General Population";
+  const isGeneralPopulationSelected = selectedCohorts.some(
+    cohort => cohort.toLowerCase() === generalPopulationCohort.toLowerCase()
+  );
 
-  useEffect(() => {
-    if (selectedIntervention && selectedIntervention !== localIntervention) {
-      setLocalIntervention(selectedIntervention);
-    }
-  }, [selectedIntervention]);
-
-  // Fetch available cohorts
-  const { data: cohorts, isLoading: isCohortsLoading } = useQuery({
-    queryKey: ['summary-cohorts'],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from('phenom_risk_dist')
-        .select('cohort')
-        .not('cohort', 'is', null);
-      
-      if (error) {
-        console.error('Error fetching cohorts:', error);
-        throw error;
-      }
-
-      const uniqueCohorts = [...new Set(data.map(item => item.cohort))].filter(Boolean).sort();
-      return uniqueCohorts;
-    }
-  });
-
-  // Set the first available cohort if none is selected
-  useEffect(() => {
-    if (cohorts && cohorts.length > 0 && !localIntervention) {
-      setLocalIntervention(cohorts[0]);
-    }
-  }, [cohorts, localIntervention]);
-
-  // Fetch distribution data for the intervention
+  // Fetch distribution data for all selected cohorts
   const { data: distributionData, isLoading: isDistributionLoading } = useQuery({
-    queryKey: ['intervention-summary', selectedRiskFactor, localIntervention, selectedTimeframe],
+    queryKey: ['intervention-summary-multi', selectedRiskFactor, selectedCohorts, selectedTimeframe],
     queryFn: async () => {
       const dbRiskFactor = RISK_COLUMN_FIELD_MAP[selectedRiskFactor];
       
-      const { data, error } = await supabase
-        .from('phenom_risk_dist')
-        .select('*')
-        .eq('time_period', parseInt(selectedTimeframe))
-        .eq('fact_type', dbRiskFactor)
-        .eq('cohort', localIntervention);
+      // Get data for all selected cohorts
+      const promises = selectedCohorts.map(async (cohort) => {
+        const { data, error } = await supabase
+          .from('phenom_risk_dist')
+          .select('*')
+          .eq('time_period', parseInt(selectedTimeframe))
+          .eq('fact_type', dbRiskFactor)
+          .eq('cohort', cohort);
+        
+        if (error) {
+          console.error(`Error fetching risk distribution for ${cohort}:`, error);
+          throw error;
+        }
+        
+        return {
+          cohort,
+          data: data as RiskDistribution[]
+        };
+      });
       
-      if (error) {
-        console.error('Error fetching risk distribution:', error);
-        throw error;
-      }
-      
-      return data as RiskDistribution[];
+      const results = await Promise.all(promises);
+      return results;
     },
-    enabled: !!localIntervention && !!selectedTimeframe
+    enabled: selectedCohorts.length > 0 && !!selectedTimeframe
   });
 
-  // Calculate stats from distribution data
+  // Calculate stats from distribution data for a specific cohort
   const calculateStats = (data: RiskDistribution[] | undefined) => {
-    if (!data || data.length === 0) return { mean: 0, median: 0, standardDeviation: 0 };
+    if (!data || data.length === 0) return { mean: 0, median: 0, standardDeviation: 0, estimatedVisits: 0, estimatedCost: 0 };
     
     // Assuming each range represents a bucket with values at the middle of the range
     const weightedValues = data.map(item => {
@@ -130,64 +123,191 @@ export function InterventionSummaryTable({
     const variance = totalPatients > 0 ? squaredDiffs / totalPatients : 0;
     const standardDeviation = Math.sqrt(variance);
     
+    // Estimate number of visits based on risk
+    const estimatedVisits = totalPatients * (mean / 100);
+    
+    // Estimate cost based on visits and risk type
+    const costMultiplier = COST_MULTIPLIERS[selectedRiskFactor] || 1.0;
+    const estimatedCost = estimatedVisits * COST_PER_VISIT * costMultiplier;
+    
     return {
       mean: parseFloat(mean.toFixed(2)),
       median: parseFloat(median.toFixed(2)),
-      standardDeviation: parseFloat(standardDeviation.toFixed(2))
+      standardDeviation: parseFloat(standardDeviation.toFixed(2)),
+      estimatedVisits: Math.round(estimatedVisits),
+      estimatedCost: Math.round(estimatedCost)
     };
   };
 
-  const stats = calculateStats(distributionData);
-  const isLoading = isCohortsLoading || isDistributionLoading;
+  // Find general population stats for comparison
+  const getGeneralPopulationStats = () => {
+    if (!distributionData) return null;
+    
+    const generalPopData = distributionData.find(
+      item => item.cohort.toLowerCase() === generalPopulationCohort.toLowerCase()
+    );
+    
+    if (!generalPopData) return null;
+    
+    return calculateStats(generalPopData.data);
+  };
+
+  const generalPopStats = getGeneralPopulationStats();
+  const isLoading = isDistributionLoading || !distributionData;
 
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
-        <h3 className="text-lg font-medium">Risk Summary</h3>
-        <div className="w-64">
-          <Select
-            value={localIntervention}
-            onValueChange={setLocalIntervention}
-            disabled={isCohortsLoading}
-          >
-            <SelectTrigger>
-              <SelectValue placeholder="Select cohort" />
-            </SelectTrigger>
-            <SelectContent>
-              {cohorts?.map((cohort) => (
-                <SelectItem key={cohort} value={cohort}>
-                  {cohort}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
+        <h3 className="text-lg font-medium">Cohort Risk Summary</h3>
       </div>
 
       {isLoading ? (
-        <div className="flex items-center justify-center h-32">
-          <p>Loading...</p>
+        <div className="space-y-4">
+          <Skeleton className="h-48 w-full" />
         </div>
       ) : (
-        <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
-          <StatCard
-            title="Mean Risk"
-            value={`${stats.mean}%`}
-            description="Average risk across population"
-          />
-          <StatCard
-            title="Median Risk"
-            value={`${stats.median}%`}
-            description="Middle value in risk distribution"
-          />
-          <StatCard
-            title="Risk Spread"
-            value={`±${stats.standardDeviation}%`}
-            description="Standard deviation of risk"
-          />
-        </div>
+        <>
+          <div className="overflow-x-auto">
+            <Table className="w-full">
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Metric</TableHead>
+                  {distributionData?.map(({ cohort }) => (
+                    <TableHead key={cohort}>
+                      {cohort}
+                    </TableHead>
+                  ))}
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                <TableRow>
+                  <TableCell className="font-medium">Mean Risk</TableCell>
+                  {distributionData?.map(({ cohort, data }) => {
+                    const stats = calculateStats(data);
+                    const isGeneralPop = cohort.toLowerCase() === generalPopulationCohort.toLowerCase();
+                    
+                    return (
+                      <TableCell key={`${cohort}-mean`}>
+                        <div className="flex items-center gap-2">
+                          <span className="font-semibold">{stats.mean}%</span>
+                          {!isGeneralPop && generalPopStats && (
+                            <ComparisonBadge 
+                              value={stats.mean} 
+                              baseline={generalPopStats.mean}
+                              higherIsBetter={false}
+                            />
+                          )}
+                        </div>
+                      </TableCell>
+                    );
+                  })}
+                </TableRow>
+                <TableRow>
+                  <TableCell className="font-medium">Median Risk</TableCell>
+                  {distributionData?.map(({ cohort, data }) => {
+                    const stats = calculateStats(data);
+                    const isGeneralPop = cohort.toLowerCase() === generalPopulationCohort.toLowerCase();
+                    
+                    return (
+                      <TableCell key={`${cohort}-median`}>
+                        <div className="flex items-center gap-2">
+                          <span className="font-semibold">{stats.median}%</span>
+                          {!isGeneralPop && generalPopStats && (
+                            <ComparisonBadge 
+                              value={stats.median} 
+                              baseline={generalPopStats.median}
+                              higherIsBetter={false}
+                            />
+                          )}
+                        </div>
+                      </TableCell>
+                    );
+                  })}
+                </TableRow>
+                <TableRow>
+                  <TableCell className="font-medium">Estimated Visits</TableCell>
+                  {distributionData?.map(({ cohort, data }) => {
+                    const stats = calculateStats(data);
+                    const isGeneralPop = cohort.toLowerCase() === generalPopulationCohort.toLowerCase();
+                    
+                    return (
+                      <TableCell key={`${cohort}-visits`}>
+                        <div className="flex items-center gap-2">
+                          <span className="font-semibold">{stats.estimatedVisits.toLocaleString()}</span>
+                          {!isGeneralPop && generalPopStats && (
+                            <ComparisonBadge 
+                              value={stats.estimatedVisits} 
+                              baseline={generalPopStats.estimatedVisits}
+                              higherIsBetter={false}
+                            />
+                          )}
+                        </div>
+                      </TableCell>
+                    );
+                  })}
+                </TableRow>
+                <TableRow>
+                  <TableCell className="font-medium">Estimated Cost</TableCell>
+                  {distributionData?.map(({ cohort, data }) => {
+                    const stats = calculateStats(data);
+                    const isGeneralPop = cohort.toLowerCase() === generalPopulationCohort.toLowerCase();
+                    
+                    return (
+                      <TableCell key={`${cohort}-cost`}>
+                        <div className="flex items-center gap-2">
+                          <span className="font-semibold">${stats.estimatedCost.toLocaleString()}</span>
+                          {!isGeneralPop && generalPopStats && (
+                            <ComparisonBadge 
+                              value={stats.estimatedCost} 
+                              baseline={generalPopStats.estimatedCost}
+                              higherIsBetter={false}
+                            />
+                          )}
+                        </div>
+                      </TableCell>
+                    );
+                  })}
+                </TableRow>
+              </TableBody>
+            </Table>
+          </div>
+          
+          <div className="text-sm text-muted-foreground">
+            <p>* Cost estimates are based on average values and may not reflect actual costs.</p>
+          </div>
+        </>
       )}
     </div>
+  );
+}
+
+// Helper component to display comparison with general population
+function ComparisonBadge({ 
+  value, 
+  baseline, 
+  higherIsBetter = false 
+}: { 
+  value: number, 
+  baseline: number, 
+  higherIsBetter?: boolean 
+}) {
+  if (!baseline) return null;
+  
+  const percentChange = ((value - baseline) / baseline) * 100;
+  const absoluteChange = Math.abs(percentChange);
+  
+  if (Math.abs(percentChange) < 1) return null;
+  
+  const isPositive = percentChange > 0;
+  const isGood = (higherIsBetter && isPositive) || (!higherIsBetter && !isPositive);
+  
+  return (
+    <Badge 
+      variant="outline" 
+      className={`text-xs ${isGood ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}
+    >
+      {isPositive ? '+' : '-'}{absoluteChange.toFixed(1)}%
+    </Badge>
   );
 }
 

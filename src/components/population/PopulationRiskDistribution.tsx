@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
@@ -53,7 +52,6 @@ export function PopulationRiskDistribution({
   
   const useMonthsForTimeframe = appVersion !== 'patient';
 
-  // Fetch available time periods from the database
   const { data: timePeriods, isLoading: isTimePeriodsLoading } = useQuery({
     queryKey: ['time-periods'],
     queryFn: async () => {
@@ -67,14 +65,12 @@ export function PopulationRiskDistribution({
         throw error;
       }
 
-      // Get unique time periods
       const uniqueTimePeriods = [...new Set(data.map(item => item.time_period))].filter(Boolean).sort();
       console.log('Unique time periods from DB:', uniqueTimePeriods);
       return uniqueTimePeriods;
     }
   });
 
-  // Set local timeframe when available time periods are loaded
   useEffect(() => {
     if (timePeriods && timePeriods.length > 0 && (!localTimeframe || !timePeriods.includes(parseInt(localTimeframe)))) {
       setLocalTimeframe(timePeriods[0].toString());
@@ -91,7 +87,6 @@ export function PopulationRiskDistribution({
     });
   };
 
-  // Fetch available cohorts from the database
   const { data: cohorts, isLoading: isCohortsLoading } = useQuery({
     queryKey: ['cohorts'],
     queryFn: async () => {
@@ -110,38 +105,29 @@ export function PopulationRiskDistribution({
     }
   });
 
-  // Default selection logic when cohorts are loaded
   useEffect(() => {
     if (cohorts && cohorts.length > 0 && selectedCohorts.length === 0) {
-      // Find "General Population" in the cohorts
       const generalPopulationIndex = cohorts.findIndex(cohort => 
         cohort.toLowerCase() === "general population");
       
       if (generalPopulationIndex !== -1) {
-        // If "General Population" exists, select it and the next cohort (or first if it's the last one)
         const secondCohortIndex = generalPopulationIndex === cohorts.length - 1 ? 0 : generalPopulationIndex + 1;
-        // Make sure we don't select the same cohort twice
         if (generalPopulationIndex !== secondCohortIndex) {
           setSelectedCohorts([cohorts[generalPopulationIndex], cohorts[secondCohortIndex]]);
         } else if (cohorts.length > 1) {
-          // If we somehow got the same cohort, find another one
           const altIndex = (generalPopulationIndex + 1) % cohorts.length;
           setSelectedCohorts([cohorts[generalPopulationIndex], cohorts[altIndex]]);
         } else {
-          // If there's only one cohort, just select it
           setSelectedCohorts([cohorts[generalPopulationIndex]]);
         }
       } else if (cohorts.length >= 2) {
-        // If "General Population" doesn't exist but we have at least 2 cohorts, select the first two
         setSelectedCohorts([cohorts[0], cohorts[1]]);
       } else if (cohorts.length === 1) {
-        // If there's only one cohort, select it
         setSelectedCohorts([cohorts[0]]);
       }
     }
   }, [cohorts, selectedCohorts.length]);
 
-  // Ensure "General Population" is always selected if it exists
   useEffect(() => {
     if (cohorts && cohorts.length > 0 && selectedCohorts.length > 0) {
       const generalPopulationCohort = cohorts.find(cohort => 
@@ -167,7 +153,6 @@ export function PopulationRiskDistribution({
 
       if (!selectedCohorts.length) return [];
 
-      // Fetch data for each selected cohort
       const promises = selectedCohorts.map(async (cohort) => {
         const { data, error } = await supabase
           .from('phenom_risk_dist')
@@ -186,11 +171,9 @@ export function PopulationRiskDistribution({
 
       const results = await Promise.all(promises);
       
-      // Combine and process all cohort data
       const allRanges = new Set<string>();
       const cohortData: Record<string, Record<string, number>> = {};
       
-      // First pass: collect all risk ranges and organize by cohort
       results.forEach((cohortResults, index) => {
         const cohortName = selectedCohorts[index];
         cohortData[cohortName] = {};
@@ -201,7 +184,6 @@ export function PopulationRiskDistribution({
         });
       });
       
-      // Second pass: create combined dataset with all ranges for all cohorts
       const combinedData = Array.from(allRanges).map(range => {
         const entry: any = { range };
         
@@ -230,7 +212,6 @@ export function PopulationRiskDistribution({
     }
   };
 
-  // Generate colors for each cohort
   const COHORT_COLORS = [
     '#1E88E5', // Blue
     '#F44336', // Red
@@ -291,7 +272,6 @@ export function PopulationRiskDistribution({
                     <CommandEmpty>No cohorts found.</CommandEmpty>
                     <CommandGroup>
                       {cohorts?.map((cohort) => {
-                        // Check if this is the General Population cohort
                         const isGeneralPopulation = cohort.toLowerCase() === "general population";
                         
                         return (
@@ -299,9 +279,8 @@ export function PopulationRiskDistribution({
                             key={cohort}
                             value={cohort}
                             onSelect={() => {
-                              // If it's General Population and trying to deselect, prevent removal
                               if (isGeneralPopulation && selectedCohorts.includes(cohort)) {
-                                return; // Don't allow deselection of General Population
+                                return;
                               }
                               
                               setSelectedCohorts(prev => 
@@ -331,7 +310,6 @@ export function PopulationRiskDistribution({
               </PopoverContent>
             </Popover>
             
-            {/* Display selected cohorts as badges */}
             {selectedCohorts.length > 0 && (
               <div className="flex flex-wrap gap-1 mt-2">
                 {selectedCohorts.map((cohort, index) => {
@@ -412,6 +390,7 @@ export function PopulationRiskDistribution({
                 selectedRiskFactor={selectedRiskFactor}
                 selectedIntervention={selectedCohorts[0] || ""}
                 selectedTimeframe={localTimeframe}
+                selectedCohorts={selectedCohorts}
               />
             </TabsContent>
             
@@ -482,7 +461,6 @@ export function PopulationRiskDistribution({
                         }}
                       />
                       
-                      {/* Render an Area component for each selected cohort */}
                       {selectedCohorts.map((cohort, index) => (
                         <Area 
                           key={cohort}
