@@ -1,3 +1,4 @@
+
 import { Search, Check, HelpCircle } from 'lucide-react';
 import { Input } from '../ui/input';
 import {
@@ -25,6 +26,7 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from '../ui/tooltip';
+import { useAppVersion } from '@/hooks/useAppVersion';
 
 interface TableControlsProps {
   searchQuery: string;
@@ -50,6 +52,10 @@ export const TableControls = ({
   onRiskTypeChange,
 }: TableControlsProps) => {
   const [open, setOpen] = useState(false);
+  const { appVersion } = useAppVersion();
+  
+  // Determine if we should show time periods in months or years
+  const useMonthsForTimeframe = appVersion !== 'patient';
   
   // Ensure we always have an array to work with
   const currentSelectedColumns = Array.isArray(selectedRiskColumns) ? selectedRiskColumns : [];
@@ -109,18 +115,24 @@ export const TableControls = ({
             }}
             className="flex gap-2"
           >
-            {timeframes.map((timeframe) => (
-              <ToggleGroupItem 
-                key={timeframe}
-                value={timeframe.toString()}
-                className={cn(
-                  "px-4 py-2 rounded-md whitespace-nowrap",
-                  selectedTimeframe === timeframe.toString() ? "bg-blue-100 hover:bg-blue-200" : "hover:bg-gray-100"
-                )}
-              >
-                {timeframe} year{timeframe > 1 ? 's' : ''}
-              </ToggleGroupItem>
-            ))}
+            {timeframes.map((timeframe) => {
+              // Convert years to months if necessary
+              const displayTimeframe = useMonthsForTimeframe ? timeframe * 12 : timeframe;
+              const timeUnit = useMonthsForTimeframe ? "month" : "year";
+              
+              return (
+                <ToggleGroupItem 
+                  key={timeframe}
+                  value={timeframe.toString()}
+                  className={cn(
+                    "px-4 py-2 rounded-md whitespace-nowrap",
+                    selectedTimeframe === timeframe.toString() ? "bg-blue-100 hover:bg-blue-200" : "hover:bg-gray-100"
+                  )}
+                >
+                  {displayTimeframe} {timeUnit}{displayTimeframe > 1 ? 's' : ''}
+                </ToggleGroupItem>
+              );
+            })}
           </ToggleGroup>
         </div>
 
