@@ -25,7 +25,7 @@ interface InterventionSummaryTableProps {
 }
 
 // Default cost constant
-const DEFAULT_COST_PER_EVENT = 250; // default cost per event in dollars
+const DEFAULT_COST_PER_EVENT = 2500; // default cost per event in dollars
 
 export function InterventionSummaryTable({
   selectedRiskFactor,
@@ -164,7 +164,6 @@ export function InterventionSummaryTable({
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
-        <h3 className="text-lg font-medium">Cohort Risk Summary</h3>
         <div className="flex items-center space-x-2">
           <span className="text-sm text-muted-foreground">Cost per event ($):</span>
           <Input
