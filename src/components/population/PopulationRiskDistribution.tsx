@@ -228,7 +228,7 @@ export function PopulationRiskDistribution({
       <div className="flex justify-end items-center space-x-8">
         <div className="grid grid-cols-3 gap-8 flex-1 mr-8">
           <div className="flex flex-col gap-2">
-            <Label className="mb-2 block">Risk</Label>
+            <Label className="mb-2 block">Outcome</Label>
             <Select
               value={selectedRiskFactor}
               onValueChange={setSelectedRiskFactor}

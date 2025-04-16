@@ -137,7 +137,7 @@ export const TableControls = ({
         </div>
 
         <div className="flex flex-col gap-2">
-          <Label htmlFor="risk-factors" className="text-center text-muted-foreground mx-auto">Risks</Label>
+          <Label htmlFor="risk-factors" className="text-center text-muted-foreground mx-auto">Outcomes</Label>
           <Popover open={open} onOpenChange={setOpen}>
             <PopoverTrigger asChild>
               <Button
@@ -147,7 +147,7 @@ export const TableControls = ({
                 className="w-48 justify-between"
                 id="risk-factors"
               >
-                Select risks
+                Select outcomes
                 <Badge variant="secondary" className="ml-2">
                   {currentSelectedColumns.length}
                 </Badge>
@@ -155,7 +155,7 @@ export const TableControls = ({
             </PopoverTrigger>
             <PopoverContent className="w-48 p-0">
               <Command>
-                <CommandInput placeholder="Search conditions..." />
+                <CommandInput placeholder="Search" />
                 <CommandList>
                   <CommandEmpty>No column found.</CommandEmpty>
                   <CommandGroup>
