@@ -12,9 +12,9 @@ export const RISK_COLUMNS = [
 export const DISABLED_RISK_COLUMNS = [
   'CKD',
   'COPD/Asthma',
-  'Death',
   'Diabetes',
-  'Medication adherence'
+  'Medication adherence', 
+  'Mortality'
 ] as const;
 
 // Map display names to database field names
