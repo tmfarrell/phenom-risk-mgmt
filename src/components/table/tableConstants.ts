@@ -7,14 +7,14 @@ export const RISK_COLUMNS = [
   'Fall',
   'Stroke',
   'MI',
+  'Mortality',
 ] as const;
 
 export const DISABLED_RISK_COLUMNS = [
   'CKD',
   'COPD/Asthma',
   'Diabetes',
-  'Medication adherence', 
-  'Mortality'
+  'Medication adherence'
 ] as const;
 
 // Map display names to database field names
@@ -23,7 +23,8 @@ export const RISK_COLUMN_FIELD_MAP: Record<string, string> = {
   'Hospitalization': 'HOSPITALIZATION',
   'Fall': 'FALL',
   'Stroke': 'STROKE',
-  'MI': 'INFARCTION'
+  'MI': 'INFARCTION',
+  'Mortality': 'DEATH'
 };
 
 export const getFieldName = (displayName: string): string => {
