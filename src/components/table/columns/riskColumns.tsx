@@ -49,14 +49,15 @@ export const getRiskColumns = (
       );
     },
     cell: ({ row }) => {
-      const value = Math.abs(row.original[column as keyof Person] as number);
+      const value = row.original[column as keyof Person];
       const riskType = row.original.risk_type;
       const changeField = `${column}_change` as keyof Person;
       const change = row.original[changeField] as number | null | undefined;
       const changeSince = row.original.change_since;
 
-      if (value === undefined || value === null || isNaN(value)) {
-        return 'N/A';
+      // If value is null or undefined, return an empty string
+      if (value === undefined || value === null || isNaN(value as number)) {
+        return '';
       }
 
       const formatChangeValue = (change: number | null | undefined, riskType: string) => {
@@ -107,8 +108,8 @@ export const getRiskColumns = (
         return (
           <div className="flex items-center justify-center w-full">
             <div className="flex items-center min-w-[5rem]">
-              <div className={`${value > 50 ? 'bg-red-100' : ''} w-16 text-center py-1 rounded`}>
-                <span>{value.toFixed(1)}%</span>
+              <div className={`${Number(value) > 50 ? 'bg-red-100' : ''} w-16 text-center py-1 rounded`}>
+                <span>{Number(value).toFixed(1)}%</span>
               </div>
               <div className="w-4 ml-2">
                 {renderChangeArrow(change, 0.25)}
@@ -120,8 +121,8 @@ export const getRiskColumns = (
         return (
           <div className="flex items-center justify-center w-full">
             <div className="flex items-center min-w-[5rem]">
-              <div className={`${isHighRisk(value) ? 'bg-red-100' : ''} w-16 text-center py-1 rounded`}>
-                <span>{value.toFixed(2)}<span>×</span></span>
+              <div className={`${isHighRisk(Number(value)) ? 'bg-red-100' : ''} w-16 text-center py-1 rounded`}>
+                <span>{Number(value).toFixed(2)}<span>×</span></span>
               </div>
               <div className="w-4 ml-2">
                 {renderChangeArrow(change, 0.1)}
