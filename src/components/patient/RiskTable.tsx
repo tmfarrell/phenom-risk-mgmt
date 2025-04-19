@@ -1,3 +1,4 @@
+
 import { Person } from '@/types/population';
 import { Table, TableBody, TableHead, TableHeader, TableRow } from '../ui/table';
 import { usePatientData } from '@/hooks/usePatientData';
@@ -12,7 +13,7 @@ interface RiskTableProps {
 }
 
 export const RiskTable = ({ currentRisks, selectedRiskType, allRisks, riskSummaries = [] }: RiskTableProps) => {
-  const riskFactors = ['ED', 'Hospitalization', 'Fall', 'Stroke', 'MI'];
+  const riskFactors = ['ED', 'Hospitalization', 'Fall', 'Stroke', 'MI', 'Mortality'];
   const { data: patientData } = usePatientData();
 
   // Set y-axis domain based on risk type
@@ -45,7 +46,8 @@ export const RiskTable = ({ currentRisks, selectedRiskType, allRisks, riskSummar
     'Hospitalization': 'HOSPITALIZATION',
     'Fall': 'FALL',
     'Stroke': 'STROKE',
-    'MI': 'INFARCTION'
+    'MI': 'INFARCTION',
+    'Mortality': 'DEATH'
   };
 
   // Get summary for a specific risk factor

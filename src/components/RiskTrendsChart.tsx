@@ -1,7 +1,9 @@
+
 import { Person } from '@/types/population';
 import { ChartContainer } from '@/components/ui/chart';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend } from 'recharts';
 import { format } from 'date-fns';
+import { formatRiskValue } from '@/components/patient/utils/riskUtils';
 
 interface RiskTrendsChartProps {
   data: Person[];
@@ -66,9 +68,9 @@ export function RiskTrendsChart({ data, selectedRiskType }: RiskTrendsChartProps
           <YAxis />
           <Tooltip
             labelFormatter={(date) => format(new Date(date), 'MM/dd/yyyy')}
-            formatter={(value: number) => [
-              selectedRiskType === 'absolute' ? `${Math.round(value)}%` : value.toFixed(2),
-              ''
+            formatter={(value: number, name: string) => [
+              selectedRiskType === 'absolute' ? `${value.toFixed(1)}%` : value.toFixed(2),
+              RISK_LABELS[name as keyof typeof RISK_LABELS] || name
             ]}
           />
           <Legend />

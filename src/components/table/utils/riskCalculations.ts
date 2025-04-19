@@ -1,3 +1,4 @@
+
 import { Person } from '@/types/population';
 
 type AverageRisks = {
@@ -18,7 +19,7 @@ export const calculateAverageRisks = (data: Person[]): AverageRisks => {
   }, {} as { [key: string]: Person[] });
 
   // Calculate averages for each timeframe and risk factor
-  const riskFactors = ['ED', 'Hospitalization', 'Fall', 'Stroke', 'MI', 'CKD', 'Mental_Health'];
+  const riskFactors = ['ED', 'Hospitalization', 'Fall', 'Stroke', 'MI', 'CKD', 'Mental_Health', 'Mortality'];
   
   const averages: AverageRisks = {};
   
@@ -29,8 +30,10 @@ export const calculateAverageRisks = (data: Person[]): AverageRisks => {
       // Filter to only include absolute risks and non-null values
       const absoluteRisks = patients.filter(person => 
         person.risk_type === 'absolute' && 
-        person[factor as keyof Person] !== null
-      ).map(person => person[factor as keyof Person] as number);
+        person[factor as keyof Person] !== null &&
+        person[factor as keyof Person] !== undefined &&
+        !isNaN(Number(person[factor as keyof Person]))
+      ).map(person => Number(person[factor as keyof Person]));
 
       if (absoluteRisks.length === 0) {
         averages[timeframe][factor] = 'N/A';

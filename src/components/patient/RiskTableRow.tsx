@@ -45,6 +45,10 @@ const riskDetails: Record<string, { fullName: string; description: string }> = {
   'MI': {
     fullName: 'Myocardial Infarction',
     description: 'Risk of first myocardial infarction'
+  },
+  'Mortality': {
+    fullName: 'Mortality',
+    description: 'Risk of death within the prediction timeframe'
   }
 };
 
@@ -58,7 +62,10 @@ export const RiskTableRow = ({
   summary
 }: RiskTableRowProps) => {
   const [isExpanded, setIsExpanded] = useState(false);
-  const details = riskDetails[risk];
+  const details = riskDetails[risk] || { 
+    fullName: risk, 
+    description: `Risk of ${risk.toLowerCase()}`
+  };
   
   // Check if all values for this risk factor are null
   const hasValidRiskData = allRisks.some(r => getRiskValue(r, risk) !== null);
