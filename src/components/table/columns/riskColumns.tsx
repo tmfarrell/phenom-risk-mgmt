@@ -17,7 +17,11 @@ export const getRiskColumns = (
 ): ColumnDef<Person>[] => 
   visibleRiskColumns.map((column): ColumnDef<Person> => ({
     accessorKey: column,
-    accessorFn: (row) => row[column as keyof Person],
+    accessorFn: (row) => {
+      // Make sure to correctly access the column value, especially for Mortality which maps to DEATH
+      const dbField = getFieldName(column);
+      return row[column as keyof Person];
+    },
     header: ({ table, column: tableColumn }) => {      
       const isSorted = tableColumn.getIsSorted();
       return (
@@ -51,7 +55,7 @@ export const getRiskColumns = (
       const change = row.original[changeField] as number | null | undefined;
       const changeSince = row.original.change_since;
 
-      if (value === undefined || value === null) {
+      if (value === undefined || value === null || isNaN(value)) {
         return 'N/A';
       }
 

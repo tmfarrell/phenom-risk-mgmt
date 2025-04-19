@@ -1,3 +1,4 @@
+
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { Person } from '@/types/population';
@@ -44,11 +45,13 @@ export const usePatientData = () => {
             Fall: null,
             Stroke: null,
             MI: null,
+            Mortality: null,
             ED_change: null,
             Hospitalization_change: null,
             Fall_change: null,
             Stroke_change: null,
             MI_change: null,
+            Mortality_change: null,
             recorded_date: null,
             prediction_timeframe_yrs: null,
             risk_type: null,
@@ -66,11 +69,13 @@ export const usePatientData = () => {
             Fall: risk.FALL || null,
             Stroke: risk.STROKE || null,
             MI: risk.INFARCTION || null,
+            Mortality: risk.DEATH !== undefined ? risk.DEATH : null,
             ED_change: risk.EMERGENCY_VISIT_change || null,
             Hospitalization_change: risk.HOSPITALIZATION_change || null,
             Fall_change: risk.FALL_change || null,
             Stroke_change: risk.STROKE_change || null,
             MI_change: risk.INFARCTION_change || null,
+            Mortality_change: risk.DEATH_change !== undefined ? risk.DEATH_change : null,
             recorded_date: risk.calculated_date,
             prediction_timeframe_yrs: risk.time_period,
             risk_type: (risk.risk_type as 'relative' | 'absolute' | null) || null,
