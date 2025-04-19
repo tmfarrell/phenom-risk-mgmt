@@ -1,6 +1,8 @@
+
 import { Line, LineChart, ResponsiveContainer, Tooltip, YAxis, ReferenceLine } from 'recharts';
 import { format, parseISO } from 'date-fns';
 import { toZonedTime } from 'date-fns-tz';
+import { formatRiskValue } from './utils/riskUtils';
 
 interface DataPoint {
   value: number;
@@ -70,7 +72,7 @@ export const SparkLine = ({
                 return (
                   <div className="bg-white border border-gray-200 shadow-sm rounded p-2 text-xs">
                     <div>value: {riskType === 'absolute' ? 
-                      `${Math.round(dataPoint.value)}%` : 
+                      `${dataPoint.value.toFixed(1)}%` : 
                       dataPoint.value.toFixed(2)
                     }</div>
                     {dataPoint.date && (
