@@ -128,17 +128,6 @@ export function PopulationRiskDistribution({
     }
   }, [cohorts, selectedCohorts.length]);
 
-  useEffect(() => {
-    if (cohorts && cohorts.length > 0 && selectedCohorts.length > 0) {
-      const generalPopulationCohort = cohorts.find(cohort => 
-        cohort.toLowerCase() === "general population");
-      
-      if (generalPopulationCohort && !selectedCohorts.includes(generalPopulationCohort)) {
-        setSelectedCohorts(prev => [generalPopulationCohort, ...prev]);
-      }
-    }
-  }, [cohorts, selectedCohorts]);
-
   const { data: distributionData, isLoading: isDistributionLoading } = useQuery({
     queryKey: ['risk-distribution', localTimeframe, selectedRiskType, selectedRiskFactor, selectedCohorts],
     queryFn: async () => {
@@ -303,8 +292,6 @@ export function PopulationRiskDistribution({
             {selectedCohorts.length > 0 && (
               <div className="flex flex-wrap gap-1 mt-2">
                 {selectedCohorts.map((cohort, index) => {
-                  const isGeneralPopulation = cohort.toLowerCase() === "general population";
-                  
                   return (
                     <Badge 
                       key={cohort} 
