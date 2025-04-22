@@ -272,24 +272,17 @@ export function PopulationRiskDistribution({
                     <CommandEmpty>No cohorts found.</CommandEmpty>
                     <CommandGroup>
                       {cohorts?.map((cohort) => {
-                        const isGeneralPopulation = cohort.toLowerCase() === "general population";
-                        
                         return (
                           <CommandItem
                             key={cohort}
                             value={cohort}
                             onSelect={() => {
-                              if (isGeneralPopulation && selectedCohorts.includes(cohort)) {
-                                return;
-                              }
-                              
-                              setSelectedCohorts(prev => 
+                              setSelectedCohorts(prev =>
                                 prev.includes(cohort)
                                   ? prev.filter(c => c !== cohort)
                                   : [...prev, cohort]
                               );
                             }}
-                            disabled={isGeneralPopulation && selectedCohorts.includes(cohort)}
                           >
                             <Check
                               className={cn(
@@ -298,9 +291,6 @@ export function PopulationRiskDistribution({
                               )}
                             />
                             {cohort}
-                            {isGeneralPopulation && selectedCohorts.includes(cohort) && (
-                              <span className="ml-auto text-xs text-muted-foreground">(always selected)</span>
-                            )}
                           </CommandItem>
                         );
                       })}
@@ -323,12 +313,10 @@ export function PopulationRiskDistribution({
                       style={{ backgroundColor: `${COHORT_COLORS[index % COHORT_COLORS.length]}20` }}
                     >
                       {cohort}
-                      {!isGeneralPopulation && (
-                        <X 
-                          className="h-3 w-3 cursor-pointer" 
-                          onClick={() => setSelectedCohorts(prev => prev.filter(c => c !== cohort))}
-                        />
-                      )}
+                      <X 
+                        className="h-3 w-3 cursor-pointer" 
+                        onClick={() => setSelectedCohorts(prev => prev.filter(c => c !== cohort))}
+                      />
                     </Badge>
                   );
                 })}
