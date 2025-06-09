@@ -21,6 +21,7 @@ export interface Person {
   Fall_change: number | null;
   Stroke_change: number | null;
   MI_change: number | null;
+  history: string | null;
   [key: string]: string | number | null | undefined;
 }
 

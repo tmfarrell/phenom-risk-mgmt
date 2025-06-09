@@ -9,10 +9,14 @@ export const usePatientData = () => {
     queryFn: async () => {
       console.log('Fetching patient data...');
       
-      // Fetch patients
+      // Fetch patients with history from phenom_risk_summary
       const { data: patients, error: patientsError } = await supabase
         .from('patient')
-        .select('*');
+        .select(`
+          *,
+          phenom_risk_summary(*)
+        `)
+        .eq('phenom_risk_summary.fact_type', 'HISTORY');
 
       if (patientsError) {
         console.error('Error fetching patients:', patientsError);
@@ -40,6 +44,7 @@ export const usePatientData = () => {
         if (patientRisks.length === 0) {
           return [{
             ...patient,
+            history: patient.phenom_risk_summary?.[0]?.summary || null,
             ED: null,
             Hospitalization: null,
             Fall: null,
@@ -64,6 +69,7 @@ export const usePatientData = () => {
           console.log('Processing risk record:', risk); // Debug log
           return {
             ...patient,
+            history: patient.phenom_risk_summary?.[0]?.summary || null,
             ED: risk.EMERGENCY_VISIT || null,
             Hospitalization: risk.HOSPITALIZATION || null,
             Fall: risk.FALL || null,

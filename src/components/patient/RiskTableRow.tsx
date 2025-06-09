@@ -79,10 +79,10 @@ export const RiskTableRow = ({
 
   return (
     <>
-      <TableRow className="group cursor-pointer hover:bg-gray-50" onClick={() => summary && setIsExpanded(!isExpanded)}>
+      <TableRow className={`group ${summary && hasValidRiskData ? 'cursor-pointer hover:bg-gray-50' : ''}`} onClick={() => summary && hasValidRiskData && setIsExpanded(!isExpanded)}>
         <TableCell className="font-medium">
           <div className="flex items-start gap-2">
-            {summary && (
+            {summary && hasValidRiskData && (
               <div className="mt-1 text-gray-400">
                 {isExpanded ? <ChevronDown size={16} /> : <ChevronRight size={16} />}
               </div>
@@ -127,11 +127,11 @@ export const RiskTableRow = ({
           }
         </TableCell>
       </TableRow>
-      {summary && isExpanded && (
+      {summary && hasValidRiskData && isExpanded && (
         <TableRow>
           <TableCell colSpan={4} className="bg-gray-50 pb-4 animate-accordion-down text-left">
             <div className="text-sm text-gray-700 p-2 border-l-2 border-blue-400 ml-8">
-              <span className="font-medium text-blue-600">Analysis: </span>
+              <span className="font-medium text-blue-600">Risk Analysis: </span>
               {summary}
             </div>
           </TableCell>

@@ -22,6 +22,7 @@ export const useRiskSummaries = (patientId?: number) => {
       const { data, error } = await supabase
         .from('phenom_risk_summary')
         .select('*')
+        .neq('fact_type', 'HISTORY')
         .eq('patient_id', patientId);
         
       if (error) {

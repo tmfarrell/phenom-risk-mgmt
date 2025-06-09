@@ -28,7 +28,7 @@ export const getRiskColumns = (
         <div className="flex flex-col items-center pb-2">
           <Button
             variant="ghost"
-            onClick={() => tableColumn.toggleSorting(tableColumn.getIsSorted() === "asc")}
+            onClick={() => tableColumn.toggleSorting(tableColumn.getIsSorted() !== "desc")}
             className="hover:bg-transparent whitespace-nowrap"
           >
             {column}

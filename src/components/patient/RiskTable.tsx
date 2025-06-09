@@ -57,9 +57,7 @@ export const RiskTable = ({ currentRisks, selectedRiskType, allRisks, riskSummar
     if (!factType) return null;
     
     const summary = riskSummaries.find(s => 
-      s.fact_type === factType && 
-      s.risk_type === selectedRiskType &&
-      s.time_period === currentRisks?.prediction_timeframe_yrs
+      s.fact_type === factType
     );
     
     console.log(`Looking for summary: factor=${riskFactor}, fact_type=${factType}, risk_type=${selectedRiskType}, time_period=${currentRisks?.prediction_timeframe_yrs}`);
