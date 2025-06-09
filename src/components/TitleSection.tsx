@@ -34,7 +34,7 @@ export const TitleSection: React.FC<TitleSectionProps> = ({ title }) => {
       <div className="max-w-[1600px] mx-auto text-left">
         <h1 className="text-3xl">
           <span className="font-bold">PhenOM</span>
-          <span className="align-super text-sm">™</span>
+          <span className="align-super text-sm">®</span>
           <span className="font-bold"> {getVersionDisplayName(appVersion)}</span>
         </h1>
         {/*<p className="text-sm mt-2 opacity-90">Medicare Advantage Plan (All)</p>*/}
