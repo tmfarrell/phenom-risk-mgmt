@@ -33,5 +33,5 @@ export const getFieldName = (displayName: string): string => {
 
 export const isHighRisk = (value: number | null | undefined) => {
   if (value === null || value === undefined) return false;
-  return value > 5;
+  return value > 3;
 };

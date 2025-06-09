@@ -108,7 +108,7 @@ export const getRiskColumns = (
         return (
           <div className="flex items-center justify-center w-full">
             <div className="flex items-center min-w-[5rem]">
-              <div className={`${Number(value) > 50 ? 'bg-red-100' : ''} w-16 text-center py-1 rounded`}>
+              <div className={`${Number(value) > 12.5 ? 'bg-red-100' : ''} w-16 text-center py-1 rounded`}>
                 <span>{Number(value).toFixed(1)}%</span>
               </div>
               <div className="w-4 ml-2">
