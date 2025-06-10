@@ -77,7 +77,7 @@ export const TableControls = ({
   const currentSelectedColumns = Array.isArray(selectedRiskColumns) ? selectedRiskColumns : [];
 
   return (
-    <div className="flex justify-start items-end gap-8 mb-6">
+    <div className="flex justify-start items-end gap-8 mb-8">
       <div className="flex flex-col gap-2">
         <div className="flex items-center gap-1 justify-center w-full">
           <Label htmlFor="risk-type" className="text-center text-muted-foreground">Risk Type</Label>
@@ -320,7 +320,7 @@ export const TableControls = ({
           <Input
             id="search"
             type="text"
-            placeholder="Name or ID"
+            placeholder="Patient name or ID"
             value={searchQuery}
             onChange={(e) => onSearchChange(e.target.value)}
             className="pl-9"

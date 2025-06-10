@@ -1,11 +1,19 @@
 import { Person } from '../types/population';
 
 // Mock providers for testing (same as in the hooks)
-const PROVIDERS = ['Dr. Sarah Johnson', 'Dr. Michael Chen', 'Dr. Emily Rodriguez'];
+const PROVIDERS = [
+  { name: 'Provider A', npi: '1234567890' },
+  { name: 'Provider B', npi: '1987654321' },
+  { name: 'Provider C', npi: '1567890123' }
+];
 
-const getRandomProvider = (patientId: number): string => {
+const getRandomProvider = (patientId: number) => {
   // Use patient ID as seed for consistent provider assignment
-  return PROVIDERS[patientId % PROVIDERS.length];
+  const provider = PROVIDERS[patientId % PROVIDERS.length];
+  return {
+    name: provider.name,
+    npi: provider.npi
+  };
 };
 
 export const mockPeople: Person[] = [
@@ -15,7 +23,8 @@ export const mockPeople: Person[] = [
     age: 32,
     gender: 'Male',
     location: 'New York',
-    provider: getRandomProvider(1),
+    provider: getRandomProvider(1).name,
+    provider_npi: getRandomProvider(1).npi,
     history: null,
     mrn: 12345,
     last_visit: '2024-01-15',
@@ -42,7 +51,8 @@ export const mockPeople: Person[] = [
     age: 28,
     gender: 'Female',
     location: 'San Francisco',
-    provider: getRandomProvider(2),
+    provider: getRandomProvider(2).name,
+    provider_npi: getRandomProvider(2).npi,
     mrn: 12346,
     last_visit: '2024-01-20',
     ED: 0.25,
@@ -68,7 +78,8 @@ export const mockPeople: Person[] = [
     age: 45,
     gender: 'Male',
     location: 'Chicago',
-    provider: getRandomProvider(3),
+    provider: getRandomProvider(3).name,
+    provider_npi: getRandomProvider(3).npi,
     mrn: 12347,
     last_visit: '2024-01-25',
     ED: 0.30,
@@ -94,7 +105,8 @@ export const mockPeople: Person[] = [
     age: 31,
     gender: 'Female',
     location: 'Boston',
-    provider: getRandomProvider(4),
+    provider: getRandomProvider(4).name,
+    provider_npi: getRandomProvider(4).npi,
     mrn: 12348,
     last_visit: '2024-01-30',
     ED: 0.40,
@@ -120,7 +132,8 @@ export const mockPeople: Person[] = [
     age: 38,
     gender: 'Male',
     location: 'Los Angeles',
-    provider: getRandomProvider(5),
+    provider: getRandomProvider(5).name,
+    provider_npi: getRandomProvider(5).npi,
     mrn: 12349,
     last_visit: '2024-02-05',
     ED: 0.50,
@@ -146,7 +159,8 @@ export const mockPeople: Person[] = [
     age: 29,
     gender: 'Female',
     location: 'New York',
-    provider: getRandomProvider(6),
+    provider: getRandomProvider(6).name,
+    provider_npi: getRandomProvider(6).npi,
     mrn: 12350,
     last_visit: '2024-02-10',
     ED: 0.55,
@@ -172,7 +186,8 @@ export const mockPeople: Person[] = [
     age: 42,
     gender: 'Male',
     location: 'San Francisco',
-    provider: getRandomProvider(7),
+    provider: getRandomProvider(7).name,
+    provider_npi: getRandomProvider(7).npi,
     mrn: 12351,
     last_visit: '2024-02-15',
     ED: 0.60,
@@ -198,7 +213,8 @@ export const mockPeople: Person[] = [
     age: 35,
     gender: 'Female',
     location: 'Chicago',
-    provider: getRandomProvider(8),
+    provider: getRandomProvider(8).name,
+    provider_npi: getRandomProvider(8).npi,
     mrn: 12352,
     last_visit: '2024-02-20',
     ED: 0.65,
@@ -224,7 +240,8 @@ export const mockPeople: Person[] = [
     age: 33,
     gender: 'Male',
     location: 'Boston',
-    provider: getRandomProvider(9),
+    provider: getRandomProvider(9).name,
+    provider_npi: getRandomProvider(9).npi,
     mrn: 12353,
     last_visit: '2024-02-25',
     ED: 0.70,
@@ -250,7 +267,8 @@ export const mockPeople: Person[] = [
     age: 39,
     gender: 'Female',
     location: 'Los Angeles',
-    provider: getRandomProvider(10),
+    provider: getRandomProvider(10).name,
+    provider_npi: getRandomProvider(10).npi,
     mrn: 12354,
     last_visit: '2024-03-01',
     ED: 0.75,

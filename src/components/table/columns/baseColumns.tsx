@@ -106,7 +106,14 @@ export const getBaseColumns = (onPatientClick?: (patientId: number) => void): Co
           </Button>
         );
       },
-      cell: ({ row }) => row.getValue('provider') || 'N/A',
+      cell: ({ row }) => (
+        <div className="text-left">
+          <div>{row.getValue('provider') || 'N/A'}</div>
+          <div className="text-xs text-gray-500">
+            NPI: {row.original.provider_npi || 'N/A'}
+          </div>
+        </div>
+      ),
     },
   ];
 };

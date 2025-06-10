@@ -3,16 +3,24 @@ import { supabase } from '@/integrations/supabase/client';
 import { Person } from '@/types/population';
 
 // Mock providers for testing
-const PROVIDERS = ['Provider A', 'Provider B', 'Provider C'];
+const PROVIDERS = [
+  { name: 'Provider A', npi: '1123456789' },
+  { name: 'Provider B', npi: '1567890123' },
+  { name: 'Provider C', npi: '1987654321' }
+];
 
-const getRandomProvider = (patientId: number): string => {
+const getRandomProvider = (patientId: number) => {
   // Use patient ID as seed for consistent provider assignment
-  return PROVIDERS[patientId % PROVIDERS.length];
+  const provider = PROVIDERS[patientId % PROVIDERS.length];
+  return {
+    name: provider.name,
+    npi: provider.npi
+  };
 };
 
 export const usePatientDataLatest = () => {
   return useQuery({
-    queryKey: ['patients-latest'],
+    queryKey: ['patient-data-latest'],
     queryFn: async () => {
       console.log('Fetching latest patient data...');
       
@@ -60,7 +68,8 @@ export const usePatientDataLatest = () => {
         if (patientLatestRisks.length === 0) {
           return [{
             ...patient,
-            provider: assignedProvider,
+            provider: assignedProvider.name,
+            provider_npi: assignedProvider.npi,
             history: null,
             ED: null,
             Hospitalization: null,
@@ -86,7 +95,8 @@ export const usePatientDataLatest = () => {
           
           return {
             ...patient,
-            provider: assignedProvider,
+            provider: assignedProvider.name,
+            provider_npi: assignedProvider.npi,
             history: null,
             ED: risk.EMERGENCY_VISIT || null,
             Hospitalization: risk.HOSPITALIZATION || null,

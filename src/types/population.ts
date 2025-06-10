@@ -8,6 +8,7 @@ export interface Person {
   gender: string | null;
   location?: string | null;
   provider?: string | null;
+  provider_npi?: string | null;
   recorded_date?: string | null;
   prediction_timeframe_yrs?: number | null;
   risk_type?: 'relative' | 'absolute' | null;
