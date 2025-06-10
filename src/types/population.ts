@@ -7,6 +7,7 @@ export interface Person {
   age: number | null;
   gender: string | null;
   location?: string | null;
+  provider?: string | null;
   recorded_date?: string | null;
   prediction_timeframe_yrs?: number | null;
   risk_type?: 'relative' | 'absolute' | null;
@@ -21,7 +22,7 @@ export interface Person {
   Fall_change: number | null;
   Stroke_change: number | null;
   MI_change: number | null;
-  history: string | null;
+  history?: string | null;
   [key: string]: string | number | null | undefined;
 }
 

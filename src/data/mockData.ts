@@ -1,5 +1,13 @@
 import { Person } from '../types/population';
 
+// Mock providers for testing (same as in the hooks)
+const PROVIDERS = ['Dr. Sarah Johnson', 'Dr. Michael Chen', 'Dr. Emily Rodriguez'];
+
+const getRandomProvider = (patientId: number): string => {
+  // Use patient ID as seed for consistent provider assignment
+  return PROVIDERS[patientId % PROVIDERS.length];
+};
+
 export const mockPeople: Person[] = [
   {
     patient_id: 1,
@@ -7,6 +15,8 @@ export const mockPeople: Person[] = [
     age: 32,
     gender: 'Male',
     location: 'New York',
+    provider: getRandomProvider(1),
+    history: null,
     mrn: 12345,
     last_visit: '2024-01-15',
     ED: 0.45,
@@ -32,6 +42,7 @@ export const mockPeople: Person[] = [
     age: 28,
     gender: 'Female',
     location: 'San Francisco',
+    provider: getRandomProvider(2),
     mrn: 12346,
     last_visit: '2024-01-20',
     ED: 0.25,
@@ -57,6 +68,7 @@ export const mockPeople: Person[] = [
     age: 45,
     gender: 'Male',
     location: 'Chicago',
+    provider: getRandomProvider(3),
     mrn: 12347,
     last_visit: '2024-01-25',
     ED: 0.30,
@@ -82,6 +94,7 @@ export const mockPeople: Person[] = [
     age: 31,
     gender: 'Female',
     location: 'Boston',
+    provider: getRandomProvider(4),
     mrn: 12348,
     last_visit: '2024-01-30',
     ED: 0.40,
@@ -107,6 +120,7 @@ export const mockPeople: Person[] = [
     age: 38,
     gender: 'Male',
     location: 'Los Angeles',
+    provider: getRandomProvider(5),
     mrn: 12349,
     last_visit: '2024-02-05',
     ED: 0.50,
@@ -132,6 +146,7 @@ export const mockPeople: Person[] = [
     age: 29,
     gender: 'Female',
     location: 'New York',
+    provider: getRandomProvider(6),
     mrn: 12350,
     last_visit: '2024-02-10',
     ED: 0.55,
@@ -157,6 +172,7 @@ export const mockPeople: Person[] = [
     age: 42,
     gender: 'Male',
     location: 'San Francisco',
+    provider: getRandomProvider(7),
     mrn: 12351,
     last_visit: '2024-02-15',
     ED: 0.60,
@@ -182,6 +198,7 @@ export const mockPeople: Person[] = [
     age: 35,
     gender: 'Female',
     location: 'Chicago',
+    provider: getRandomProvider(8),
     mrn: 12352,
     last_visit: '2024-02-20',
     ED: 0.65,
@@ -207,6 +224,7 @@ export const mockPeople: Person[] = [
     age: 33,
     gender: 'Male',
     location: 'Boston',
+    provider: getRandomProvider(9),
     mrn: 12353,
     last_visit: '2024-02-25',
     ED: 0.70,
@@ -232,6 +250,7 @@ export const mockPeople: Person[] = [
     age: 39,
     gender: 'Female',
     location: 'Los Angeles',
+    provider: getRandomProvider(10),
     mrn: 12354,
     last_visit: '2024-03-01',
     ED: 0.75,

@@ -1,5 +1,4 @@
-
-import { Search, Check, HelpCircle } from 'lucide-react';
+import { Search, Check, HelpCircle, ChevronDown } from 'lucide-react';
 import { Input } from '../ui/input';
 import {
   Command,
@@ -20,6 +19,7 @@ import { useState } from 'react';
 import { Label } from '../ui/label';
 import { ToggleGroup, ToggleGroupItem } from '../ui/toggle-group';
 import { Badge } from '../ui/badge';
+import { Switch } from '../ui/switch';
 import { RISK_COLUMNS, DISABLED_RISK_COLUMNS } from './tableConstants';
 import {
   Tooltip,
@@ -27,6 +27,11 @@ import {
   TooltipTrigger,
 } from '../ui/tooltip';
 import { useAppVersion } from '@/hooks/useAppVersion';
+
+interface ProviderList {
+  availableList: string[];
+  selectedList: string[];
+}
 
 interface TableControlsProps {
   searchQuery: string;
@@ -38,6 +43,10 @@ interface TableControlsProps {
   timeframes: number[];
   selectedRiskType: 'relative' | 'absolute';
   onRiskTypeChange: (value: 'relative' | 'absolute') => void;
+  providerList: ProviderList;
+  onProviderSelection: (providerList: ProviderList) => void;
+  showSelectedOnly: boolean;
+  onShowSelectedOnlyChange: (value: boolean) => void;
 }
 
 export const TableControls = ({
@@ -50,8 +59,15 @@ export const TableControls = ({
   timeframes,
   selectedRiskType,
   onRiskTypeChange,
+  providerList,
+  onProviderSelection,
+  showSelectedOnly,
+  onShowSelectedOnlyChange,
 }: TableControlsProps) => {
   const [open, setOpen] = useState(false);
+  const [providerOpen, setProviderOpen] = useState(false);
+  const [riskTypeOpen, setRiskTypeOpen] = useState(false);
+  const [timeframeOpen, setTimeframeOpen] = useState(false);
   const { appVersion } = useAppVersion();
   
   // Determine if we should show time periods in months or years
@@ -61,141 +77,240 @@ export const TableControls = ({
   const currentSelectedColumns = Array.isArray(selectedRiskColumns) ? selectedRiskColumns : [];
 
   return (
-    <div className="flex justify-between items-center mb-6">
-      <div className="grid grid-cols-3 gap-8 flex-1 mr-8">
-        <div className="flex flex-col gap-2">
-          <div className="flex items-center gap-1 justify-center w-full">
-            <Label htmlFor="risk-type" className="text-center text-muted-foreground">Risk Type</Label>
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <HelpCircle className="h-4 w-4 text-muted-foreground" />
-              </TooltipTrigger>
-              <TooltipContent className="max-w-[300px] space-y-2">
-                <p>Relative risk is risk compared to the average in the cohort over the time period.</p>
-                <p>Absolute risk is the chances that event will occur in the time period.</p>
-              </TooltipContent>
-            </Tooltip>
-          </div>
-          <ToggleGroup 
-            type="single" 
-            value={selectedRiskType}
-            onValueChange={(value) => {
-              if (value) onRiskTypeChange(value as 'relative' | 'absolute');
-            }}
-            className="flex gap-2"
-          >
-            <ToggleGroupItem 
-              value="relative" 
-              className={cn(
-                "px-4 py-2 rounded-md",
-                selectedRiskType === 'relative' ? "bg-blue-100 hover:bg-blue-200" : "hover:bg-gray-100"
-              )}
-            >
-              Relative
-            </ToggleGroupItem>
-            <ToggleGroupItem 
-              value="absolute"
-              className={cn(
-                "px-4 py-2 rounded-md",
-                selectedRiskType === 'absolute' ? "bg-blue-100 hover:bg-blue-200" : "hover:bg-gray-100"
-              )}
-            >
-              Absolute
-            </ToggleGroupItem>
-          </ToggleGroup>
+    <div className="flex justify-start items-end gap-8 mb-6">
+      <div className="flex flex-col gap-2">
+        <div className="flex items-center gap-1 justify-center w-full">
+          <Label htmlFor="risk-type" className="text-center text-muted-foreground">Risk Type</Label>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <HelpCircle className="h-4 w-4 text-muted-foreground" />
+            </TooltipTrigger>
+            <TooltipContent className="max-w-[300px] space-y-2">
+              <p>Relative risk is risk compared to the average in the cohort over the time period.</p>
+              <p>Absolute risk is the chances that event will occur in the time period.</p>
+            </TooltipContent>
+          </Tooltip>
         </div>
+        <Popover open={riskTypeOpen} onOpenChange={setRiskTypeOpen}>
+          <PopoverTrigger asChild>
+            <Button
+              variant="outline"
+              role="combobox"
+              aria-expanded={riskTypeOpen}
+              className="w-28 justify-between"
+              id="risk-type"
+            >
+              {selectedRiskType === 'relative' ? 'Relative' : 'Absolute'}
+              <ChevronDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+            </Button>
+          </PopoverTrigger>
+          <PopoverContent className="w-28 p-0">
+            <Command>
+              <CommandList>
+                <CommandGroup>
+                  <CommandItem
+                    value="relative"
+                    onSelect={() => {
+                      onRiskTypeChange('relative');
+                      setRiskTypeOpen(false);
+                    }}
+                  >
+                    <Check
+                      className={cn(
+                        "mr-2 h-4 w-4",
+                        selectedRiskType === 'relative' ? "opacity-100" : "opacity-0"
+                      )}
+                    />
+                    Relative
+                  </CommandItem>
+                  <CommandItem
+                    value="absolute"
+                    onSelect={() => {
+                      onRiskTypeChange('absolute');
+                      setRiskTypeOpen(false);
+                    }}
+                  >
+                    <Check
+                      className={cn(
+                        "mr-2 h-4 w-4",
+                        selectedRiskType === 'absolute' ? "opacity-100" : "opacity-0"
+                      )}
+                    />
+                    Absolute
+                  </CommandItem>
+                </CommandGroup>
+              </CommandList>
+            </Command>
+          </PopoverContent>
+        </Popover>
+      </div>
 
-        <div className="flex flex-col gap-2">
-          <Label htmlFor="risk-timeframe" className="text-center text-muted-foreground mx-auto">Time Period</Label>
-          <ToggleGroup 
-            type="single" 
-            value={selectedTimeframe}
-            onValueChange={(value) => {
-              if (value) onTimeframeChange(value);
-            }}
-            className="flex gap-2"
-          >
-            {timeframes.map((timeframe) => {
-              // Convert years to months if necessary
-              const displayTimeframe = useMonthsForTimeframe ? timeframe * 12 : timeframe;
-              const timeUnit = useMonthsForTimeframe ? "month" : "year";
-              
-              return (
-                <ToggleGroupItem 
-                  key={timeframe}
-                  value={timeframe.toString()}
-                  className={cn(
-                    "px-4 py-2 rounded-md whitespace-nowrap",
-                    selectedTimeframe === timeframe.toString() ? "bg-blue-100 hover:bg-blue-200" : "hover:bg-gray-100"
-                  )}
-                >
-                  {displayTimeframe} {timeUnit}{displayTimeframe > 1 ? 's' : ''}
-                </ToggleGroupItem>
-              );
-            })}
-          </ToggleGroup>
-        </div>
-
-        <div className="flex flex-col gap-2">
-          <Label htmlFor="risk-factors" className="text-center text-muted-foreground mx-auto">Outcomes</Label>
-          <Popover open={open} onOpenChange={setOpen}>
-            <PopoverTrigger asChild>
-              <Button
-                variant="outline"
-                role="combobox"
-                aria-expanded={open}
-                className="w-48 justify-between"
-                id="risk-factors"
-              >
-                Select outcomes
-                <Badge variant="secondary" className="ml-2">
-                  {currentSelectedColumns.length}
-                </Badge>
-              </Button>
-            </PopoverTrigger>
-            <PopoverContent className="w-48 p-0">
-              <Command>
-                <CommandInput placeholder="Search" />
-                <CommandList>
-                  <CommandEmpty>No column found.</CommandEmpty>
-                  <CommandGroup>
-                    {RISK_COLUMNS.map((column) => (
+      <div className="flex flex-col gap-2">
+        <Label htmlFor="risk-timeframe" className="text-center text-muted-foreground mx-auto">Time Period</Label>
+        <Popover open={timeframeOpen} onOpenChange={setTimeframeOpen}>
+          <PopoverTrigger asChild>
+            <Button
+              variant="outline"
+              role="combobox"
+              aria-expanded={timeframeOpen}
+              className="w-28 justify-between"
+              id="risk-timeframe"
+            >
+              {(() => {
+                const timeframe = parseInt(selectedTimeframe);
+                const displayTimeframe = useMonthsForTimeframe ? timeframe * 12 : timeframe;
+                const timeUnit = useMonthsForTimeframe ? "month" : "year";
+                return `${displayTimeframe} ${timeUnit}${displayTimeframe > 1 ? 's' : ''}`;
+              })()}
+              <ChevronDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+            </Button>
+          </PopoverTrigger>
+          <PopoverContent className="w-28 p-0">
+            <Command>
+              <CommandList>
+                <CommandGroup>
+                  {timeframes.map((timeframe) => {
+                    // Convert years to months if necessary
+                    const displayTimeframe = useMonthsForTimeframe ? timeframe * 12 : timeframe;
+                    const timeUnit = useMonthsForTimeframe ? "month" : "year";
+                    
+                    return (
                       <CommandItem
-                        key={column}
-                        value={column}
+                        key={timeframe}
+                        value={timeframe.toString()}
                         onSelect={() => {
-                          const newSelection = currentSelectedColumns.includes(column)
-                            ? currentSelectedColumns.filter((c) => c !== column)
-                            : [...currentSelectedColumns, column];
-                          onRiskColumnsChange(newSelection);
+                          onTimeframeChange(timeframe.toString());
+                          setTimeframeOpen(false);
                         }}
                       >
                         <Check
                           className={cn(
                             "mr-2 h-4 w-4",
-                            currentSelectedColumns.includes(column) ? "opacity-100" : "opacity-0"
+                            selectedTimeframe === timeframe.toString() ? "opacity-100" : "opacity-0"
                           )}
                         />
-                        {column}
+                        {displayTimeframe} {timeUnit}{displayTimeframe > 1 ? 's' : ''}
                       </CommandItem>
-                    ))}
-                    {DISABLED_RISK_COLUMNS.map((column) => (
-                      <CommandItem
-                        key={column}
-                        value={column}
-                        disabled
-                        className="opacity-50 cursor-not-allowed"
-                      >
-                        <Check className="mr-2 h-4 w-4 opacity-0" />
-                        {column}
-                      </CommandItem>
-                    ))}
-                  </CommandGroup>
-                </CommandList>
-              </Command>
-            </PopoverContent>
-          </Popover>
-        </div>
+                    );
+                  })}
+                </CommandGroup>
+              </CommandList>
+            </Command>
+          </PopoverContent>
+        </Popover>
+      </div>
+
+      <div className="flex flex-col gap-2">
+        <Label htmlFor="risk-factors" className="text-center text-muted-foreground mx-auto">Outcomes</Label>
+        <Popover open={open} onOpenChange={setOpen}>
+          <PopoverTrigger asChild>
+            <Button
+              variant="outline"
+              role="combobox"
+              aria-expanded={open}
+              className="w-48 justify-between"
+              id="risk-factors"
+            >
+              Select outcomes
+              <Badge variant="secondary" className="ml-2">
+                {currentSelectedColumns.length}
+              </Badge>
+            </Button>
+          </PopoverTrigger>
+          <PopoverContent className="w-48 p-0">
+            <Command>
+              <CommandInput placeholder="Search" />
+              <CommandList>
+                <CommandEmpty>No column found.</CommandEmpty>
+                <CommandGroup>
+                  {RISK_COLUMNS.map((column) => (
+                    <CommandItem
+                      key={column}
+                      value={column}
+                      onSelect={() => {
+                        const newSelection = currentSelectedColumns.includes(column)
+                          ? currentSelectedColumns.filter((c) => c !== column)
+                          : [...currentSelectedColumns, column];
+                        onRiskColumnsChange(newSelection);
+                      }}
+                    >
+                      <Check
+                        className={cn(
+                          "mr-2 h-4 w-4",
+                          currentSelectedColumns.includes(column) ? "opacity-100" : "opacity-0"
+                        )}
+                      />
+                      {column}
+                    </CommandItem>
+                  ))}
+                  {DISABLED_RISK_COLUMNS.map((column) => (
+                    <CommandItem
+                      key={column}
+                      value={column}
+                      disabled
+                      className="opacity-50 cursor-not-allowed"
+                    >
+                      <Check className="mr-2 h-4 w-4 opacity-0" />
+                      {column}
+                    </CommandItem>
+                  ))}
+                </CommandGroup>
+              </CommandList>
+            </Command>
+          </PopoverContent>
+        </Popover>
+      </div>
+
+      <div className='flex flex-col gap-2'>
+        <Label htmlFor='provider' className='text-center text-muted-foreground mx-auto'>
+          Provider
+        </Label>
+        <Popover open={providerOpen} onOpenChange={setProviderOpen}>
+          <PopoverTrigger asChild>
+            <Button variant='outline' role='combobox' aria-expanded={providerOpen} className='w-48 justify-between' id='provider'>
+              Select providers
+              <Badge variant='secondary' className='ml-2'>
+                {Array.isArray(providerList?.selectedList) && providerList?.selectedList?.length > 0 ? providerList.selectedList.length : 'All'}
+              </Badge>
+            </Button>
+          </PopoverTrigger>
+          <PopoverContent className='w-48 p-0'>
+            <Command>
+              <CommandInput placeholder='Search providers...' />
+              <CommandList>
+                <CommandEmpty>No provider found.</CommandEmpty>
+                <CommandGroup>
+                  {providerList?.availableList.map((provider) => (
+                    <CommandItem
+                      key={provider}
+                      onSelect={() => {
+                        const selected = Array.isArray(providerList?.selectedList) ? providerList.selectedList : []
+                        const newSelection = selected.includes(provider)
+                          ? selected.filter((p) => p !== provider)
+                          : [...selected, provider]
+
+                        const updatedProviderList = {
+                          ...providerList,
+                          selectedList: newSelection
+                        }
+
+                        onProviderSelection(updatedProviderList)
+                      }}
+                    >
+                      <Check
+                        className={cn(
+                          'mr-2 h-4 w-4',
+                          providerList?.selectedList.includes(provider) ? 'opacity-100' : 'opacity-0'
+                        )}
+                      />
+                      {provider}
+                    </CommandItem>
+                  ))}
+                </CommandGroup>
+              </CommandList>
+            </Command>
+          </PopoverContent>
+        </Popover>
       </div>
 
       <div className="flex flex-col gap-2">
@@ -211,6 +326,15 @@ export const TableControls = ({
             className="pl-9"
           />
         </div>
+      </div>
+
+      <div className="flex items-center space-x-2">
+        <Switch
+          id="show-selected"
+          checked={showSelectedOnly}
+          onCheckedChange={onShowSelectedOnlyChange}
+        />
+        <Label htmlFor="show-selected">Only selected patients</Label>
       </div>
     </div>
   );

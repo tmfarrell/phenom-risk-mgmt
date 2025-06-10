@@ -1,4 +1,3 @@
-
 import { Table } from './ui/table';
 import { ScrollArea } from './ui/scroll-area';
 import { Person } from '../types/population';
@@ -28,6 +27,7 @@ interface ResultsTableProps {
     };
   };
   selectedTimeframe: string;
+  onPatientClick?: (patientId: number) => void;
 }
 
 export const ResultsTable = ({ 
@@ -35,13 +35,14 @@ export const ResultsTable = ({
   visibleRiskColumns,
   onSelectionChange,
   averageRisks,
-  selectedTimeframe
+  selectedTimeframe,
+  onPatientClick
 }: ResultsTableProps) => {
   const [sorting, setSorting] = useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
   const [rowSelection, setRowSelection] = useState<RowSelectionState>({});
 
-  const columns = useTableColumns(visibleRiskColumns, averageRisks[selectedTimeframe] || {});
+  const columns = useTableColumns(visibleRiskColumns, averageRisks[selectedTimeframe] || {}, onPatientClick);
 
   const table = useReactTable({
     data,

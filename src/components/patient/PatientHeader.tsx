@@ -1,4 +1,3 @@
-
 import { Person } from '@/types/population';
 import { useAppVersion } from '@/hooks/useAppVersion';
 import { useState } from 'react';
@@ -24,7 +23,7 @@ export const PatientHeader = ({ person }: PatientHeaderProps) => {
         <span className="font-bold">{person.name || 'Unknown'}</span>
         <span className="font-normal">{ageGenderString}</span>
       </h2>
-      <div className="grid grid-cols-5 gap-4 text-sm">
+      <div className="grid grid-cols-6 gap-4 text-sm">
         <div>
           <p className="text-gray-500 font-medium mb-0.5">{mrnLabel}</p>
           <p>{person.mrn || 'N/A'}</p>
@@ -40,6 +39,10 @@ export const PatientHeader = ({ person }: PatientHeaderProps) => {
         <div>
           <p className="text-gray-500 font-medium mb-0.5">Sex</p>
           <p>{person.gender || 'N/A'}</p>
+        </div>
+        <div>
+          <p className="text-gray-500 font-medium mb-0.5">Provider</p>
+          <p>{person.provider || 'N/A'}</p>
         </div>
         <div>
           <p className="text-gray-500 font-medium mb-0.5">Last Visit</p>

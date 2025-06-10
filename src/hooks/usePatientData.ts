@@ -1,7 +1,14 @@
-
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { Person } from '@/types/population';
+
+// Mock providers for testing
+const PROVIDERS = ['Provider A', 'Provider B', 'Provider C'];
+
+const getRandomProvider = (patientId: number): string => {
+  // Use patient ID as seed for consistent provider assignment
+  return PROVIDERS[patientId % PROVIDERS.length];
+};
 
 export const usePatientData = () => {
   return useQuery({
@@ -40,11 +47,15 @@ export const usePatientData = () => {
       const transformedData: Person[] = (patients || []).flatMap((patient) => {
         const patientRisks = risks?.filter(risk => risk.patient_id === patient.patient_id) || [];
         
+        // Assign random provider based on patient ID
+        const assignedProvider = getRandomProvider(patient.patient_id);
+        
         // If no risks found for patient, return single entry with null values
         if (patientRisks.length === 0) {
           return [{
             ...patient,
-            history: patient.phenom_risk_summary?.[0]?.summary || null,
+            provider: assignedProvider,
+            history: (patient.phenom_risk_summary as any)?.[0]?.summary || null,
             ED: null,
             Hospitalization: null,
             Fall: null,
@@ -66,10 +77,11 @@ export const usePatientData = () => {
         
         // Return an entry for each risk record
         return patientRisks.map(risk => {
-          console.log('Processing risk record:', risk); // Debug log
+          //console.log('Processing risk record:', risk); // Debug log
           return {
             ...patient,
-            history: patient.phenom_risk_summary?.[0]?.summary || null,
+            provider: assignedProvider,
+            history: (patient.phenom_risk_summary as any)?.[0]?.summary || null,
             ED: risk.EMERGENCY_VISIT || null,
             Hospitalization: risk.HOSPITALIZATION || null,
             Fall: risk.FALL || null,

@@ -1,4 +1,3 @@
-
 import { ColumnDef } from '@tanstack/react-table';
 import { Person } from '@/types/population';
 import { Button } from '@/components/ui/button';
@@ -7,7 +6,7 @@ import { Link } from 'react-router-dom';
 import { Checkbox } from '@/components/ui/checkbox';
 import { useAppVersion } from '@/hooks/useAppVersion';
 
-export const getBaseColumns = (): ColumnDef<Person>[] => {
+export const getBaseColumns = (onPatientClick?: (patientId: number) => void): ColumnDef<Person>[] => {
   // Get current app version to determine label text
   const { appVersion } = useAppVersion();
   
@@ -59,12 +58,21 @@ export const getBaseColumns = (): ColumnDef<Person>[] => {
       },
       cell: ({ row }) => (
         <div className="text-left">
-          <Link
-            to={`/patient/${row.original.patient_id}`}
-            className="text-blue-600 hover:text-blue-800 transition-colors"
-          >
-            {row.getValue('name')}
-          </Link>
+          {onPatientClick ? (
+            <button
+              onClick={() => onPatientClick(row.original.patient_id)}
+              className="text-blue-600 hover:text-blue-800 transition-colors"
+            >
+              {row.getValue('name')}
+            </button>
+          ) : (
+            <Link
+              to={`/patient/${row.original.patient_id}`}
+              className="text-blue-600 hover:text-blue-800 transition-colors"
+            >
+              {row.getValue('name')}
+            </Link>
+          )}
           <div className="text-xs text-gray-500">
             {mrnLabel}: {row.original.mrn || 'N/A'}
           </div>
@@ -76,7 +84,7 @@ export const getBaseColumns = (): ColumnDef<Person>[] => {
       enableColumnFilter: true,
     },
     {
-      accessorKey: 'last_visit',
+      accessorKey: 'provider',
       header: ({ column }) => {
         const isSorted = column.getIsSorted();
         return (
@@ -85,7 +93,7 @@ export const getBaseColumns = (): ColumnDef<Person>[] => {
             onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
             className="hover:bg-transparent whitespace-nowrap"
           >
-            Last Visit
+            Provider
             {isSorted ? (
               isSorted === "asc" ? (
                 <ArrowUp className="ml-2 h-4 w-4 font-bold" />
@@ -98,7 +106,7 @@ export const getBaseColumns = (): ColumnDef<Person>[] => {
           </Button>
         );
       },
-      cell: ({ row }) => row.getValue('last_visit') || 'N/A',
+      cell: ({ row }) => row.getValue('provider') || 'N/A',
     },
   ];
 };

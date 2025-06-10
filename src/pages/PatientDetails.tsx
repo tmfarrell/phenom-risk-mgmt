@@ -19,8 +19,8 @@ export const PatientDetails = () => {
   console.log('PatientDetails - Selected Person:', person);
 
   const handleBack = () => {
-    if (location.state?.from === 'panel') {
-      navigate('/panel', { state: location.state });
+    if (location.state) {
+      navigate('/', { state: location.state });
     } else {
       navigate('/');
     }
