@@ -15,7 +15,7 @@ export const DISABLED_RISK_COLUMNS = [
   'COPD/Asthma',
   'Diabetes',
   'Medication adherence', 
-  'Hereditary angioedema (HAE)'
+  'Hereditary angioedema'
 ] as const;
 
 // Map display names to database field names
