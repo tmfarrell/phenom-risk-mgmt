@@ -60,11 +60,12 @@ export const usePatientData = () => {
         
         // If no risks found for patient, return single entry with null values
         if (patientRisks.length === 0) {
+          const { phenom_risk_summary, ...patientWithoutSummary } = patient;
           return [{
-            ...patient,
+            ...patientWithoutSummary,
             provider: assignedProvider.name,
             provider_npi: assignedProvider.npi,
-            history: (patient.phenom_risk_summary as any)?.[0]?.summary || null,
+            history: (phenom_risk_summary as any)?.[0]?.summary || null,
             ED: null,
             Hospitalization: null,
             Fall: null,
@@ -87,11 +88,12 @@ export const usePatientData = () => {
         // Return an entry for each risk record
         return patientRisks.map(risk => {
           //console.log('Processing risk record:', risk); // Debug log
+          const { phenom_risk_summary, ...patientWithoutSummary } = patient;
           return {
-            ...patient,
+            ...patientWithoutSummary,
             provider: assignedProvider.name,
             provider_npi: assignedProvider.npi,
-            history: (patient.phenom_risk_summary as any)?.[0]?.summary || null,
+            history: (phenom_risk_summary as any)?.[0]?.summary || null,
             ED: risk.EMERGENCY_VISIT || null,
             Hospitalization: risk.HOSPITALIZATION || null,
             Fall: risk.FALL || null,

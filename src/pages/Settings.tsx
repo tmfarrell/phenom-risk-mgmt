@@ -10,7 +10,7 @@ import { Button } from '@/components/ui/button';
 import { ArrowLeft } from 'lucide-react';
 import { useAppVersion } from '@/hooks/useAppVersion';
 
-type AppVersion = 'patient' | 'safety' | 'cohort';
+type AppVersion = 'patient' | 'safety' | 'cohort' | 'payor';
 
 export const Settings = () => {
   const { isAdmin } = useContext(AuthContext);
@@ -36,11 +36,13 @@ export const Settings = () => {
   const getVersionDisplayName = (version: AppVersion): string => {
     switch (version) {
       case 'patient':
-        return 'Patient Risk Panel';
+        return 'Patient Risk Panel (Provider)';
       case 'safety':
         return 'Safety Risk Panel';
       case 'cohort':
         return 'Cohort Risk Panel';
+      case 'payor':
+        return 'Patient Risk Panel';
       default:
         return 'Unknown';
     }
@@ -81,9 +83,10 @@ export const Settings = () => {
                   <SelectValue placeholder="Select app version" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="patient">Patient Risk Panel</SelectItem>
+                  <SelectItem value="patient">Patient Risk Panel (Provider)</SelectItem>
                   <SelectItem value="safety">Safety Risk Panel</SelectItem>
                   <SelectItem value="cohort">Cohort Risk Panel</SelectItem>
+                  <SelectItem value="payor">Patient Risk Panel</SelectItem>
                 </SelectContent>
               </Select>
             </div>

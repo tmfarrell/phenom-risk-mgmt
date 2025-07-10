@@ -1,10 +1,10 @@
 
 import { useState, useEffect } from 'react';
 
-type AppVersion = 'patient' | 'safety' | 'cohort';
+type AppVersion = 'patient' | 'safety' | 'cohort' | 'payor';
 
 export const useAppVersion = () => {
-  const [appVersion, setAppVersion] = useState<AppVersion>('patient');
+  const [appVersion, setAppVersion] = useState<AppVersion>('payor');
   
   useEffect(() => {
     // Load the app version from localStorage on mount
@@ -12,8 +12,8 @@ export const useAppVersion = () => {
     if (savedVersion) {
       setAppVersion(savedVersion);
     } else {
-      // Set default to 'patient' if no version is saved
-      localStorage.setItem('appVersion', 'patient');
+      // Set default to 'payor' if no version is saved
+      localStorage.setItem('appVersion', 'payor');
     }
     
     // Listen for storage events to update the state if changed in another tab

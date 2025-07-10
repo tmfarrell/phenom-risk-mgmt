@@ -261,57 +261,59 @@ export const TableControls = ({
         </Popover>
       </div>
 
-      <div className='flex flex-col gap-2'>
-        <Label htmlFor='provider' className='text-center text-muted-foreground mx-auto'>
-          Provider
-        </Label>
-        <Popover open={providerOpen} onOpenChange={setProviderOpen}>
-          <PopoverTrigger asChild>
-            <Button variant='outline' role='combobox' aria-expanded={providerOpen} className='w-48 justify-between' id='provider'>
-              Select providers
-              <Badge variant='secondary' className='ml-2'>
-                {Array.isArray(providerList?.selectedList) && providerList?.selectedList?.length > 0 ? providerList.selectedList.length : 'All'}
-              </Badge>
-            </Button>
-          </PopoverTrigger>
-          <PopoverContent className='w-48 p-0'>
-            <Command>
-              <CommandInput placeholder='Search providers...' />
-              <CommandList>
-                <CommandEmpty>No provider found.</CommandEmpty>
-                <CommandGroup>
-                  {providerList?.availableList.map((provider) => (
-                    <CommandItem
-                      key={provider}
-                      onSelect={() => {
-                        const selected = Array.isArray(providerList?.selectedList) ? providerList.selectedList : []
-                        const newSelection = selected.includes(provider)
-                          ? selected.filter((p) => p !== provider)
-                          : [...selected, provider]
+      {appVersion !== 'payor' && (
+        <div className='flex flex-col gap-2'>
+          <Label htmlFor='provider' className='text-center text-muted-foreground mx-auto'>
+            Provider
+          </Label>
+          <Popover open={providerOpen} onOpenChange={setProviderOpen}>
+            <PopoverTrigger asChild>
+              <Button variant='outline' role='combobox' aria-expanded={providerOpen} className='w-48 justify-between' id='provider'>
+                Select providers
+                <Badge variant='secondary' className='ml-2'>
+                  {Array.isArray(providerList?.selectedList) && providerList?.selectedList?.length > 0 ? providerList.selectedList.length : 'All'}
+                </Badge>
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent className='w-48 p-0'>
+              <Command>
+                <CommandInput placeholder='Search providers...' />
+                <CommandList>
+                  <CommandEmpty>No provider found.</CommandEmpty>
+                  <CommandGroup>
+                    {providerList?.availableList.map((provider) => (
+                      <CommandItem
+                        key={provider}
+                        onSelect={() => {
+                          const selected = Array.isArray(providerList?.selectedList) ? providerList.selectedList : []
+                          const newSelection = selected.includes(provider)
+                            ? selected.filter((p) => p !== provider)
+                            : [...selected, provider]
 
-                        const updatedProviderList = {
-                          ...providerList,
-                          selectedList: newSelection
-                        }
+                          const updatedProviderList = {
+                            ...providerList,
+                            selectedList: newSelection
+                          }
 
-                        onProviderSelection(updatedProviderList)
-                      }}
-                    >
-                      <Check
-                        className={cn(
-                          'mr-2 h-4 w-4',
-                          providerList?.selectedList.includes(provider) ? 'opacity-100' : 'opacity-0'
-                        )}
-                      />
-                      {provider}
-                    </CommandItem>
-                  ))}
-                </CommandGroup>
-              </CommandList>
-            </Command>
-          </PopoverContent>
-        </Popover>
-      </div>
+                          onProviderSelection(updatedProviderList)
+                        }}
+                      >
+                        <Check
+                          className={cn(
+                            'mr-2 h-4 w-4',
+                            providerList?.selectedList.includes(provider) ? 'opacity-100' : 'opacity-0'
+                          )}
+                        />
+                        {provider}
+                      </CommandItem>
+                    ))}
+                  </CommandGroup>
+                </CommandList>
+              </Command>
+            </PopoverContent>
+          </Popover>
+        </div>
+      )}
 
       <div className="flex flex-col gap-2">
         <Label htmlFor="search" className="text-center text-muted-foreground mx-auto">Search</Label>

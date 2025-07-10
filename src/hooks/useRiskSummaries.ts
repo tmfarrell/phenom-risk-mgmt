@@ -6,8 +6,6 @@ export interface RiskSummary {
   id: number;
   patient_id: number;
   fact_type: string;
-  risk_type: string;
-  time_period: number;
   summary: string;
 }
 
