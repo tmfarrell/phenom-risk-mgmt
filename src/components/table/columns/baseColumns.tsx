@@ -11,7 +11,7 @@ export const getBaseColumns = (onPatientClick?: (patientId: number) => void): Co
   const { appVersion } = useAppVersion();
   
   // Set MRN label based on app version
-  const mrnLabel = appVersion === 'patient' ? 'MRN' : 'Subject ID';
+  const mrnLabel = (appVersion === 'patient' || appVersion === 'payor') ? 'MRN' : 'Subject ID';
   
   const columns: ColumnDef<Person>[] = [
     {
