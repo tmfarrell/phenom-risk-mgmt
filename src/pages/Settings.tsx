@@ -10,7 +10,7 @@ import { Button } from '@/components/ui/button';
 import { ArrowLeft } from 'lucide-react';
 import { useAppVersion } from '@/hooks/useAppVersion';
 
-type AppVersion = 'patient' | 'safety' | 'cohort';
+type AppVersion = 'patient' | 'safety' | 'cohort' | 'payor';
 
 export const Settings = () => {
   const { isAdmin } = useContext(AuthContext);
@@ -41,6 +41,8 @@ export const Settings = () => {
         return 'Safety Risk Panel';
       case 'cohort':
         return 'Cohort Risk Panel';
+      case 'payor':
+        return 'Patient Risk Panel (Payor)';
       default:
         return 'Unknown';
     }
@@ -84,6 +86,7 @@ export const Settings = () => {
                   <SelectItem value="patient">Patient Risk Panel</SelectItem>
                   <SelectItem value="safety">Safety Risk Panel</SelectItem>
                   <SelectItem value="cohort">Cohort Risk Panel</SelectItem>
+                  <SelectItem value="payor">Patient Risk Panel (Payor)</SelectItem>
                 </SelectContent>
               </Select>
             </div>

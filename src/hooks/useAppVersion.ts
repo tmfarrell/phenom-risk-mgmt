@@ -1,7 +1,7 @@
 
 import { useState, useEffect } from 'react';
 
-type AppVersion = 'patient' | 'safety' | 'cohort';
+type AppVersion = 'patient' | 'safety' | 'cohort' | 'payor';
 
 export const useAppVersion = () => {
   const [appVersion, setAppVersion] = useState<AppVersion>('patient');

@@ -17,6 +17,8 @@ export const TitleSection: React.FC<TitleSectionProps> = ({ title }) => {
         return 'Safety Risk Panel';
       case 'cohort':
         return 'Cohort Risk Panel';
+      case 'payor':
+        return 'Patient Risk Panel (Payor)';
       default:
         return 'Patient Risk Panel';
     }

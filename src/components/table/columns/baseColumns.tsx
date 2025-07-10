@@ -13,7 +13,7 @@ export const getBaseColumns = (onPatientClick?: (patientId: number) => void): Co
   // Set MRN label based on app version
   const mrnLabel = appVersion === 'patient' ? 'MRN' : 'Subject ID';
   
-  return [
+  const columns: ColumnDef<Person>[] = [
     {
       id: 'select',
       header: ({ table }) => (
@@ -83,7 +83,11 @@ export const getBaseColumns = (onPatientClick?: (patientId: number) => void): Co
       ),
       enableColumnFilter: true,
     },
-    {
+  ];
+
+  // Add provider column only if not payor version
+  if (appVersion !== 'payor') {
+    columns.push({
       accessorKey: 'provider',
       header: ({ column }) => {
         const isSorted = column.getIsSorted();
@@ -114,6 +118,8 @@ export const getBaseColumns = (onPatientClick?: (patientId: number) => void): Co
           </div>
         </div>
       ),
-    },
-  ];
+    });
+  }
+
+  return columns;
 };
