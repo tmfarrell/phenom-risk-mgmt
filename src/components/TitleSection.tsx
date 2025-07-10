@@ -12,13 +12,13 @@ export const TitleSection: React.FC<TitleSectionProps> = ({ title }) => {
   const getVersionDisplayName = (version: string): string => {
     switch (version) {
       case 'patient':
-        return 'Patient Risk Panel';
+        return 'Patient Risk Panel (Provider)';
       case 'safety':
         return 'Safety Risk Panel';
       case 'cohort':
         return 'Cohort Risk Panel';
       case 'payor':
-        return 'Patient Risk Panel (Payor)';
+        return 'Patient Risk Panel';
       default:
         return 'Patient Risk Panel';
     }
