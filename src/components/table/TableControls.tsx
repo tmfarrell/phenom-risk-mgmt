@@ -261,7 +261,7 @@ export const TableControls = ({
         </Popover>
       </div>
 
-      {appVersion !== 'payor' && (
+      {appVersion === 'patient' && (
         <div className='flex flex-col gap-2'>
           <Label htmlFor='provider' className='text-center text-muted-foreground mx-auto'>
             Provider
