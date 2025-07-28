@@ -85,8 +85,8 @@ export const getBaseColumns = (onPatientClick?: (patientId: number) => void): Co
     },
   ];
 
-  // Add provider column only if not payor version
-  if (appVersion !== 'payor') {
+  // Add provider column only for patient version (Provider Risk Panel)
+  if (appVersion === 'patient') {
     columns.push({
       accessorKey: 'provider',
       header: ({ column }) => {
