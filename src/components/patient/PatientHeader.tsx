@@ -40,10 +40,12 @@ export const PatientHeader = ({ person }: PatientHeaderProps) => {
           <p className="text-gray-500 font-medium mb-0.5">Sex</p>
           <p>{person.gender || 'N/A'}</p>
         </div>
-        <div>
-          <p className="text-gray-500 font-medium mb-0.5">Provider</p>
-          <p>{person.provider || 'N/A'}</p>
-        </div>
+        {appVersion === 'patient' && (
+          <div>
+            <p className="text-gray-500 font-medium mb-0.5">Provider</p>
+            <p>{person.provider || 'N/A'}</p>
+          </div>
+        )}
         <div>
           <p className="text-gray-500 font-medium mb-0.5">Last Visit</p>
           <p>{person.last_visit || 'N/A'}</p>
