@@ -6,6 +6,8 @@ PhenOM 2.0 is a clinical event risk model that predicts patients risks based on 
 
 This app provides users with PhenOM 2.0 predictions for patients, so they can better understand how to improve patient care/ outcomes and reduce care delivery costs
 
+![prp demo](/public/prp-demo.png)
+
 ### Development 
 
 To run the dev server, do: 
