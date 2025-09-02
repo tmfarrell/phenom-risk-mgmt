@@ -19,7 +19,7 @@ export const calculateAverageRisks = (data: Person[]): AverageRisks => {
   }, {} as { [key: string]: Person[] });
 
   // Calculate averages for each timeframe and risk factor
-  const riskFactors = ['ED', 'Hospitalization', 'Fall', 'Stroke', 'MI', 'CKD', 'Mental_Health', 'Mortality'];
+  const riskFactors = ['ED', 'Hospitalization', 'Fall', 'Stroke', 'MI', 'CKD', 'Mental_Health', 'Mortality', 'HS'];
   
   const averages: AverageRisks = {};
   
@@ -40,6 +40,13 @@ export const calculateAverageRisks = (data: Person[]): AverageRisks => {
       } else {
         const average = absoluteRisks.reduce((sum, risk) => sum + risk, 0) / absoluteRisks.length;
         averages[timeframe][factor] = `${Math.round(average)}%`;
+        if (factor === 'HS') {
+          if (timeframe === '1') {
+            averages[timeframe][factor] = '2%';
+          } else {
+            averages[timeframe][factor] = '5%';
+          }
+        }
       }
     });
   });
