@@ -24,11 +24,27 @@ export const getRiskColumns = (
     },
     header: ({ table, column: tableColumn }) => {      
       const isSorted = tableColumn.getIsSorted();
+      
+      const handleThreeStateSorting = () => {
+        const currentSort = tableColumn.getIsSorted();
+        
+        if (!currentSort) {
+          // First click: sort ascending
+          tableColumn.toggleSorting(false);
+        } else if (currentSort === "asc") {
+          // Second click: sort descending
+          tableColumn.toggleSorting(true);
+        } else {
+          // Third click: return to default (composite_risk descending)
+          table.setSorting([{ id: 'composite_risk', desc: true }]);
+        }
+      };
+      
       return (
         <div className="flex flex-col items-center pb-2">
           <Button
             variant="ghost"
-            onClick={() => tableColumn.toggleSorting(tableColumn.getIsSorted() !== "desc")}
+            onClick={handleThreeStateSorting}
             className="hover:bg-transparent whitespace-nowrap"
           >
             {column}

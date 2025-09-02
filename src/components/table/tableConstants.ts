@@ -7,6 +7,7 @@ export const RISK_COLUMNS = [
   'Fall',
   'Stroke',
   'MI',
+  'HS',
   'Mortality',
 ] as const;
 
@@ -25,6 +26,7 @@ export const RISK_COLUMN_FIELD_MAP: Record<string, string> = {
   'Fall': 'FALL',
   'Stroke': 'STROKE',
   'MI': 'INFARCTION',
+  'HS': 'INFARCTION', // Reuse MI/INFARCTION values for HS
   'Mortality': 'DEATH'
 };
 
