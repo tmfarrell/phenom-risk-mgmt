@@ -41,7 +41,7 @@ export default function Index() {
   const [searchQuery, setSearchQuery] = useState(savedState?.searchQuery || '');
   const [selectedRiskType, setSelectedRiskType] = useState<'relative' | 'absolute'>(savedState?.selectedRiskType || 'relative');
   const [selectedRiskColumns, setSelectedRiskColumns] = useState<string[]>(
-    savedState?.selectedRiskColumns || ['ED', 'Hospitalization', 'Fall', 'Stroke', 'MI']
+    savedState?.selectedRiskColumns || ['ED', 'Hospitalization', 'Fall', 'Stroke', 'HS']
   );
   const [selectedPatients, setSelectedPatients] = useState<Person[]>(savedState?.selectedPatients || []);
   const [showSelectedOnly, setShowSelectedOnly] = useState(savedState?.showSelectedOnly || false);

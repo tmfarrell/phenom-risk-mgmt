@@ -13,7 +13,7 @@ interface RiskTableProps {
 }
 
 export const RiskTable = ({ currentRisks, selectedRiskType, allRisks, riskSummaries = [] }: RiskTableProps) => {
-  const riskFactors = ['ED', 'Hospitalization', 'Fall', 'Stroke', 'MI', 'Mortality'];
+  const riskFactors = ['ED', 'Hospitalization', 'Fall', 'Stroke', 'HS', 'Mortality'];
   const { data: patientData } = usePatientData();
 
   // Set y-axis domain based on risk type

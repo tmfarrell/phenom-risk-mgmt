@@ -48,6 +48,7 @@ export type Database = {
         Row: {
           calculated_date: string | null
           change_since: string | null
+          composite_risk: number | null
           DEATH: number | null
           DEATH_change: number | null
           EMERGENCY_VISIT: number | null
@@ -68,6 +69,7 @@ export type Database = {
         Insert: {
           calculated_date?: string | null
           change_since?: string | null
+          composite_risk?: number | null
           DEATH?: number | null
           DEATH_change?: number | null
           EMERGENCY_VISIT?: number | null
@@ -88,6 +90,7 @@ export type Database = {
         Update: {
           calculated_date?: string | null
           change_since?: string | null
+          composite_risk?: number | null
           DEATH?: number | null
           DEATH_change?: number | null
           EMERGENCY_VISIT?: number | null

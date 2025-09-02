@@ -35,12 +35,28 @@ export const getBaseColumns = (onPatientClick?: (patientId: number) => void): Co
     },
     {
       accessorKey: 'name',
-      header: ({ column }) => {
+      header: ({ table, column }) => {
         const isSorted = column.getIsSorted();
+        
+        const handleThreeStateSorting = () => {
+          const currentSort = column.getIsSorted();
+          
+          if (!currentSort) {
+            // First click: sort ascending
+            column.toggleSorting(false);
+          } else if (currentSort === "asc") {
+            // Second click: sort descending
+            column.toggleSorting(true);
+          } else {
+            // Third click: return to default (composite_risk descending)
+            table.setSorting([{ id: 'composite_risk', desc: true }]);
+          }
+        };
+        
         return (
           <Button
             variant="ghost"
-            onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+            onClick={handleThreeStateSorting}
             className="hover:bg-transparent"
           >
             Name
@@ -83,18 +99,45 @@ export const getBaseColumns = (onPatientClick?: (patientId: number) => void): Co
       ),
       enableColumnFilter: true,
     },
+    {
+      // Hidden column for composite_risk sorting
+      accessorKey: 'composite_risk',
+      header: () => null,
+      cell: () => null,
+      enableSorting: true,
+      enableColumnFilter: false,
+      enableHiding: false,
+      // This column will not be visible but allows sorting by composite_risk
+      size: 0,
+    },
   ];
 
   // Add provider column only for patient version (Provider Risk Panel)
   if (appVersion === 'patient') {
     columns.push({
       accessorKey: 'provider',
-      header: ({ column }) => {
+      header: ({ table, column }) => {
         const isSorted = column.getIsSorted();
+        
+        const handleThreeStateSorting = () => {
+          const currentSort = column.getIsSorted();
+          
+          if (!currentSort) {
+            // First click: sort ascending
+            column.toggleSorting(false);
+          } else if (currentSort === "asc") {
+            // Second click: sort descending
+            column.toggleSorting(true);
+          } else {
+            // Third click: return to default (composite_risk descending)
+            table.setSorting([{ id: 'composite_risk', desc: true }]);
+          }
+        };
+        
         return (
           <Button
             variant="ghost"
-            onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+            onClick={handleThreeStateSorting}
             className="hover:bg-transparent whitespace-nowrap"
           >
             Provider

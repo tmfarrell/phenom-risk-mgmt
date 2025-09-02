@@ -38,7 +38,9 @@ export const ResultsTable = ({
   selectedTimeframe,
   onPatientClick
 }: ResultsTableProps) => {
-  const [sorting, setSorting] = useState<SortingState>([]);
+  const [sorting, setSorting] = useState<SortingState>([
+    { id: 'composite_risk', desc: true } // Default sort by composite_risk descending (highest to lowest)
+  ]);
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
   const [rowSelection, setRowSelection] = useState<RowSelectionState>({});
 
@@ -64,6 +66,9 @@ export const ResultsTable = ({
       pagination: {
         pageSize: 8,
       },
+      sorting: [
+        { id: 'composite_risk', desc: true } // Default sort by composite_risk descending
+      ],
     },
     getRowId: (row) => row.patient_id.toString(),
     autoResetPageIndex: false,
