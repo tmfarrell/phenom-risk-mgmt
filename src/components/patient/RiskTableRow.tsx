@@ -48,7 +48,7 @@ const riskDetails: Record<string, { fullName: string; description: string }> = {
   },
   'HS': {
     fullName: 'Hidradenitis Suppurativa',
-    description: 'Risk of hidradenitis suppurativa condition'
+    description: 'Risk of hidradenitis suppurativa diagnosis'
   },
   'Mortality': {
     fullName: 'Mortality',
