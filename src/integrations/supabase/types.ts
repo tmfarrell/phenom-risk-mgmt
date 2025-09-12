@@ -205,6 +205,76 @@ export type Database = {
         }
         Relationships: []
       }
+      ,
+      phenom_models: {
+        Row: {
+          id: string
+          model_name: string
+          min_patient_age: number | null
+          max_patient_age: number | null
+          patient_sex: string | null
+          indication_type: string
+          indication_code: string
+          indication_new_onset: boolean
+          prediction_timeframe_yrs: number | null
+          history_type: string | null
+          history_code: string | null
+          history_no_history: boolean
+          user_id: string | null
+          created_at: string
+          updated_at: string
+          patients_total: number | null
+          patients_phenom: number | null
+          auc: number | null
+          providers_total: number | null
+          providers_phenom: number | null
+        }
+        Insert: {
+          id?: string
+          model_name?: string
+          min_patient_age?: number | null
+          max_patient_age?: number | null
+          patient_sex?: string | null
+          indication_type?: string
+          indication_code?: string
+          indication_new_onset?: boolean
+          prediction_timeframe_yrs?: number | null
+          history_type?: string | null
+          history_code?: string | null
+          history_no_history?: boolean
+          user_id?: string | null
+          created_at?: string
+          updated_at?: string
+          patients_total?: number | null
+          patients_phenom?: number | null
+          auc?: number | null
+          providers_total?: number | null
+          providers_phenom?: number | null
+        }
+        Update: {
+          id?: string
+          model_name?: string
+          min_patient_age?: number | null
+          max_patient_age?: number | null
+          patient_sex?: string | null
+          indication_type?: string
+          indication_code?: string
+          indication_new_onset?: boolean
+          prediction_timeframe_yrs?: number | null
+          history_type?: string | null
+          history_code?: string | null
+          history_no_history?: boolean
+          user_id?: string | null
+          created_at?: string
+          updated_at?: string
+          patients_total?: number | null
+          patients_phenom?: number | null
+          auc?: number | null
+          providers_total?: number | null
+          providers_phenom?: number | null
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never

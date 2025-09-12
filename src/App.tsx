@@ -1,5 +1,5 @@
 
-import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Navigate, Outlet } from 'react-router-dom';
 import { useEffect, useState, createContext } from 'react';
 import { supabase } from './integrations/supabase/client';
 import { Session } from '@supabase/supabase-js';
@@ -9,6 +9,9 @@ import { PatientDetails } from './pages/PatientDetails';
 import Settings from './pages/Settings';
 import { useAdminStatus } from './hooks/useAdminStatus';
 import './App.css';
+import PhenomBuilder from './pages/PhenomBuilder';
+import { SidebarProvider } from './components/ui/sidebar';
+import { AppSidebar } from './components/AppSidebar';
 
 // Create a context to share auth and admin status
 export const AuthContext = createContext<{
@@ -71,32 +74,34 @@ function App() {
       <Routes>
         <Route path="/login" element={<Login />} />
         <Route
-          path="/"
           element={
             <ProtectedRoute>
-              <Index />
+              <MainLayout />
             </ProtectedRoute>
           }
-        />
-        <Route
-          path="/patient/:id"
-          element={
-            <ProtectedRoute>
-              <PatientDetails />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/settings"
-          element={
-            <ProtectedRoute>
-              <Settings />
-            </ProtectedRoute>
-          }
-        />
+        >
+          <Route index element={<Index />} />
+          <Route path="patient/:id" element={<PatientDetails />} />
+          <Route path="settings" element={<Settings />} />
+          <Route path="phenom-builder" element={<PhenomBuilder />} />
+          <Route path="phenom-builder/:modelId" element={<PhenomBuilder />} />
+        </Route>
       </Routes>
     </Router>
   );
 }
 
 export default App;
+
+function MainLayout() {
+  return (
+    <SidebarProvider>
+      <div className="min-h-screen flex bg-gray-50">
+        <AppSidebar />
+        <main className="flex-1">
+          <Outlet />
+        </main>
+      </div>
+    </SidebarProvider>
+  );
+}
