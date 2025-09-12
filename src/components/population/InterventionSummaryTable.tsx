@@ -4,10 +4,11 @@ import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { RISK_COLUMN_FIELD_MAP } from '../table/tableConstants';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Input } from '@/components/ui/input';
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import { AlertCircle } from 'lucide-react';
 
 type RiskDistribution = {
   range: string;
@@ -43,7 +44,29 @@ export function InterventionSummaryTable({
   const { data: distributionData, isLoading: isDistributionLoading } = useQuery({
     queryKey: ['intervention-summary-multi', selectedRiskFactor, selectedCohorts, selectedTimeframe],
     queryFn: async () => {
-      const dbRiskFactor = RISK_COLUMN_FIELD_MAP[selectedRiskFactor];
+      // TEMPORARY: First, get all available fact_types from phenom_risk_dist
+      const { data: factTypes, error: factTypesError } = await supabase
+        .from('phenom_risk_dist')
+        .select('fact_type')
+        .eq('time_period', parseInt(selectedTimeframe))
+        .limit(1000);
+
+      if (factTypesError) {
+        console.error('Error fetching fact types:', factTypesError);
+        return [];
+      }
+
+      // Get unique fact_types
+      const uniqueFactTypes = [...new Set(factTypes?.map(item => item.fact_type) || [])];
+      
+      if (uniqueFactTypes.length === 0) {
+        console.log('No fact_types found for the selected timeframe');
+        return [];
+      }
+
+      // TEMPORARY: Pick a random fact_type
+      const randomFactType = uniqueFactTypes[Math.floor(Math.random() * uniqueFactTypes.length)];
+      console.log(`TEMPORARY: Using random fact_type '${randomFactType}' instead of '${selectedRiskFactor}' for demo purposes in summary table`);
       
       // Get data for all selected cohorts
       const promises = selectedCohorts.map(async (cohort) => {
@@ -51,7 +74,7 @@ export function InterventionSummaryTable({
           .from('phenom_risk_dist')
           .select('*')
           .eq('time_period', parseInt(selectedTimeframe))
-          .eq('fact_type', dbRiskFactor)
+          .eq('fact_type', randomFactType) // Use the random fact_type
           .eq('cohort', cohort);
         
         if (error) {

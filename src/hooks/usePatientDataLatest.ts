@@ -24,6 +24,21 @@ export const usePatientDataLatest = () => {
     queryFn: async () => {
       console.log('Fetching latest patient data...');
       
+      // First, fetch available outcomes from phenom_models
+      const { data: phenomModels, error: modelsError } = await supabase
+        .from('phenom_models')
+        .select('indication_code, prediction_timeframe_yrs')
+        .not('prediction_timeframe_yrs', 'is', null);
+
+      if (modelsError) {
+        console.error('Error fetching phenom models:', modelsError);
+        throw modelsError;
+      }
+
+      // Extract unique outcomes
+      const availableOutcomes = [...new Set(phenomModels?.map(item => item.indication_code) || [])];
+      console.log('Available outcomes:', availableOutcomes);
+      
       // Fetch patients
       const { data: patients, error: patientsError } = await supabase
         .from('patient')
@@ -66,61 +81,55 @@ export const usePatientDataLatest = () => {
 
         // If no risks found for patient, return single entry with null values
         if (patientLatestRisks.length === 0) {
-          return [{
+          const basePatient: Person = {
             ...patient,
             provider: assignedProvider.name,
             provider_npi: assignedProvider.npi,
             history: null,
             composite_risk: null,
-            ED: null,
-            Hospitalization: null,
-            Fall: null,
-            Stroke: null,
-            MI: null,
-            HS: null,
-            Mortality: null,
-            ED_change: null,
-            Hospitalization_change: null,
-            Fall_change: null,
-            Stroke_change: null,
-            MI_change: null,
-            HS_change: null,
-            Mortality_change: null,
             recorded_date: null,
             prediction_timeframe_yrs: null,
             risk_type: null,
             change_since: null
-          }];
+          };
+          
+          // Add null values for each available outcome
+          availableOutcomes.forEach(outcome => {
+            basePatient[outcome] = null;
+            basePatient[`${outcome}_change`] = null;
+          });
+          
+          return [basePatient];
         }
 
         // Return an entry for each unique risk type and timeframe combination
         return patientLatestRisks.map((risk: any) => {
-          
-          return {
+          const basePatient: Person = {
             ...patient,
             provider: assignedProvider.name,
             provider_npi: assignedProvider.npi,
             history: null,
             composite_risk: risk.composite_risk || null,
-            ED: risk.EMERGENCY_VISIT || null,
-            Hospitalization: risk.HOSPITALIZATION || null,
-            Fall: risk.FALL || null,
-            Stroke: risk.STROKE || null,
-            MI: risk.INFARCTION || null,
-            HS: risk.INFARCTION || null, // Reuse MI values for HS
-            Mortality: risk.DEATH !== undefined ? risk.DEATH : null, // Explicitly map DEATH to Mortality
-            ED_change: risk.EMERGENCY_VISIT_change || null,
-            Hospitalization_change: risk.HOSPITALIZATION_change || null,
-            Fall_change: risk.FALL_change || null,
-            Stroke_change: risk.STROKE_change || null,
-            MI_change: risk.INFARCTION_change || null,
-            HS_change: risk.INFARCTION_change || null, // Reuse MI change values for HS
-            Mortality_change: risk.DEATH_change !== undefined ? risk.DEATH_change : null, // Explicitly map DEATH_change to Mortality_change
             recorded_date: risk.calculated_date,
             prediction_timeframe_yrs: risk.time_period,
             risk_type: (risk.risk_type as 'relative' | 'absolute' | null) || null,
             change_since: risk.change_since || null
           };
+          
+          // For demo purposes: pick random values from available risk fields for each outcome
+          const riskFields = ['EMERGENCY_VISIT', 'HOSPITALIZATION', 'FALL', 'STROKE', 'INFARCTION', 'DEATH'];
+          
+          availableOutcomes.forEach(outcome => {
+            // Pick a random risk field to use for this outcome
+            const randomField = riskFields[Math.floor(Math.random() * riskFields.length)];
+            const changeField = `${randomField}_change`;
+            
+            // Assign the random values
+            basePatient[outcome] = risk[randomField] || null;
+            basePatient[`${outcome}_change`] = risk[changeField] || null;
+          });
+          
+          return basePatient;
         });
       });
 

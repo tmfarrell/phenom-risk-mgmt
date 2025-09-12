@@ -2,7 +2,7 @@ import { ResultsTable } from '@/components/ResultsTable';
 import { Header } from '@/components/Header';
 import { usePatientDataLatest } from '@/hooks/usePatientDataLatest';
 import { Skeleton } from '@/components/ui/skeleton';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Person } from '@/types/population';
 import { TableControls } from '@/components/table/TableControls';
 import { calculateAverageRisks } from '@/components/table/utils/riskCalculations';
@@ -52,48 +52,61 @@ export default function Index() {
     }
   );
 
-  // Fetch available time periods from the database
-  const { data: fetchedTimePeriods, isLoading: isTimePeriodsLoading } = useQuery({
-    queryKey: ['index-time-periods'],
+  // Fetch available outcomes and time periods from phenom_models
+  const { data: phenomModelsData, isLoading: isModelsLoading } = useQuery({
+    queryKey: ['phenom-models-outcomes'],
     queryFn: async () => {
-      // Fetch from both tables to ensure we have all possible time periods
-      const [riskDistResponse, patientRiskResponse] = await Promise.all([
-        supabase.from('phenom_risk_dist').select('time_period').order('time_period'),
-        supabase.from('phenom_risk').select('time_period').order('time_period')
-      ]);
+      const { data, error } = await supabase
+        .from('phenom_models')
+        .select('id, indication_code, prediction_timeframe_yrs')
+        .not('prediction_timeframe_yrs', 'is', null)
+        .order('indication_code');
       
-      if (riskDistResponse.error) {
-        console.error('Error fetching risk_dist time periods:', riskDistResponse.error);
+      if (error) {
+        console.error('Error fetching phenom_models:', error);
+        throw error;
       }
       
-      if (patientRiskResponse.error) {
-        console.error('Error fetching patient risk time periods:', patientRiskResponse.error);
-      }
+      // Create a map of outcomes to their available timeframes and model info
+      const outcomeTimeframeMap: Record<string, number[]> = {};
+      const outcomeModelMap: Record<string, Array<{id: string, timeframe: number}>> = {};
       
-      // Combine time periods from both tables
-      const allTimePeriods = [
-        ...(riskDistResponse.data || []).map(item => item.time_period),
-        ...(patientRiskResponse.data || []).map(item => item.time_period)
-      ];
+      data?.forEach(item => {
+        if (!outcomeTimeframeMap[item.indication_code]) {
+          outcomeTimeframeMap[item.indication_code] = [];
+          outcomeModelMap[item.indication_code] = [];
+        }
+        if (!outcomeTimeframeMap[item.indication_code].includes(item.prediction_timeframe_yrs)) {
+          outcomeTimeframeMap[item.indication_code].push(item.prediction_timeframe_yrs);
+        }
+        outcomeModelMap[item.indication_code].push({
+          id: item.id,
+          timeframe: item.prediction_timeframe_yrs
+        });
+      });
       
-      // Get unique values and sort
-      const uniqueTimePeriods = [...new Set(allTimePeriods)].filter(Boolean).sort();
-      console.log('Unique time periods for Index page:', uniqueTimePeriods);
+      // Extract unique timeframes
+      const uniqueTimeframes = [...new Set(data?.map(item => item.prediction_timeframe_yrs) || [])].filter(Boolean).sort();
       
-      return uniqueTimePeriods.length > 0 ? uniqueTimePeriods : [1, 2]; // Default if empty
+      console.log('Outcome to timeframe mapping:', outcomeTimeframeMap);
+      console.log('Available timeframes from phenom_models:', uniqueTimeframes);
+      
+      return {
+        outcomeTimeframeMap,
+        outcomeModelMap,
+        timeframes: uniqueTimeframes as number[],
+        rawData: data
+      };
     }
   });
-  
-  // Get time periods from fetched data or patient data as fallback
-  const timePeriods = fetchedTimePeriods || 
-    (patientData 
-      ? [...new Set(patientData.filter(p => p.prediction_timeframe_yrs !== null).map(p => p.prediction_timeframe_yrs))]
-      : [1, 2]); // Default if nothing is available
+
+  // Use timeframes from phenom_models
+  const timePeriods = phenomModelsData?.timeframes || [1, 2];
 
   // Make sure we have a valid initial timeframe selection
   const [selectedTimeframe, setSelectedTimeframe] = useState<string>(savedState?.selectedTimeframe || '1');
   
-  // Set the timeframe once data is loaded
+  // Set the timeframe and outcomes once data is loaded
   useEffect(() => {
     if (timePeriods && timePeriods.length > 0) {
       // Check if the current selection exists in the new options
@@ -104,6 +117,62 @@ export default function Index() {
       }
     }
   }, [timePeriods]);
+
+  // Get available outcomes with model info for the selected timeframe
+  const availableOutcomesForTimeframe = phenomModelsData?.outcomeTimeframeMap 
+    ? Object.entries(phenomModelsData.outcomeTimeframeMap)
+        .filter(([_, timeframes]) => timeframes.includes(parseInt(selectedTimeframe)))
+        .map(([outcome]) => outcome)
+        .sort()
+    : [];
+    
+  // Get model data for available outcomes
+  const availableModelsForTimeframe = phenomModelsData?.outcomeModelMap
+    ? Object.entries(phenomModelsData.outcomeModelMap)
+        .reduce((acc, [outcome, models]) => {
+          const modelsForTimeframe = models.filter(m => m.timeframe === parseInt(selectedTimeframe));
+          if (modelsForTimeframe.length > 0) {
+            acc.push({
+              outcome,
+              modelId: modelsForTimeframe[0].id // Use the first model ID for this outcome/timeframe combination
+            });
+          }
+          return acc;
+        }, [] as Array<{outcome: string, modelId: string}>)
+        .sort((a, b) => a.outcome.localeCompare(b.outcome))
+    : [];
+
+  // Track the previous timeframe to detect changes
+  const prevTimeframeRef = useRef<string>(selectedTimeframe);
+  const hasInitializedRef = useRef<boolean>(false);
+
+  // Set initial risk columns when outcomes are loaded (only once)
+  useEffect(() => {
+    if (availableOutcomesForTimeframe.length > 0 && !hasInitializedRef.current && !savedState?.selectedRiskColumns) {
+      // Select first 5 outcomes by default
+      setSelectedRiskColumns(availableOutcomesForTimeframe.slice(0, 5));
+      hasInitializedRef.current = true;
+    }
+  }, [availableOutcomesForTimeframe, savedState?.selectedRiskColumns]);
+
+  // Update selected risk columns when timeframe changes (filter out invalid ones)
+  useEffect(() => {
+    // Only run this when the timeframe actually changes, not on every render
+    if (prevTimeframeRef.current !== selectedTimeframe && hasInitializedRef.current) {
+      if (availableOutcomesForTimeframe.length > 0) {
+        // Filter out any currently selected columns that are not available for the new timeframe
+        const validColumns = selectedRiskColumns.filter(col => 
+          availableOutcomesForTimeframe.includes(col)
+        );
+        
+        // If we filtered out some columns, update the selection
+        if (validColumns.length !== selectedRiskColumns.length) {
+          setSelectedRiskColumns(validColumns);
+        }
+      }
+      prevTimeframeRef.current = selectedTimeframe;
+    }
+  }, [selectedTimeframe, availableOutcomesForTimeframe, selectedRiskColumns]);
 
   // Calculate average risks from the full dataset
   const averageRisks = patientData ? calculateAverageRisks(patientData) : {};
@@ -165,9 +234,9 @@ export default function Index() {
         </div>
       </div>
       <div className="p-6">
-        <div className="max-w-[2000px] mx-auto">
+        <div className="max-w-[1250px] mx-auto">
           <div className="flex flex-col space-y-6">
-            <div className="glass-card p-4">
+            <div className="glass-card p-4 overflow-hidden">
               {viewMode === 'patient' ? (
                 <>
                   <div className="flex justify-end mb-6">
@@ -200,13 +269,15 @@ export default function Index() {
                     onTimeframeChange={setSelectedTimeframe}
                     selectedRiskColumns={selectedRiskColumns}
                     onRiskColumnsChange={setSelectedRiskColumns}
-                    timeframes={isTimePeriodsLoading ? [1, 2] : timePeriods as number[]}
+                    timeframes={isModelsLoading ? [1, 2] : timePeriods as number[]}
                     selectedRiskType={selectedRiskType}
                     onRiskTypeChange={setSelectedRiskType}
                     providerList={providerList}
                     onProviderSelection={setProviderList}
                     showSelectedOnly={showSelectedOnly}
                     onShowSelectedOnlyChange={setShowSelectedOnly}
+                    availableOutcomes={availableOutcomesForTimeframe}
+                    availableModels={availableModelsForTimeframe}
                   />
                   <div className='flex justify-end mb-4'>
                       <p className='text-sm text-gray-600'>

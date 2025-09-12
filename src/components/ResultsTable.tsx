@@ -1,5 +1,5 @@
 import { Table } from './ui/table';
-import { ScrollArea } from './ui/scroll-area';
+import { ScrollArea, ScrollBar } from './ui/scroll-area';
 import { Person } from '../types/population';
 import {
   useReactTable,
@@ -84,13 +84,14 @@ export const ResultsTable = ({
 
   return (
     <div className="w-full rounded-md border">
-      <ScrollArea className="h-[600px]" type="always">
-        <div className="relative">
-          <Table>
+      <ScrollArea className="h-[600px] w-full" type="always">
+        <div className="relative min-w-max">
+          <Table className="min-w-full">
             <TableHeader table={table} />
             <TableBody table={table} columns={columns} />
           </Table>
         </div>
+        <ScrollBar orientation="horizontal" />
       </ScrollArea>
       <TablePagination table={table} />
     </div>

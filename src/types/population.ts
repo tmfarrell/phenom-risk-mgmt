@@ -14,21 +14,8 @@ export interface Person {
   risk_type?: 'relative' | 'absolute' | null;
   change_since?: string | null;
   composite_risk: number | null;
-  ED: number | null;
-  Hospitalization: number | null;
-  Fall: number | null;
-  Stroke: number | null;
-  MI: number | null;
-  HS: number | null;
-  Mortality: number | null;
-  ED_change: number | null;
-  Hospitalization_change: number | null;
-  Fall_change: number | null;
-  Stroke_change: number | null;
-  MI_change: number | null;
-  HS_change: number | null;
-  Mortality_change: number | null;
   history?: string | null;
+  // Dynamic risk values - will be populated based on available outcomes
   [key: string]: string | number | null | undefined;
 }
 

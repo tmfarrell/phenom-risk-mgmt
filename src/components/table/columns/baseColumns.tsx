@@ -32,6 +32,8 @@ export const getBaseColumns = (onPatientClick?: (patientId: number) => void): Co
       ),
       enableSorting: false,
       enableColumnFilter: false,
+      size: 50,
+      minSize: 50,
     },
     {
       accessorKey: 'name',
@@ -98,6 +100,8 @@ export const getBaseColumns = (onPatientClick?: (patientId: number) => void): Co
         </div>
       ),
       enableColumnFilter: true,
+      size: 200,
+      minSize: 180,
     },
     {
       // Hidden column for composite_risk sorting
@@ -161,6 +165,8 @@ export const getBaseColumns = (onPatientClick?: (patientId: number) => void): Co
           </div>
         </div>
       ),
+      size: 150,
+      minSize: 130,
     });
   }
 

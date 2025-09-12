@@ -1,4 +1,5 @@
-import { Search, Check, HelpCircle, ChevronDown } from 'lucide-react';
+import React from 'react';
+import { Search, Check, HelpCircle, ChevronDown, ExternalLink } from 'lucide-react';
 import { Input } from '../ui/input';
 import {
   Command,
@@ -47,6 +48,8 @@ interface TableControlsProps {
   onProviderSelection: (providerList: ProviderList) => void;
   showSelectedOnly: boolean;
   onShowSelectedOnlyChange: (value: boolean) => void;
+  availableOutcomes?: string[]; // Dynamic outcomes from phenom_models
+  availableModels?: Array<{outcome: string, modelId: string}>; // Model info for each outcome
 }
 
 export const TableControls = ({
@@ -63,6 +66,8 @@ export const TableControls = ({
   onProviderSelection,
   showSelectedOnly,
   onShowSelectedOnlyChange,
+  availableOutcomes = [],
+  availableModels = [],
 }: TableControlsProps) => {
   const [open, setOpen] = useState(false);
   const [providerOpen, setProviderOpen] = useState(false);
@@ -223,27 +228,47 @@ export const TableControls = ({
               <CommandList>
                 <CommandEmpty>No column found.</CommandEmpty>
                 <CommandGroup>
-                  {RISK_COLUMNS.map((column) => (
-                    <CommandItem
-                      key={column}
-                      value={column}
-                      onSelect={() => {
-                        const newSelection = currentSelectedColumns.includes(column)
-                          ? currentSelectedColumns.filter((c) => c !== column)
-                          : [...currentSelectedColumns, column];
-                        onRiskColumnsChange(newSelection);
-                      }}
-                    >
-                      <Check
-                        className={cn(
-                          "mr-2 h-4 w-4",
-                          currentSelectedColumns.includes(column) ? "opacity-100" : "opacity-0"
+                  {/* Use availableOutcomes if provided, otherwise fall back to RISK_COLUMNS */}
+                  {(availableOutcomes.length > 0 ? availableOutcomes : RISK_COLUMNS).map((column) => {
+                    const modelInfo = availableModels.find(m => m.outcome === column);
+                    return (
+                      <CommandItem
+                        key={column}
+                        value={column}
+                        onSelect={() => {
+                          const newSelection = currentSelectedColumns.includes(column)
+                            ? currentSelectedColumns.filter((c) => c !== column)
+                            : [...currentSelectedColumns, column];
+                          onRiskColumnsChange(newSelection);
+                        }}
+                        className="group"
+                      >
+                        <Check
+                          className={cn(
+                            "mr-2 h-4 w-4",
+                            currentSelectedColumns.includes(column) ? "opacity-100" : "opacity-0"
+                          )}
+                        />
+                        <span className="flex-1">{column}</span>
+                        {modelInfo && (
+                          <button
+                            type="button"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              e.preventDefault();
+                              window.open(`/phenom-builder/${modelInfo.modelId}`, '_blank');
+                            }}
+                            className="ml-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200"
+                            title="View model details"
+                          >
+                            <ExternalLink className="h-3 w-3 text-gray-500 hover:text-blue-600" />
+                          </button>
                         )}
-                      />
-                      {column}
-                    </CommandItem>
-                  ))}
-                  {DISABLED_RISK_COLUMNS.map((column) => (
+                      </CommandItem>
+                    );
+                  })}
+                  {/* Only show disabled columns if we're using the fallback RISK_COLUMNS */}
+                  {availableOutcomes.length === 0 && DISABLED_RISK_COLUMNS.map((column) => (
                     <CommandItem
                       key={column}
                       value={column}

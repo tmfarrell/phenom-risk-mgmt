@@ -15,7 +15,7 @@ import {
 
 const applications = [
   {
-    title: "PhenOM Explorer",
+    title: "PhenOM Catalog",
     url: "/phenom-builder",
     icon: Fingerprint,
   },

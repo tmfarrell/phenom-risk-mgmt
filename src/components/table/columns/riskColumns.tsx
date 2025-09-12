@@ -18,10 +18,11 @@ export const getRiskColumns = (
   visibleRiskColumns.map((column): ColumnDef<Person> => ({
     accessorKey: column,
     accessorFn: (row) => {
-      // Make sure to correctly access the column value, especially for Mortality which maps to DEATH
-      const dbField = getFieldName(column);
+      // Access the column value directly using the outcome code from phenom_models
       return row[column as keyof Person];
     },
+    size: 120, // Set minimum width for risk columns
+    minSize: 120,
     header: ({ table, column: tableColumn }) => {      
       const isSorted = tableColumn.getIsSorted();
       

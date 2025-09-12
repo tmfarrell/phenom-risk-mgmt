@@ -5,20 +5,13 @@ import { AreaChart, Area, XAxis, YAxis, CartesianGrid, ReferenceLine, Legend } f
 import { ChartContainer } from '@/components/ui/chart';
 import { Label } from '@/components/ui/label';
 import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
-import { RISK_COLUMNS, RISK_COLUMN_FIELD_MAP } from '../table/tableConstants';
+// Dynamic outcomes will be fetched from phenom_models
 import { cn } from '@/lib/utils';
 import { InterventionSummaryTable } from './InterventionSummaryTable';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useAppVersion } from '@/hooks/useAppVersion';
 import { Badge } from '@/components/ui/badge';
-import { Check, ChevronsUpDown, X } from 'lucide-react';
+import { Check, ChevronsUpDown, X, ExternalLink, AlertCircle } from 'lucide-react';
 import {
   Command,
   CommandEmpty,
@@ -43,14 +36,91 @@ export function PopulationRiskDistribution({
   selectedTimeframe,
   selectedRiskType,
 }: PopulationRiskDistributionProps) {
-  const [selectedRiskFactor, setSelectedRiskFactor] = useState<string>(RISK_COLUMNS[0]);
+  const [selectedRiskFactor, setSelectedRiskFactor] = useState<string>('');
   const [localTimeframe, setLocalTimeframe] = useState<string>(selectedTimeframe);
   const [selectedCohorts, setSelectedCohorts] = useState<string[]>([]);
   const [cohortsPopoverOpen, setCohortsPopoverOpen] = useState<boolean>(false);
+  const [outcomePopoverOpen, setOutcomePopoverOpen] = useState<boolean>(false);
   const [activeTab, setActiveTab] = useState<string>("summary");
   const { appVersion } = useAppVersion();
   
   const useMonthsForTimeframe = appVersion !== 'patient';
+
+  // Fetch available outcomes from phenom_models
+  const { data: phenomModelsData, isLoading: isOutcomesLoading } = useQuery({
+    queryKey: ['population-outcomes'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('phenom_models')
+        .select('id, indication_code, prediction_timeframe_yrs')
+        .not('prediction_timeframe_yrs', 'is', null)
+        .order('indication_code');
+      
+      if (error) {
+        console.error('Error fetching outcomes:', error);
+        throw error;
+      }
+
+      // Create a map of outcomes to their available timeframes and model info
+      const outcomeTimeframeMap: Record<string, number[]> = {};
+      const outcomeModelMap: Record<string, Array<{id: string, timeframe: number}>> = {};
+      
+      data?.forEach(item => {
+        if (!outcomeTimeframeMap[item.indication_code]) {
+          outcomeTimeframeMap[item.indication_code] = [];
+          outcomeModelMap[item.indication_code] = [];
+        }
+        if (!outcomeTimeframeMap[item.indication_code].includes(item.prediction_timeframe_yrs)) {
+          outcomeTimeframeMap[item.indication_code].push(item.prediction_timeframe_yrs);
+        }
+        outcomeModelMap[item.indication_code].push({
+          id: item.id,
+          timeframe: item.prediction_timeframe_yrs
+        });
+      });
+      
+      console.log('Outcome to timeframe mapping for population view:', outcomeTimeframeMap);
+      return { outcomeTimeframeMap, outcomeModelMap };
+    }
+  });
+
+  // Get available outcomes with model info for the selected timeframe
+  const availableOutcomes = phenomModelsData?.outcomeTimeframeMap
+    ? Object.entries(phenomModelsData.outcomeTimeframeMap)
+        .filter(([_, timeframes]) => timeframes.includes(parseInt(localTimeframe)))
+        .map(([outcome]) => outcome)
+        .sort()
+    : [];
+    
+  // Get model data for available outcomes
+  const availableModelsForTimeframe = phenomModelsData?.outcomeModelMap
+    ? Object.entries(phenomModelsData.outcomeModelMap)
+        .reduce((acc, [outcome, models]) => {
+          const modelsForTimeframe = models.filter(m => m.timeframe === parseInt(localTimeframe));
+          if (modelsForTimeframe.length > 0) {
+            acc.push({
+              outcome,
+              modelId: modelsForTimeframe[0].id // Use the first model ID for this outcome/timeframe combination
+            });
+          }
+          return acc;
+        }, [] as Array<{outcome: string, modelId: string}>)
+        .sort((a, b) => a.outcome.localeCompare(b.outcome))
+    : [];
+
+  // Set default selected risk factor once outcomes are loaded
+  useEffect(() => {
+    if (availableOutcomes && availableOutcomes.length > 0) {
+      // If no risk factor is selected, select the first one
+      if (!selectedRiskFactor) {
+        setSelectedRiskFactor(availableOutcomes[0]);
+      }
+      // If current risk factor is not available for the new timeframe, select the first available one
+      else if (!availableOutcomes.includes(selectedRiskFactor)) {
+        setSelectedRiskFactor(availableOutcomes[0]);
+      }
+    }
+  }, [availableOutcomes, selectedRiskFactor]);
 
   const { data: timePeriods, isLoading: isTimePeriodsLoading } = useQuery({
     queryKey: ['time-periods'],
@@ -131,23 +201,45 @@ export function PopulationRiskDistribution({
   const { data: distributionData, isLoading: isDistributionLoading } = useQuery({
     queryKey: ['risk-distribution', localTimeframe, selectedRiskType, selectedRiskFactor, selectedCohorts],
     queryFn: async () => {
-      const dbRiskFactor = RISK_COLUMN_FIELD_MAP[selectedRiskFactor];
       console.log('Fetching risk distribution data with params:', {
         timeframe: localTimeframe,
         riskType: selectedRiskType,
         riskFactor: selectedRiskFactor,
-        dbRiskFactor: dbRiskFactor,
         cohorts: selectedCohorts
       });
 
       if (!selectedCohorts.length) return [];
+
+      // TEMPORARY: First, get all available fact_types from phenom_risk_dist
+      const { data: factTypes, error: factTypesError } = await supabase
+        .from('phenom_risk_dist')
+        .select('fact_type')
+        .eq('time_period', parseInt(localTimeframe))
+        .limit(1000);
+
+      if (factTypesError) {
+        console.error('Error fetching fact types:', factTypesError);
+        return [];
+      }
+
+      // Get unique fact_types
+      const uniqueFactTypes = [...new Set(factTypes?.map(item => item.fact_type) || [])];
+      
+      if (uniqueFactTypes.length === 0) {
+        console.log('No fact_types found for the selected timeframe');
+        return [];
+      }
+
+      // TEMPORARY: Pick a random fact_type
+      const randomFactType = uniqueFactTypes[Math.floor(Math.random() * uniqueFactTypes.length)];
+      console.log(`TEMPORARY: Using random fact_type '${randomFactType}' instead of '${selectedRiskFactor}' for demo purposes`);
 
       const promises = selectedCohorts.map(async (cohort) => {
         const { data, error } = await supabase
           .from('phenom_risk_dist')
           .select('*')
           .eq('time_period', parseInt(localTimeframe))
-          .eq('fact_type', dbRiskFactor)
+          .eq('fact_type', randomFactType) // Use the random fact_type
           .eq('cohort', cohort);
 
         if (error) {
@@ -189,7 +281,7 @@ export function PopulationRiskDistribution({
     enabled: selectedCohorts.length > 0
   });
 
-  const isLoading = isCohortsLoading || isDistributionLoading || isTimePeriodsLoading || selectedCohorts.length === 0;
+  const isLoading = isCohortsLoading || isDistributionLoading || isTimePeriodsLoading || isOutcomesLoading || selectedCohorts.length === 0;
 
   const getTimeUnitLabel = (timeframe: string) => {
     const numericTimeframe = parseInt(timeframe);
@@ -218,21 +310,66 @@ export function PopulationRiskDistribution({
         <div className="grid grid-cols-3 gap-8 flex-1 mr-8">
           <div className="flex flex-col gap-2">
             <Label className="mb-2 block">Outcome</Label>
-            <Select
-              value={selectedRiskFactor}
-              onValueChange={setSelectedRiskFactor}
-            >
-              <SelectTrigger>
-                <SelectValue placeholder="Select risk factor" />
-              </SelectTrigger>
-              <SelectContent>
-                {RISK_COLUMNS.map((riskFactor) => (
-                  <SelectItem key={riskFactor} value={riskFactor}>
-                    {riskFactor}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+            <Popover open={outcomePopoverOpen} onOpenChange={setOutcomePopoverOpen}>
+              <PopoverTrigger asChild>
+                <Button
+                  variant="outline"
+                  role="combobox"
+                  aria-expanded={outcomePopoverOpen}
+                  className="w-full justify-between"
+                  disabled={isOutcomesLoading}
+                >
+                  {selectedRiskFactor || "Select outcome"}
+                  <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-full p-0">
+                <Command>
+                  <CommandInput placeholder="Search outcomes..." />
+                  <CommandList>
+                    <CommandEmpty>No outcome found.</CommandEmpty>
+                    <CommandGroup>
+                      {availableOutcomes?.map((outcome) => {
+                        const modelInfo = availableModelsForTimeframe.find(m => m.outcome === outcome);
+                        return (
+                          <CommandItem
+                            key={outcome}
+                            value={outcome}
+                            onSelect={() => {
+                              setSelectedRiskFactor(outcome);
+                              setOutcomePopoverOpen(false);
+                            }}
+                            className="group"
+                          >
+                            <Check
+                              className={cn(
+                                "mr-2 h-4 w-4",
+                                selectedRiskFactor === outcome ? "opacity-100" : "opacity-0"
+                              )}
+                            />
+                            <span className="flex-1">{outcome}</span>
+                            {modelInfo && (
+                              <button
+                                type="button"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  e.preventDefault();
+                                  window.open(`/phenom-builder/${modelInfo.modelId}`, '_blank');
+                                }}
+                                className="ml-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200"
+                                title="View model details"
+                              >
+                                <ExternalLink className="h-3 w-3 text-gray-500 hover:text-blue-600" />
+                              </button>
+                            )}
+                          </CommandItem>
+                        );
+                      })}
+                    </CommandGroup>
+                  </CommandList>
+                </Command>
+              </PopoverContent>
+            </Popover>
           </div>
 
           <div className="w-full">
@@ -348,7 +485,7 @@ export function PopulationRiskDistribution({
         </div>
       ) : (
         <>
-          <div className="space-y-0.5">
+          <div className="space-y-2">
             <h3 className="text-2xl font-medium" style={{ color: '#002B71' }}>
               Predicted {useMonthsForTimeframe ? (parseInt(selectedTimeframe) * 12) + ' month' : selectedTimeframe + ' year'} {selectedRiskFactor} Risk
             </h3>
