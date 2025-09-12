@@ -39,9 +39,7 @@ export default function Index() {
   const { data: patientData, isLoading, error } = usePatientDataLatest();
   const [searchQuery, setSearchQuery] = useState(savedState?.searchQuery || '');
   const [selectedRiskType, setSelectedRiskType] = useState<'relative' | 'absolute'>(savedState?.selectedRiskType || 'relative');
-  const [selectedRiskColumns, setSelectedRiskColumns] = useState<string[]>(
-    savedState?.selectedRiskColumns || ['ED', 'Hospitalization', 'Fall', 'Stroke', 'HS']
-  );
+  const [selectedRiskColumns, setSelectedRiskColumns] = useState<string[]>([]);
   const [selectedPatients, setSelectedPatients] = useState<Person[]>(savedState?.selectedPatients || []);
   const [showSelectedOnly, setShowSelectedOnly] = useState(savedState?.showSelectedOnly || false);
   const [viewMode, setViewMode] = useState<'patient' | 'population'>(savedState?.viewMode || 'patient');
@@ -148,31 +146,24 @@ export default function Index() {
 
   // Set initial risk columns when outcomes are loaded (only once)
   useEffect(() => {
-    if (availableOutcomesForTimeframe.length > 0 && !hasInitializedRef.current && !savedState?.selectedRiskColumns) {
-      // Select first 5 outcomes by default
-      setSelectedRiskColumns(availableOutcomesForTimeframe.slice(0, 5));
+    if (availableOutcomesForTimeframe.length > 0 && !hasInitializedRef.current) {
+      // Select first 4 outcomes by default
+      setSelectedRiskColumns(availableOutcomesForTimeframe.slice(0, 4));
       hasInitializedRef.current = true;
     }
-  }, [availableOutcomesForTimeframe, savedState?.selectedRiskColumns]);
+  }, [availableOutcomesForTimeframe]);
 
-  // Update selected risk columns when timeframe changes (filter out invalid ones)
+  // Whenever timeframe changes, select the first 4 outcomes for that timeframe
   useEffect(() => {
-    // Only run this when the timeframe actually changes, not on every render
-    if (prevTimeframeRef.current !== selectedTimeframe && hasInitializedRef.current) {
+    if (prevTimeframeRef.current !== selectedTimeframe) {
       if (availableOutcomesForTimeframe.length > 0) {
-        // Filter out any currently selected columns that are not available for the new timeframe
-        const validColumns = selectedRiskColumns.filter(col => 
-          availableOutcomesForTimeframe.includes(col)
-        );
-        
-        // If we filtered out some columns, update the selection
-        if (validColumns.length !== selectedRiskColumns.length) {
-          setSelectedRiskColumns(validColumns);
-        }
+        setSelectedRiskColumns(availableOutcomesForTimeframe.slice(0, 4));
+      } else {
+        setSelectedRiskColumns([]);
       }
       prevTimeframeRef.current = selectedTimeframe;
     }
-  }, [selectedTimeframe, availableOutcomesForTimeframe, selectedRiskColumns]);
+  }, [selectedTimeframe, availableOutcomesForTimeframe]);
 
   // Calculate average risks from the full dataset
   const averageRisks = patientData ? calculateAverageRisks(patientData) : {};
