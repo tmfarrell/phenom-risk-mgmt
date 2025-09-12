@@ -7,7 +7,13 @@ import { useNavigate } from 'react-router-dom';
 import { useToast } from './ui/use-toast';
 import { AuthContext } from '@/App';
 
-export const Header = () => {
+interface HeaderProps {
+  hideLogout?: boolean;
+  bgClassName?: string;
+  logoSrc?: string;
+}
+
+export const Header = ({ hideLogout = false, bgClassName = 'bg-blue-900', logoSrc = '/om1_logo_wht.png' }: HeaderProps) => {
   const navigate = useNavigate();
   const { toast } = useToast();
   const { isAdmin } = useContext(AuthContext);
@@ -37,10 +43,10 @@ export const Header = () => {
   };
 
   return (
-    <div className="w-full bg-blue-900 px-6 py-3 flex justify-between items-center">
+    <div className={`w-full ${bgClassName} px-6 py-3 flex justify-between items-center`}>
       <div className="flex items-center">
         <img 
-          src="/om1_logo_wht.png" 
+          src={logoSrc} 
           alt="OM1 Logo" 
           className="h-10"
         />
@@ -57,15 +63,17 @@ export const Header = () => {
             <Settings className="h-5 w-5" />
           </Button>
         )}
-        <Button
-          variant="ghost"
-          size="icon"
-          className="text-white hover:text-gray-800"
-          onClick={handleLogout}
-          aria-label="Logout"
-        >
-          <LogOut className="h-5 w-5" />
-        </Button>
+        {!hideLogout && (
+          <Button
+            variant="ghost"
+            size="icon"
+            className="text-white hover:text-gray-800"
+            onClick={handleLogout}
+            aria-label="Logout"
+          >
+            <LogOut className="h-5 w-5" />
+          </Button>
+        )}
       </div>
     </div>
   );

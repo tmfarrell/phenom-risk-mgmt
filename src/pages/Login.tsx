@@ -34,8 +34,12 @@ export const Login = () => {
   }, [navigate]);
 
   return (
-    <div className="min-h-screen bg-background">
-      <Header />
+    <div className="min-h-screen bg-gray-50">
+      <Header 
+        hideLogout 
+        bgClassName="bg-gray-100"
+        logoSrc="/lovable-uploads/ea083c57-2c98-4f52-9b12-3aab9125c621.png"
+      />
       <TitleSection title="PhenOM Risk Management Dashboard" />
       <div className="container max-w-md mx-auto pt-8">
         <Auth
