@@ -37,6 +37,20 @@ export const RiskTable = ({
   const [newOutcome, setNewOutcome] = useState<string>(availableOutcomes[0] || '');
   const [newTimeframe, setNewTimeframe] = useState<string>((timeframes[0]?.toString()) || '1');
 
+  // Exclude outcomes already on the table
+  const existingOutcomes = useMemo(() => rowConfigs.map(r => r.outcome), [rowConfigs]);
+  const selectableOutcomes = useMemo(
+    () => availableOutcomes.filter(o => !existingOutcomes.includes(o)),
+    [availableOutcomes, existingOutcomes]
+  );
+
+  // Ensure newOutcome is valid when list changes
+  useEffect(() => {
+    if (!selectableOutcomes.includes(newOutcome)) {
+      setNewOutcome(selectableOutcomes[0] || '');
+    }
+  }, [selectableOutcomes, newOutcome]);
+
   const newOutcomeTimeframes = useMemo(() => {
     const tf = outcomeTimeframeMap[newOutcome];
     return (tf && tf.length > 0 ? tf : timeframes).map(t => t.toString());
@@ -136,7 +150,11 @@ export const RiskTable = ({
         <TableBody>
           {rowConfigs.map((cfg, index) => {
             const timeframeNum = parseInt(cfg.timeframe);
-            const risksForRow = patientRisks.filter(r => r.risk_type === selectedRiskType && r.prediction_timeframe_yrs === timeframeNum);
+            let risksForRow = patientRisks.filter(r => r.risk_type === selectedRiskType && r.prediction_timeframe_yrs === timeframeNum);
+            // Fallback: if no data for requested timeframe, use all available timeframes for this risk type
+            if (risksForRow.length === 0) {
+              risksForRow = patientRisks.filter(r => r.risk_type === selectedRiskType);
+            }
             const currentRisk = [...risksForRow].sort((a, b) => {
               const da = a.recorded_date ? new Date(a.recorded_date).getTime() : 0;
               const db = b.recorded_date ? new Date(b.recorded_date).getTime() : 0;
@@ -145,6 +163,9 @@ export const RiskTable = ({
             const valueKey = rowKeyToSourceField[`${cfg.outcome}-${cfg.timeframe}`] || cfg.outcome;
             // Find model id for this outcome and timeframe (first match)
             const modelId = (outcomeModelMap[cfg.outcome] || []).find(m => m.timeframe === timeframeNum)?.id;
+            const averageTimeframe = risksForRow.some(r => r.prediction_timeframe_yrs === timeframeNum)
+              ? timeframeNum
+              : (currentRisk?.prediction_timeframe_yrs || timeframeNum);
             return (
               <RiskTableRow
                 key={`${cfg.outcome}-${cfg.timeframe}-${index}`}
@@ -154,7 +175,7 @@ export const RiskTable = ({
                 currentRisks={currentRisk}
                 selectedRiskType={selectedRiskType}
                 allRisks={risksForRow}
-                averageRisk={calculateAverageRisk(valueKey, timeframeNum)}
+                averageRisk={calculateAverageRisk(valueKey, averageTimeframe)}
                 yAxisDomain={yAxisDomain}
                 summary={getSummary(cfg.outcome)}
                 onRemove={() => onRemoveRow(index)}
@@ -172,7 +193,7 @@ export const RiskTable = ({
                       <SelectValue placeholder="Outcome" />
                     </SelectTrigger>
                     <SelectContent>
-                      {availableOutcomes.map(o => (
+                      {selectableOutcomes.map(o => (
                         <SelectItem key={o} value={o}>{o}</SelectItem>
                       ))}
                     </SelectContent>
@@ -191,7 +212,7 @@ export const RiskTable = ({
                     </SelectContent>
                   </Select>
                 </div>
-                <Button onClick={() => onAddRow(newOutcome, newTimeframe)} disabled={!newOutcome || !newTimeframe}>
+                <Button onClick={() => onAddRow(newOutcome, newTimeframe)} disabled={!newOutcome || !newTimeframe || existingOutcomes.includes(newOutcome)}>
                   Add
                 </Button>
               </div>

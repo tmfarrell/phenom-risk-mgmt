@@ -13,7 +13,7 @@ import {
 import { format, parseISO } from 'date-fns';
 import { toZonedTime } from 'date-fns-tz';
 import { useState } from 'react';
-import { ChevronDown, ChevronRight, ExternalLink } from 'lucide-react';
+import { ChevronDown, ChevronRight, ExternalLink, X } from 'lucide-react';
 
 interface RiskTableRowProps {
   risk: string;
@@ -154,6 +154,18 @@ export const RiskTableRow = ({
             <span className="text-gray-400 italic">No data</span>
           }
         </TableCell>
+        {onRemove && (
+          <TableCell className="w-10 text-right" onClick={(e) => e.stopPropagation()}>
+            <button
+              type="button"
+              onClick={onRemove}
+              className="text-gray-400 hover:text-red-600"
+              title="Remove row"
+            >
+              <X className="h-4 w-4" />
+            </button>
+          </TableCell>
+        )}
       </TableRow>
       {hasValidRiskData && isExpanded && (
         <TableRow>
