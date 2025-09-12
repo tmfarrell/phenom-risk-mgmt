@@ -37,12 +37,12 @@ export const Header = () => {
   };
 
   return (
-    <div className="w-full bg-gray-100 px-6 py-3 flex justify-between items-center">
+    <div className="w-full bg-blue-900 px-6 py-3 flex justify-between items-center">
       <div className="flex items-center">
         <img 
-          src="/lovable-uploads/ea083c57-2c98-4f52-9b12-3aab9125c621.png" 
+          src="/om1_logo_wht.png" 
           alt="OM1 Logo" 
-          className="h-8"
+          className="h-10"
         />
       </div>
       <div className="flex items-center space-x-2">
@@ -50,7 +50,7 @@ export const Header = () => {
           <Button
             variant="ghost"
             size="icon"
-            className="text-gray-600 hover:text-gray-800"
+            className="text-white hover:text-gray-800"
             onClick={() => navigate('/settings')}
             aria-label="Settings"
           >
@@ -60,7 +60,7 @@ export const Header = () => {
         <Button
           variant="ghost"
           size="icon"
-          className="text-gray-600 hover:text-gray-800"
+          className="text-white hover:text-gray-800"
           onClick={handleLogout}
           aria-label="Logout"
         >

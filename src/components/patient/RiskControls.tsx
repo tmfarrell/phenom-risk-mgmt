@@ -10,6 +10,7 @@ interface RiskControlsProps {
   onTimeframeChange: (value: string) => void;
   onRiskTypeChange: (value: 'relative' | 'absolute') => void;
   timeframes?: number[];
+  hideTimeframe?: boolean;
 }
 
 export const RiskControls = ({
@@ -17,7 +18,8 @@ export const RiskControls = ({
   selectedRiskType,
   onTimeframeChange,
   onRiskTypeChange,
-  timeframes = [1, 2]
+  timeframes = [1, 2],
+  hideTimeframe = false
 }: RiskControlsProps) => {
   const { appVersion } = useAppVersion();
   
@@ -68,30 +70,32 @@ export const RiskControls = ({
         </ToggleGroup>
       </div>
 
-      <div className="flex flex-col gap-2">
-        <Label className="text-sm text-gray-600 text-center mx-auto">Time Period</Label>
-        <ToggleGroup 
-          type="single" 
-          value={selectedTimeframe}
-          onValueChange={(value) => {
-            if (value) onTimeframeChange(value);
-          }}
-          className="flex gap-2"
-        >
-          {timeframes.map((timeframe) => (
-            <ToggleGroupItem 
-              key={timeframe}
-              value={timeframe.toString()} 
-              className={cn(
-                "px-4 py-2 rounded-md",
-                selectedTimeframe === timeframe.toString() ? "bg-blue-100 hover:bg-blue-200" : "hover:bg-gray-100"
-              )}
-            >
-              {getTimeframeDisplay(timeframe.toString())}
-            </ToggleGroupItem>
-          ))}
-        </ToggleGroup>
-      </div>
+      {!hideTimeframe && (
+        <div className="flex flex-col gap-2">
+          <Label className="text-sm text-gray-600 text-center mx-auto">Time Period</Label>
+          <ToggleGroup 
+            type="single" 
+            value={selectedTimeframe}
+            onValueChange={(value) => {
+              if (value) onTimeframeChange(value);
+            }}
+            className="flex gap-2"
+          >
+            {timeframes.map((timeframe) => (
+              <ToggleGroupItem 
+                key={timeframe}
+                value={timeframe.toString()} 
+                className={cn(
+                  "px-4 py-2 rounded-md",
+                  selectedTimeframe === timeframe.toString() ? "bg-blue-100 hover:bg-blue-200" : "hover:bg-gray-100"
+                )}
+              >
+                {getTimeframeDisplay(timeframe.toString())}
+              </ToggleGroupItem>
+            ))}
+          </ToggleGroup>
+        </div>
+      )}
     </div>
   );
 };

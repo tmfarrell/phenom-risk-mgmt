@@ -17,12 +17,15 @@ import { ChevronDown, ChevronRight } from 'lucide-react';
 
 interface RiskTableRowProps {
   risk: string;
+  timeframe: string;
+  valueKey?: string; // underlying field used for value/trend in demo mode
   currentRisks: Person | undefined;
   selectedRiskType: 'relative' | 'absolute';
   allRisks: Person[];
   averageRisk: string;
   yAxisDomain: [number, number];
   summary: string | null;
+  onRemove?: () => void;
 }
 
 const riskDetails: Record<string, { fullName: string; description: string }> = {
@@ -58,12 +61,15 @@ const riskDetails: Record<string, { fullName: string; description: string }> = {
 
 export const RiskTableRow = ({ 
   risk, 
+  timeframe,
+  valueKey,
   currentRisks, 
   selectedRiskType, 
   allRisks,
   averageRisk,
   yAxisDomain,
-  summary
+  summary,
+  onRemove
 }: RiskTableRowProps) => {
   const [isExpanded, setIsExpanded] = useState(false);
   const details = riskDetails[risk] || { 
@@ -72,7 +78,8 @@ export const RiskTableRow = ({
   };
   
   // Check if all values for this risk factor are null
-  const hasValidRiskData = allRisks.some(r => getRiskValue(r, risk) !== null);
+  const displayKey = valueKey || risk;
+  const hasValidRiskData = allRisks.some(r => getRiskValue(r, displayKey) !== null);
 
   const formatDate = (dateStr: string | undefined | null) => {
     if (!dateStr) return null;
@@ -92,14 +99,15 @@ export const RiskTableRow = ({
               </div>
             )}
             <div className="flex flex-col items-start">
-              <span className="font-bold">{details.fullName}</span>
-              <span className="text-sm text-gray-500 font-normal">{details.description}</span>
+              <span className="text-lg">{details.fullName}</span>
+              {/* <span className="text-sm text-gray-500 font-normal">{details.description}</span> */}
             </div>
           </div>
         </TableCell>
+        <TableCell className="whitespace-nowrap text-sm text-gray-600">{parseInt(timeframe)} year{timeframe !== '1' ? 's' : ''}</TableCell>
         <TableCell className="min-w-[220px]">
           <SparkLine 
-            data={hasValidRiskData ? getRiskTrendData(allRisks, risk) : []}
+            data={hasValidRiskData ? getRiskTrendData(allRisks, displayKey) : []}
             yAxisDomain={yAxisDomain}
             averageRisk={selectedRiskType === 'absolute' ? averageRisk : undefined}
             riskType={selectedRiskType}
@@ -109,11 +117,11 @@ export const RiskTableRow = ({
           <div className="flex items-center gap-2">
             <div className="flex flex-col">
               <div className="flex items-center gap-1">
-                <span className={`${isHighRisk(getRiskValue(currentRisks, risk), selectedRiskType) ? 'bg-red-100' : ''} px-2 py-1 rounded`}>
-                  {formatRiskValue(getRiskValue(currentRisks, risk), selectedRiskType)}
+                <span className={`${isHighRisk(getRiskValue(currentRisks, displayKey), selectedRiskType) ? 'bg-red-100' : ''} px-2 py-1 rounded`}>
+                  {formatRiskValue(getRiskValue(currentRisks, displayKey), selectedRiskType)}
                 </span>
                 <RiskChangeIndicator 
-                  change={getChangeValue(currentRisks, risk)}
+                  change={getChangeValue(currentRisks, displayKey)}
                   selectedRiskType={selectedRiskType}
                   changeSince={currentRisks?.change_since}
                 />
@@ -133,7 +141,7 @@ export const RiskTableRow = ({
       </TableRow>
       {hasValidRiskData && isExpanded && (
         <TableRow>
-          <TableCell colSpan={4} className="bg-gray-50 pb-4 animate-accordion-down text-left">
+          <TableCell colSpan={5} className="bg-gray-50 pb-4 animate-accordion-down text-left">
             <div className="text-sm text-gray-700 p-2 border-l-2 border-blue-400 ml-8">
               <span className="font-medium text-blue-600">Risk Analysis: </span>
               {summary || <span className="italic text-gray-500">No Risk Analysis available</span>}

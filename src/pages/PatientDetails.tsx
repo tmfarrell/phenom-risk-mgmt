@@ -9,6 +9,11 @@ export const PatientDetails = () => {
   const { data: patients, isLoading, error } = usePatientData();
   const navigate = useNavigate();
   const location = useLocation();
+  const savedState = location.state as {
+    selectedRiskColumns?: string[];
+    selectedTimeframe?: string;
+    selectedRiskType?: 'relative' | 'absolute';
+  } | null;
   
   console.log('PatientDetails - ID:', id);
   console.log('PatientDetails - All Patients:', patients);
@@ -28,11 +33,15 @@ export const PatientDetails = () => {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-indigo-50 to-slate-50">
+      <div className="min-h-screen bg-gray-50">
         <Header />
-        <TitleSection title="PhenOM Risk Management Dashboard" />
+        <div className="flex items-start">
+          <div className="px-6 pt-6">
+            <h1 className="text-2xl font-bold text-blue-900 text-left">Patient Details</h1>
+          </div>
+        </div>
         <div className="p-6">
-          <div className="max-w-[1600px] mx-auto">
+          <div className="max-w-[1250px] mx-auto">
             Loading...
           </div>
         </div>
@@ -42,11 +51,15 @@ export const PatientDetails = () => {
 
   if (error) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-indigo-50 to-slate-50">
+      <div className="min-h-screen bg-gray-50">
         <Header />
-        <TitleSection title="PhenOM Risk Management Dashboard" />
+        <div className="flex items-start">
+          <div className="px-6 pt-6">
+            <h1 className="text-2xl font-bold text-blue-900 text-left">Patient Details</h1>
+          </div>
+        </div>
         <div className="p-6">
-          <div className="max-w-[1600px] mx-auto">
+          <div className="max-w-[1250px] mx-auto">
             Error loading patient data
           </div>
         </div>
@@ -55,11 +68,15 @@ export const PatientDetails = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-indigo-50 to-slate-50">
+    <div className="min-h-screen bg-gray-50">
       <Header />
-      <TitleSection title="PhenOM Risk Management Dashboard" />
-      <div className="p-6">
-        <div className="max-w-[1600px] mx-auto">
+      <div className="flex items-start">
+        <div className="px-6 pt-6">
+          <h1 className="text-2xl font-bold text-blue-900 text-left">Patient Details</h1>
+        </div>
+      </div>
+      <div className="px-6 pb-6">
+        <div className="max-w-[1250px] mx-auto">
           <div className="flex items-center justify-end mb-6">
             <button 
               onClick={handleBack}

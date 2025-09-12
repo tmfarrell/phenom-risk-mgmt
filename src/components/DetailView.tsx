@@ -2,68 +2,86 @@
 import { Person } from '../types/population';
 import { Card } from './ui/card';
 import { usePatientData } from '@/hooks/usePatientData';
-import { useState, useEffect } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { PatientHeader } from './patient/PatientHeader';
 import { RiskControls } from './patient/RiskControls';
 import { RiskTable } from './patient/RiskTable';
 import { useRiskSummaries } from '@/hooks/useRiskSummaries';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
+import { useLocation } from 'react-router-dom';
 
-interface DetailViewProps {
+export interface DetailViewProps {
   person: Person | null;
+  initialOutcomes?: string[] | null;
+  initialTimeframe?: string | null;
+  initialRiskType?: 'relative' | 'absolute' | null;
 }
 
-export const DetailView = ({ person }: DetailViewProps) => {
-  const [selectedRiskType, setSelectedRiskType] = useState<'relative' | 'absolute'>('relative');
-  const [selectedTimeframe, setSelectedTimeframe] = useState<string>('1');
+type RowConfig = { outcome: string; timeframe: string };
 
-  // Fetch available time periods from the database
-  const { data: fetchedTimePeriods, isLoading: isTimePeriodsLoading } = useQuery({
-    queryKey: ['detail-time-periods', person?.patient_id],
+export const DetailView = ({ person, initialOutcomes, initialTimeframe, initialRiskType }: DetailViewProps) => {
+  const location = useLocation();
+  const savedState = location.state as {
+    selectedRiskColumns?: string[];
+    selectedTimeframe?: string;
+    selectedRiskType?: 'relative' | 'absolute';
+  } | null;
+
+  const [selectedRiskType, setSelectedRiskType] = useState<'relative' | 'absolute'>(initialRiskType || savedState?.selectedRiskType || 'relative');
+  const [rowConfigs, setRowConfigs] = useState<RowConfig[]>([]);
+
+  // Fetch available outcomes and timeframes (and models) from phenom_models
+  const { data: phenomModelsData, isLoading: isModelsLoading } = useQuery({
+    queryKey: ['detail-phenom-models'],
     queryFn: async () => {
-      // Fetch from both tables to ensure we have all possible time periods
-      const [riskDistResponse, patientRiskResponse] = await Promise.all([
-        supabase.from('phenom_risk_dist').select('time_period').order('time_period'),
-        supabase.from('phenom_risk').select('time_period').order('time_period')
-      ]);
-      
-      if (riskDistResponse.error) {
-        console.error('Error fetching risk_dist time periods:', riskDistResponse.error);
+      const { data, error } = await supabase
+        .from('phenom_models')
+        .select('id, indication_code, prediction_timeframe_yrs')
+        .not('prediction_timeframe_yrs', 'is', null)
+        .order('indication_code');
+      if (error) {
+        console.error('Error fetching phenom_models:', error);
+        throw error;
       }
-      
-      if (patientRiskResponse.error) {
-        console.error('Error fetching patient risk time periods:', patientRiskResponse.error);
-      }
-      
-      // Combine time periods from both tables
-      const allTimePeriods = [
-        ...(riskDistResponse.data || []).map(item => item.time_period),
-        ...(patientRiskResponse.data || []).map(item => item.time_period)
-      ];
-      
-      // Get unique values and sort
-      const uniqueTimePeriods = [...new Set(allTimePeriods)].filter(Boolean).sort();
-      console.log('Unique time periods for Detail page:', uniqueTimePeriods);
-      
-      return uniqueTimePeriods.length > 0 ? uniqueTimePeriods : [1, 2]; // Default if empty
+      const outcomeTimeframeMap: Record<string, number[]> = {};
+      data?.forEach(item => {
+        if (!outcomeTimeframeMap[item.indication_code]) outcomeTimeframeMap[item.indication_code] = [];
+        if (!outcomeTimeframeMap[item.indication_code].includes(item.prediction_timeframe_yrs)) {
+          outcomeTimeframeMap[item.indication_code].push(item.prediction_timeframe_yrs);
+        }
+      });
+      const uniqueTimeframes = [...new Set(data?.map(item => item.prediction_timeframe_yrs) || [])].filter(Boolean).sort();
+      const availableOutcomes = Object.keys(outcomeTimeframeMap).sort();
+      return {
+        outcomeTimeframeMap,
+        timeframes: uniqueTimeframes as number[],
+        availableOutcomes
+      };
     }
   });
-  
-  // Get time periods from fetched data or patient data as fallback
-  const timePeriods = fetchedTimePeriods || [1, 2]; 
-  
-  // Update selected timeframe when time periods are loaded
+
+  const timePeriods = phenomModelsData?.timeframes || [1, 2];
+  const availableOutcomes = phenomModelsData?.availableOutcomes || ['ED', 'Hospitalization', 'Fall', 'Stroke', 'HS', 'Mortality'];
+
+  // Initialize row configurations once models are loaded
+  const initializedRowConfigs = useMemo(() => {
+    if (!phenomModelsData) return null;
+    const tf = initialTimeframe || savedState?.selectedTimeframe || (phenomModelsData.timeframes?.[0]?.toString() || '1');
+    const outcomes = (initialOutcomes && initialOutcomes.length > 0)
+      ? initialOutcomes
+      : (savedState?.selectedRiskColumns && savedState.selectedRiskColumns.length > 0)
+        ? savedState.selectedRiskColumns
+        : availableOutcomes.slice(0, Math.min(5, availableOutcomes.length));
+    return outcomes.map(o => ({ outcome: o, timeframe: tf }));
+  }, [phenomModelsData, initialOutcomes, initialTimeframe, availableOutcomes, savedState?.selectedRiskColumns, savedState?.selectedTimeframe]);
+
+  // Set initial rows when ready
   useEffect(() => {
-    if (timePeriods && timePeriods.length > 0) {
-      // Check if the current selection exists in the new options
-      const exists = timePeriods.includes(parseInt(selectedTimeframe));
-      if (!exists) {
-        // If not, select the first available option
-        setSelectedTimeframe(timePeriods[0]?.toString() || '1');
-      }
+    if (rowConfigs.length === 0 && initializedRowConfigs) {
+      setRowConfigs(initializedRowConfigs);
     }
-  }, [timePeriods]);
+  }, [initializedRowConfigs, rowConfigs.length]);
 
   if (!person) {
     return (
@@ -77,26 +95,8 @@ export const DetailView = ({ person }: DetailViewProps) => {
   const { data: riskSummaries = [], isLoading: isLoadingSummaries } = useRiskSummaries(person.patient_id);
   
   // Filter data for the current patient
-  const patientRisks = patientData?.filter(p => p.patient_id === person.patient_id) || [];
+  const patientRisks = (patientData || []).filter(p => p.patient_id === person.patient_id);
   
-  // Get the latest risk record for the selected risk type and timeframe
-  const latestRisk = patientRisks
-    .filter(p => 
-      p.risk_type === selectedRiskType && 
-      p.prediction_timeframe_yrs === Number(selectedTimeframe)
-    )
-    .sort((a, b) => {
-      if (!a.recorded_date || !b.recorded_date) return 0;
-      return new Date(b.recorded_date).getTime() - new Date(a.recorded_date).getTime();
-    })[0];
-
-  // Filter risks for the selected risk type and timeframe
-  const selectedTypeRisks = patientRisks.filter(p => 
-    p.risk_type === selectedRiskType && 
-    p.prediction_timeframe_yrs === Number(selectedTimeframe)
-  );
-
-  console.log("selectedTypeRisks", selectedTypeRisks); 
   console.log("riskSummaries", riskSummaries);
   
   return (
@@ -107,21 +107,37 @@ export const DetailView = ({ person }: DetailViewProps) => {
       
       <Card className="p-6">
         <RiskControls 
-          selectedTimeframe={selectedTimeframe}
+          selectedTimeframe={rowConfigs[0]?.timeframe || (timePeriods[0]?.toString() || '1')}
           selectedRiskType={selectedRiskType}
-          onTimeframeChange={setSelectedTimeframe}
+          onTimeframeChange={() => { /* hidden in detail view */ }}
           onRiskTypeChange={setSelectedRiskType}
-          timeframes={isTimePeriodsLoading ? [1, 2] : timePeriods}
+          timeframes={timePeriods}
+          hideTimeframe
         />
 
-        {isLoadingSummaries ? (
+        {isModelsLoading || !phenomModelsData ? (
+          <div className="py-4 text-center text-gray-500">Loading models...</div>
+        ) : isLoadingSummaries ? (
           <div className="py-4 text-center text-gray-500">Loading risk summaries...</div>
         ) : (
           <RiskTable 
-            currentRisks={latestRisk}
             selectedRiskType={selectedRiskType}
-            allRisks={selectedTypeRisks}
+            patientRisks={patientRisks}
             riskSummaries={riskSummaries}
+            rowConfigs={rowConfigs}
+            onRemoveRow={(index) => {
+              setRowConfigs(prev => prev.filter((_, i) => i !== index));
+            }}
+            onAddRow={(outcome, timeframe) => {
+              setRowConfigs(prev => {
+                const exists = prev.some(r => r.outcome === outcome && r.timeframe === timeframe);
+                if (exists) return prev;
+                return [...prev, { outcome, timeframe }];
+              });
+            }}
+            availableOutcomes={availableOutcomes}
+            timeframes={timePeriods}
+            outcomeTimeframeMap={phenomModelsData.outcomeTimeframeMap}
           />
         )}
       </Card>
