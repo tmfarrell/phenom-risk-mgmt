@@ -13,7 +13,7 @@ import {
 import { format, parseISO } from 'date-fns';
 import { toZonedTime } from 'date-fns-tz';
 import { useState } from 'react';
-import { ChevronDown, ChevronRight } from 'lucide-react';
+import { ChevronDown, ChevronRight, ExternalLink } from 'lucide-react';
 
 interface RiskTableRowProps {
   risk: string;
@@ -26,6 +26,7 @@ interface RiskTableRowProps {
   yAxisDomain: [number, number];
   summary: string | null;
   onRemove?: () => void;
+  modelId?: string;
 }
 
 const riskDetails: Record<string, { fullName: string; description: string }> = {
@@ -69,7 +70,8 @@ export const RiskTableRow = ({
   averageRisk,
   yAxisDomain,
   summary,
-  onRemove
+  onRemove,
+  modelId
 }: RiskTableRowProps) => {
   const [isExpanded, setIsExpanded] = useState(false);
   const details = riskDetails[risk] || { 
@@ -99,7 +101,21 @@ export const RiskTableRow = ({
               </div>
             )}
             <div className="flex flex-col items-start">
-              <span className="text-lg">{details.fullName}</span>
+              <div className="flex items-center gap-2">
+                <span className="text-lg">{details.fullName}</span>
+                {modelId && (
+                  <a
+                    href={`/phenom-builder/${modelId}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-xs text-blue-600 hover:text-blue-800 inline-flex items-center gap-1"
+                    title="View model"
+                    onClick={(e) => e.stopPropagation()}
+                  >
+                    <ExternalLink className="h-4 w-4" />
+                  </a>
+                )}
+              </div>
               {/* <span className="text-sm text-gray-500 font-normal">{details.description}</span> */}
             </div>
           </div>

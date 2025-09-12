@@ -45,16 +45,20 @@ export const DetailView = ({ person, initialOutcomes, initialTimeframe, initialR
         throw error;
       }
       const outcomeTimeframeMap: Record<string, number[]> = {};
+      const outcomeModelMap: Record<string, Array<{id: string, timeframe: number}>> = {};
       data?.forEach(item => {
         if (!outcomeTimeframeMap[item.indication_code]) outcomeTimeframeMap[item.indication_code] = [];
+        if (!outcomeModelMap[item.indication_code]) outcomeModelMap[item.indication_code] = [];
         if (!outcomeTimeframeMap[item.indication_code].includes(item.prediction_timeframe_yrs)) {
           outcomeTimeframeMap[item.indication_code].push(item.prediction_timeframe_yrs);
         }
+        outcomeModelMap[item.indication_code].push({ id: item.id, timeframe: item.prediction_timeframe_yrs });
       });
       const uniqueTimeframes = [...new Set(data?.map(item => item.prediction_timeframe_yrs) || [])].filter(Boolean).sort();
       const availableOutcomes = Object.keys(outcomeTimeframeMap).sort();
       return {
         outcomeTimeframeMap,
+        outcomeModelMap,
         timeframes: uniqueTimeframes as number[],
         availableOutcomes
       };
@@ -138,6 +142,7 @@ export const DetailView = ({ person, initialOutcomes, initialTimeframe, initialR
             availableOutcomes={availableOutcomes}
             timeframes={timePeriods}
             outcomeTimeframeMap={phenomModelsData.outcomeTimeframeMap}
+            outcomeModelMap={phenomModelsData.outcomeModelMap}
           />
         )}
       </Card>

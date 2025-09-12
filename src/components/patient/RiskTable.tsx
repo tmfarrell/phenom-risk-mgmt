@@ -18,6 +18,7 @@ interface RiskTableProps {
   availableOutcomes: string[];
   timeframes: number[];
   outcomeTimeframeMap: Record<string, number[]>;
+  outcomeModelMap: Record<string, Array<{id: string, timeframe: number}>>;
 }
 
 export const RiskTable = ({ 
@@ -29,7 +30,8 @@ export const RiskTable = ({
   onAddRow,
   availableOutcomes,
   timeframes,
-  outcomeTimeframeMap
+  outcomeTimeframeMap,
+  outcomeModelMap
 }: RiskTableProps) => {
   const { data: patientData } = usePatientData();
   const [newOutcome, setNewOutcome] = useState<string>(availableOutcomes[0] || '');
@@ -141,6 +143,8 @@ export const RiskTable = ({
               return db - da;
             })[0];
             const valueKey = rowKeyToSourceField[`${cfg.outcome}-${cfg.timeframe}`] || cfg.outcome;
+            // Find model id for this outcome and timeframe (first match)
+            const modelId = (outcomeModelMap[cfg.outcome] || []).find(m => m.timeframe === timeframeNum)?.id;
             return (
               <RiskTableRow
                 key={`${cfg.outcome}-${cfg.timeframe}-${index}`}
@@ -154,6 +158,7 @@ export const RiskTable = ({
                 yAxisDomain={yAxisDomain}
                 summary={getSummary(cfg.outcome)}
                 onRemove={() => onRemoveRow(index)}
+                modelId={modelId}
               />
             );
           })}
