@@ -24,11 +24,10 @@ export const usePatientDataLatest = () => {
     queryFn: async () => {
       console.log('Fetching latest patient data...');
       
-      // First, fetch available outcomes from phenom_models
+      // First, fetch available outcomes from phenom_models (including null timeframes)
       const { data: phenomModels, error: modelsError } = await supabase
         .from('phenom_models')
-        .select('indication_code, prediction_timeframe_yrs')
-        .not('prediction_timeframe_yrs', 'is', null);
+        .select('indication_code, prediction_timeframe_yrs');
 
       if (modelsError) {
         console.error('Error fetching phenom models:', modelsError);
