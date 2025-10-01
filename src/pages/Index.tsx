@@ -57,6 +57,7 @@ export default function Index() {
       const { data, error } = await supabase
         .from('phenom_models')
         .select('id, indication_code, prediction_timeframe_yrs')
+        .not('prediction_timeframe_yrs', 'is', null)
         .order('indication_code');
       
       if (error) {
@@ -65,28 +66,25 @@ export default function Index() {
       }
       
       // Create a map of outcomes to their available timeframes and model info
-      // Treat null timeframes as 0 to represent "Today"
       const outcomeTimeframeMap: Record<string, number[]> = {};
       const outcomeModelMap: Record<string, Array<{id: string, timeframe: number}>> = {};
       
       data?.forEach(item => {
-        const timeframe = item.prediction_timeframe_yrs ?? 0;
-        
         if (!outcomeTimeframeMap[item.indication_code]) {
           outcomeTimeframeMap[item.indication_code] = [];
           outcomeModelMap[item.indication_code] = [];
         }
-        if (!outcomeTimeframeMap[item.indication_code].includes(timeframe)) {
-          outcomeTimeframeMap[item.indication_code].push(timeframe);
+        if (!outcomeTimeframeMap[item.indication_code].includes(item.prediction_timeframe_yrs)) {
+          outcomeTimeframeMap[item.indication_code].push(item.prediction_timeframe_yrs);
         }
         outcomeModelMap[item.indication_code].push({
           id: item.id,
-          timeframe: timeframe
+          timeframe: item.prediction_timeframe_yrs
         });
       });
       
-      // Extract unique timeframes, treating null as 0
-      const uniqueTimeframes = [...new Set(data?.map(item => item.prediction_timeframe_yrs ?? 0) || [])].sort();
+      // Extract unique timeframes
+      const uniqueTimeframes = [...new Set(data?.map(item => item.prediction_timeframe_yrs) || [])].filter(Boolean).sort();
       
       console.log('Outcome to timeframe mapping:', outcomeTimeframeMap);
       console.log('Available timeframes from phenom_models:', uniqueTimeframes);
@@ -101,10 +99,10 @@ export default function Index() {
   });
 
   // Use timeframes from phenom_models
-  const timePeriods = phenomModelsData?.timeframes || [0, 1, 2];
+  const timePeriods = phenomModelsData?.timeframes || [1, 2];
 
   // Make sure we have a valid initial timeframe selection
-  const [selectedTimeframe, setSelectedTimeframe] = useState<string>(savedState?.selectedTimeframe || '0');
+  const [selectedTimeframe, setSelectedTimeframe] = useState<string>(savedState?.selectedTimeframe || '1');
   
   // Set the timeframe and outcomes once data is loaded
   useEffect(() => {
@@ -113,7 +111,7 @@ export default function Index() {
       const exists = timePeriods.includes(parseInt(selectedTimeframe));
       if (!exists) {
         // If not, select the first available option
-        setSelectedTimeframe(timePeriods[0]?.toString() || '0');
+        setSelectedTimeframe(timePeriods[0]?.toString() || '1');
       }
     }
   }, [timePeriods]);
@@ -176,9 +174,7 @@ export default function Index() {
     const mrnMatch = patient.mrn?.toString().includes(searchQuery);
     const searchMatches = nameMatch || mrnMatch;
 
-    // Treat null timeframes as 0 (Today)
-    const patientTimeframe = patient.prediction_timeframe_yrs ?? 0;
-    const timeframeMatches = patientTimeframe === Number(selectedTimeframe);
+    const timeframeMatches = patient.prediction_timeframe_yrs === Number(selectedTimeframe);
     const riskTypeMatches = patient.risk_type === selectedRiskType;
     const selectedFilter = showSelectedOnly ? selectedPatients.some(p => p.patient_id === patient.patient_id) : true;
     
@@ -264,7 +260,7 @@ export default function Index() {
                     onTimeframeChange={setSelectedTimeframe}
                     selectedRiskColumns={selectedRiskColumns}
                     onRiskColumnsChange={setSelectedRiskColumns}
-                    timeframes={isModelsLoading ? [0, 1, 2] : timePeriods as number[]}
+                    timeframes={isModelsLoading ? [1, 2] : timePeriods as number[]}
                     selectedRiskType={selectedRiskType}
                     onRiskTypeChange={setSelectedRiskType}
                     providerList={providerList}

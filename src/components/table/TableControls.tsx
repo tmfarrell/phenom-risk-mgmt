@@ -163,7 +163,6 @@ export const TableControls = ({
             >
               {(() => {
                 const timeframe = parseInt(selectedTimeframe);
-                if (timeframe === 0) return 'Today';
                 const displayTimeframe = useMonthsForTimeframe ? timeframe * 12 : timeframe;
                 const timeUnit = useMonthsForTimeframe ? "month" : "year";
                 return `${displayTimeframe} ${timeUnit}${displayTimeframe > 1 ? 's' : ''}`;
@@ -176,28 +175,6 @@ export const TableControls = ({
               <CommandList>
                 <CommandGroup>
                   {timeframes.map((timeframe) => {
-                    // Special handling for timeframe 0 = "Today"
-                    if (timeframe === 0) {
-                      return (
-                        <CommandItem
-                          key={timeframe}
-                          value={timeframe.toString()}
-                          onSelect={() => {
-                            onTimeframeChange(timeframe.toString());
-                            setTimeframeOpen(false);
-                          }}
-                        >
-                          <Check
-                            className={cn(
-                              "mr-2 h-4 w-4",
-                              selectedTimeframe === timeframe.toString() ? "opacity-100" : "opacity-0"
-                            )}
-                          />
-                          Today
-                        </CommandItem>
-                      );
-                    }
-                    
                     // Convert years to months if necessary
                     const displayTimeframe = useMonthsForTimeframe ? timeframe * 12 : timeframe;
                     const timeUnit = useMonthsForTimeframe ? "month" : "year";

@@ -8,9 +8,9 @@ type AverageRisks = {
 };
 
 export const calculateAverageRisks = (data: Person[]): AverageRisks => {
-  // Group data by timeframe, treating null as 0 (Today)
+  // Group data by timeframe
   const groupedByTimeframe = data.reduce((acc, person) => {
-    const timeframe = (person.prediction_timeframe_yrs ?? 0).toString();
+    const timeframe = person.prediction_timeframe_yrs?.toString() || 'unknown';
     if (!acc[timeframe]) {
       acc[timeframe] = [];
     }
