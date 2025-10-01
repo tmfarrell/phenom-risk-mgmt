@@ -43,7 +43,8 @@ export const mockPeople: Person[] = [
     recorded_date: '2024-01-15',
     prediction_timeframe_yrs: 1,
     risk_type: 'relative',
-    change_since: '2023-12-15'
+    change_since: '2023-12-15',
+    composite_risk: 0.28
   },
   {
     patient_id: 2,
@@ -70,7 +71,8 @@ export const mockPeople: Person[] = [
     recorded_date: '2024-01-20',
     prediction_timeframe_yrs: 1,
     risk_type: 'relative',
-    change_since: '2023-12-20'
+    change_since: '2023-12-20',
+    composite_risk: 0.15
   },
   {
     patient_id: 3,
@@ -97,7 +99,8 @@ export const mockPeople: Person[] = [
     recorded_date: '2024-01-25',
     prediction_timeframe_yrs: 1,
     risk_type: 'relative',
-    change_since: '2023-12-25'
+    change_since: '2023-12-25',
+    composite_risk: 0.17
   },
   {
     patient_id: 4,
@@ -124,7 +127,8 @@ export const mockPeople: Person[] = [
     recorded_date: '2024-01-30',
     prediction_timeframe_yrs: 1,
     risk_type: 'relative',
-    change_since: '2023-12-30'
+    change_since: '2023-12-30',
+    composite_risk: 0.25
   },
   {
     patient_id: 5,
@@ -151,7 +155,8 @@ export const mockPeople: Person[] = [
     recorded_date: '2024-02-05',
     prediction_timeframe_yrs: 1,
     risk_type: 'relative',
-    change_since: '2023-12-15'
+    change_since: '2023-12-15',
+    composite_risk: 0.33
   },
   {
     patient_id: 6,
@@ -178,7 +183,8 @@ export const mockPeople: Person[] = [
     recorded_date: '2024-02-10',
     prediction_timeframe_yrs: 1,
     risk_type: 'relative',
-    change_since: '2023-12-20'
+    change_since: '2023-12-20',
+    composite_risk: 0.41
   },
   {
     patient_id: 7,
@@ -205,7 +211,8 @@ export const mockPeople: Person[] = [
     recorded_date: '2024-02-15',
     prediction_timeframe_yrs: 1,
     risk_type: 'relative',
-    change_since: '2023-12-25'
+    change_since: '2023-12-25',
+    composite_risk: 0.48
   },
   {
     patient_id: 8,
@@ -232,7 +239,8 @@ export const mockPeople: Person[] = [
     recorded_date: '2024-02-20',
     prediction_timeframe_yrs: 1,
     risk_type: 'relative',
-    change_since: '2023-12-30'
+    change_since: '2023-12-30',
+    composite_risk: 0.52
   },
   {
     patient_id: 9,
@@ -259,7 +267,8 @@ export const mockPeople: Person[] = [
     recorded_date: '2024-02-25',
     prediction_timeframe_yrs: 1,
     risk_type: 'relative',
-    change_since: '2024-01-05'
+    change_since: '2024-01-05',
+    composite_risk: 0.58
   },
   {
     patient_id: 10,
@@ -286,7 +295,8 @@ export const mockPeople: Person[] = [
     recorded_date: '2024-03-01',
     prediction_timeframe_yrs: 1,
     risk_type: 'relative',
-    change_since: '2024-01-15'
+    change_since: '2024-01-15',
+    composite_risk: 0.63
   }
 ];
 

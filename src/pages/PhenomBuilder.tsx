@@ -974,8 +974,8 @@ export default function PhenomBuilder() {
                     </CardContent>
                   </Card>
 
-                  {/* ROC Curve */}
-                  <Card>
+                  {/* ROC Curve - Commented out per user request */}
+                  {/* <Card>
                     <CardHeader>
                       <CardTitle className="text-lg">ROC Curve Analysis</CardTitle>
                     </CardHeader>
@@ -990,23 +990,25 @@ export default function PhenomBuilder() {
                             <XAxis 
                               dataKey="fpr" 
                               label={{ value: 'False Positive Rate', position: 'insideBottom', offset: -5 }}
+                              tick={{ fontSize: 12 }}
                               domain={[0, 1]}
+                              tickFormatter={(value) => value.toFixed(1)}
                             />
                             <YAxis 
-                              label={{ value: 'True Positive Rate', angle: -90, position: 'insideLeft', style: { textAnchor: 'middle' } }}
+                              label={{ value: 'True Positive Rate', angle: -90, position: 'insideLeft', offset: -10 }}
+                              tick={{ fontSize: 12 }}
                               domain={[0, 1]}
+                              tickFormatter={(value) => value.toFixed(1)}
                             />
                             <Tooltip 
-                              formatter={(value, name) => [
-                                typeof value === 'number' ? value.toFixed(3) : value, 
-                                name === 'tpr' ? 'True Positive Rate' : 'False Positive Rate'
-                              ]}
-                              labelFormatter={(label) => `FPR: ${label}`}
+                              formatter={(value: number) => value.toFixed(3)}
+                              contentStyle={{ backgroundColor: 'rgba(255, 255, 255, 0.95)', border: '1px solid #ccc', borderRadius: '4px' }}
                             />
                             <ReferenceLine 
-                              segment={[{x: 0, y: 0}, {x: 1, y: 1}]} 
                               stroke="#999" 
-                              strokeDasharray="5 5"
+                              strokeDasharray="5 5" 
+                              segment={[{ x: 0, y: 0 }, { x: 1, y: 1 }]}
+                              strokeWidth={2}
                             />
                             <Line 
                               type="monotone" 
@@ -1025,7 +1027,7 @@ export default function PhenomBuilder() {
                         <p>• Current model AUC of {selectedModel?.auc?.toFixed(3) || 'N/A'} indicates {(selectedModel?.auc || 0) > 0.8 ? 'excellent' : (selectedModel?.auc || 0) > 0.7 ? 'good' : 'fair'} discrimination ability</p>
                       </div>
                     </CardContent>
-                  </Card>
+                  </Card> */}
                 </div>
             </div>
           </div>
