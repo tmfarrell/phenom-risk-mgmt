@@ -10,6 +10,7 @@ import Settings from './pages/Settings';
 import { useAdminStatus } from './hooks/useAdminStatus';
 import './App.css';
 import PhenomBuilder from './pages/PhenomBuilder';
+import Origin from './pages/Origin';
 import { SidebarProvider } from './components/ui/sidebar';
 import { AppSidebar } from './components/AppSidebar';
 
@@ -85,6 +86,7 @@ function App() {
           <Route path="settings" element={<Settings />} />
           <Route path="phenom-builder" element={<PhenomBuilder />} />
           <Route path="phenom-builder/:modelId" element={<PhenomBuilder />} />
+          <Route path="origin" element={<Origin />} />
         </Route>
       </Routes>
     </Router>
