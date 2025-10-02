@@ -141,6 +141,11 @@ export function PopulationRiskDistribution({
     }
   });
 
+  // Sync localTimeframe with selectedTimeframe prop
+  useEffect(() => {
+    setLocalTimeframe(selectedTimeframe);
+  }, [selectedTimeframe]);
+
   useEffect(() => {
     if (timePeriods && timePeriods.length > 0 && (!localTimeframe || !timePeriods.includes(parseInt(localTimeframe)))) {
       setLocalTimeframe(timePeriods[0].toString());
@@ -487,7 +492,7 @@ export function PopulationRiskDistribution({
         <>
           <div className="space-y-2">
             <h3 className="text-2xl font-medium" style={{ color: '#002B71' }}>
-              Predicted {useMonthsForTimeframe ? (parseInt(selectedTimeframe) * 12) + ' month' : selectedTimeframe + ' year'} {selectedRiskFactor} Risk
+              Predicted {useMonthsForTimeframe ? (parseInt(localTimeframe) * 12) + ' month' : localTimeframe + ' year'} {selectedRiskFactor} Risk
             </h3>
           </div>
           
@@ -539,7 +544,7 @@ export function PopulationRiskDistribution({
                         dataKey="range" 
                         height={60}
                         label={{ 
-                          value: `Predicted ${useMonthsForTimeframe ? (parseInt(selectedTimeframe) * 12) + ' month' : selectedTimeframe + ' year'} ${selectedRiskFactor} Risk (%)`, 
+                          value: `Predicted ${useMonthsForTimeframe ? (parseInt(localTimeframe) * 12) + ' month' : localTimeframe + ' year'} ${selectedRiskFactor} Risk (%)`, 
                           position: 'insideBottom',
                           offset: -15,
                           style: { 

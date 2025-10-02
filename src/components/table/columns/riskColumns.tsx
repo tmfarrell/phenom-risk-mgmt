@@ -13,7 +13,8 @@ import {
 
 export const getRiskColumns = (
   visibleRiskColumns: string[],
-  averageRisks: { [key: string]: string }
+  averageRisks: { [key: string]: string },
+  outcomeLabels?: Record<string, string>
 ): ColumnDef<Person>[] => 
   visibleRiskColumns.map((column): ColumnDef<Person> => ({
     accessorKey: column,
@@ -25,6 +26,7 @@ export const getRiskColumns = (
     minSize: 120,
     header: ({ table, column: tableColumn }) => {      
       const isSorted = tableColumn.getIsSorted();
+      const label = outcomeLabels?.[column] || column;
       
       const handleThreeStateSorting = () => {
         const currentSort = tableColumn.getIsSorted();
@@ -42,26 +44,36 @@ export const getRiskColumns = (
       };
       
       return (
-        <div className="flex flex-col items-center pb-2">
+        <div className="flex flex-col align-center items-center pb-2 w-56 min-w-[14rem] max-w-[14rem]">
           <Button
             variant="ghost"
             onClick={handleThreeStateSorting}
-            className="hover:bg-transparent whitespace-nowrap"
+            className="hover:bg-transparent whitespace-normal text-center leading-snug w-full"
           >
-            {column}
+            <span className="break-words whitespace-normal leading-snug mt-2">
+              {label}
+            </span>
             {isSorted ? (
               isSorted === "asc" ? (
-                <ArrowUp className="ml-2 h-4 w-4 font-bold" />
+                <span className="ml-2 inline-flex items-center justify-center h-4 w-4 min-w-4 min-h-4 shrink-0">
+                  <ArrowUp className="h-4 w-4 font-bold" />
+                </span>
               ) : (
-                <ArrowDown className="ml-2 h-4 w-4 font-bold" />
+                <span className="ml-2 inline-flex items-center justify-center h-4 w-4 min-w-4 min-h-4 shrink-0">
+                  <ArrowDown className="h-4 w-4 font-bold" />
+                </span>
               )
             ) : (
-              <ArrowUpDown className="ml-2 h-4 w-4" />
+              <span className="ml-2 inline-flex items-center justify-center h-4 w-4 min-w-4 min-h-4 shrink-0">
+                <ArrowUpDown className="h-4 w-4" />
+              </span>
             )}
           </Button>
-          <div className="text-xs text-blue-400/70 bg-white px-2 py-0.5 rounded mt-0.5 shadow-sm">
-            Avg: {averageRisks[column] || 'N/A'}
-          </div>
+          {averageRisks[column] !== undefined && averageRisks[column] !== null && averageRisks[column] !== 'N/A' && (
+            <div className="text-xs text-blue-400/70 bg-white px-2 py-0.5 rounded mt-2 shadow-sm">
+              Avg: {averageRisks[column]}
+            </div>
+          )}
         </div>
       );
     },
@@ -74,7 +86,7 @@ export const getRiskColumns = (
 
       // If value is null or undefined, return an empty string
       if (value === undefined || value === null || isNaN(value as number)) {
-        return '';
+        return <span className="text-gray-300">Not in cohort</span>;
       }
 
       const formatChangeValue = (change: number | null | undefined, riskType: string) => {
@@ -123,8 +135,8 @@ export const getRiskColumns = (
 
       if (riskType === 'absolute') {
         return (
-          <div className="flex items-center justify-center w-full">
-            <div className="flex items-center min-w-[5rem]">
+          <div className="flex items-center justify-center w-56 min-w-[14rem] max-w-[14rem]">
+            <div className="flex items-center w-full justify-center">
               <div className={`${Number(value) > 15 ? 'bg-red-100' : ''} w-16 text-center py-1 rounded`}>
                 <span>{Number(value).toFixed(1)}%</span>
               </div>
@@ -136,8 +148,8 @@ export const getRiskColumns = (
         );
       } else {
         return (
-          <div className="flex items-center justify-center w-full">
-            <div className="flex items-center min-w-[5rem]">
+          <div className="flex items-center justify-center w-56 min-w-[14rem] max-w-[14rem]">
+            <div className="flex items-center w-full justify-center">
               <div className={`${isHighRisk(Number(value)) ? 'bg-red-100' : ''} w-16 text-center py-1 rounded`}>
                 <span>{Number(value).toFixed(2)}<span>×</span></span>
               </div>

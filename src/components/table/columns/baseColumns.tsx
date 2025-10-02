@@ -100,8 +100,8 @@ export const getBaseColumns = (onPatientClick?: (patientId: number) => void): Co
         </div>
       ),
       enableColumnFilter: true,
-      size: 200,
-      minSize: 180,
+      size: 176,
+      minSize: 160,
     },
     {
       // Hidden column for composite_risk sorting

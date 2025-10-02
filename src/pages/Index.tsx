@@ -56,9 +56,8 @@ export default function Index() {
     queryFn: async () => {
       const { data, error } = await supabase
         .from('phenom_models')
-        .select('id, indication_code, prediction_timeframe_yrs')
-        .not('prediction_timeframe_yrs', 'is', null)
-        .order('indication_code');
+        .select('id, indication_code, model_name, prediction_timeframe_yrs')
+        .order('model_name');
       
       if (error) {
         console.error('Error fetching phenom_models:', error);
@@ -66,25 +65,36 @@ export default function Index() {
       }
       
       // Create a map of outcomes to their available timeframes and model info
-      const outcomeTimeframeMap: Record<string, number[]> = {};
-      const outcomeModelMap: Record<string, Array<{id: string, timeframe: number}>> = {};
+      const outcomeTimeframeMap: Record<string, Array<number | 'today'>> = {};
+      const outcomeModelMap: Record<string, Array<{id: string, timeframe: number | 'today'}>> = {};
+      // Map indication_code to a display label (model_name)
+      const outcomeLabelMap: Record<string, string> = {};
       
       data?.forEach(item => {
         if (!outcomeTimeframeMap[item.indication_code]) {
           outcomeTimeframeMap[item.indication_code] = [];
           outcomeModelMap[item.indication_code] = [];
         }
-        if (!outcomeTimeframeMap[item.indication_code].includes(item.prediction_timeframe_yrs)) {
-          outcomeTimeframeMap[item.indication_code].push(item.prediction_timeframe_yrs);
+        // set display label from model_name (prefer first seen)
+        if (!outcomeLabelMap[item.indication_code] && item.model_name) {
+          outcomeLabelMap[item.indication_code] = item.model_name;
+        }
+        const tf = item.prediction_timeframe_yrs === null ? 'today' : item.prediction_timeframe_yrs;
+        if (!outcomeTimeframeMap[item.indication_code].includes(tf)) {
+          outcomeTimeframeMap[item.indication_code].push(tf);
         }
         outcomeModelMap[item.indication_code].push({
           id: item.id,
-          timeframe: item.prediction_timeframe_yrs
+          timeframe: tf
         });
       });
       
-      // Extract unique timeframes
-      const uniqueTimeframes = [...new Set(data?.map(item => item.prediction_timeframe_yrs) || [])].filter(Boolean).sort();
+      // Extract unique timeframes, including 'today' if any nulls exist
+      const hasToday = (data || []).some(item => item.prediction_timeframe_yrs === null);
+      const numericTimeframes = [...new Set((data || [])
+        .map(item => item.prediction_timeframe_yrs)
+        .filter((v): v is number => typeof v === 'number'))].sort((a, b) => a - b);
+      const uniqueTimeframes: Array<number | 'today'> = hasToday ? ['today', ...numericTimeframes] : numericTimeframes;
       
       console.log('Outcome to timeframe mapping:', outcomeTimeframeMap);
       console.log('Available timeframes from phenom_models:', uniqueTimeframes);
@@ -92,14 +102,15 @@ export default function Index() {
       return {
         outcomeTimeframeMap,
         outcomeModelMap,
-        timeframes: uniqueTimeframes as number[],
+        outcomeLabelMap,
+        timeframes: uniqueTimeframes,
         rawData: data
       };
     }
   });
 
   // Use timeframes from phenom_models
-  const timePeriods = phenomModelsData?.timeframes || [1, 2];
+  const timePeriods = (phenomModelsData?.timeframes as Array<number | 'today'>) || [1, 2];
 
   // Make sure we have a valid initial timeframe selection
   const [selectedTimeframe, setSelectedTimeframe] = useState<string>(savedState?.selectedTimeframe || '1');
@@ -108,10 +119,13 @@ export default function Index() {
   useEffect(() => {
     if (timePeriods && timePeriods.length > 0) {
       // Check if the current selection exists in the new options
-      const exists = timePeriods.includes(parseInt(selectedTimeframe));
+      const exists = selectedTimeframe === 'today'
+        ? (timePeriods as Array<number | 'today'>).includes('today')
+        : (timePeriods as Array<number | 'today'>).includes(parseInt(selectedTimeframe));
       if (!exists) {
         // If not, select the first available option
-        setSelectedTimeframe(timePeriods[0]?.toString() || '1');
+        const first = timePeriods[0];
+        setSelectedTimeframe(first === 'today' ? 'today' : (first as number).toString());
       }
     }
   }, [timePeriods]);
@@ -119,7 +133,9 @@ export default function Index() {
   // Get available outcomes with model info for the selected timeframe
   const availableOutcomesForTimeframe = phenomModelsData?.outcomeTimeframeMap 
     ? Object.entries(phenomModelsData.outcomeTimeframeMap)
-        .filter(([_, timeframes]) => timeframes.includes(parseInt(selectedTimeframe)))
+        .filter(([_, timeframes]) => selectedTimeframe === 'today'
+          ? (timeframes as Array<number | 'today'>).includes('today')
+          : (timeframes as Array<number | 'today'>).includes(parseInt(selectedTimeframe)))
         .map(([outcome]) => outcome)
         .sort()
     : [];
@@ -128,7 +144,11 @@ export default function Index() {
   const availableModelsForTimeframe = phenomModelsData?.outcomeModelMap
     ? Object.entries(phenomModelsData.outcomeModelMap)
         .reduce((acc, [outcome, models]) => {
-          const modelsForTimeframe = models.filter(m => m.timeframe === parseInt(selectedTimeframe));
+          const modelsForTimeframe = models.filter(m =>
+            selectedTimeframe === 'today'
+              ? m.timeframe === 'today'
+              : m.timeframe === parseInt(selectedTimeframe)
+          );
           if (modelsForTimeframe.length > 0) {
             acc.push({
               outcome,
@@ -174,7 +194,9 @@ export default function Index() {
     const mrnMatch = patient.mrn?.toString().includes(searchQuery);
     const searchMatches = nameMatch || mrnMatch;
 
-    const timeframeMatches = patient.prediction_timeframe_yrs === Number(selectedTimeframe);
+    const timeframeMatches = selectedTimeframe === 'today'
+      ? (patient.prediction_timeframe_yrs === null || patient.prediction_timeframe_yrs === undefined)
+      : patient.prediction_timeframe_yrs === Number(selectedTimeframe);
     const riskTypeMatches = patient.risk_type === selectedRiskType;
     const selectedFilter = showSelectedOnly ? selectedPatients.some(p => p.patient_id === patient.patient_id) : true;
     
@@ -260,7 +282,7 @@ export default function Index() {
                     onTimeframeChange={setSelectedTimeframe}
                     selectedRiskColumns={selectedRiskColumns}
                     onRiskColumnsChange={setSelectedRiskColumns}
-                    timeframes={isModelsLoading ? [1, 2] : timePeriods as number[]}
+                    timeframes={isModelsLoading ? [1, 2] : (timePeriods as Array<number | 'today'>)}
                     selectedRiskType={selectedRiskType}
                     onRiskTypeChange={setSelectedRiskType}
                     providerList={providerList}
@@ -269,11 +291,12 @@ export default function Index() {
                     onShowSelectedOnlyChange={setShowSelectedOnly}
                     availableOutcomes={availableOutcomesForTimeframe}
                     availableModels={availableModelsForTimeframe}
+                    outcomeLabels={phenomModelsData?.outcomeLabelMap}
                   />
                   <div className='flex justify-end mb-4'>
                       <p className='text-sm text-gray-600'>
                           {/* TODO: this will need to be replaced with a date from an endpoint */}
-                          Data current as of: <span className='font-bold'>2024-04-04</span>
+                          Data current as of: <span className='font-bold'>2025-09-12</span>
                       </p>
                   </div>
                   {isLoading ? (
@@ -289,6 +312,7 @@ export default function Index() {
                       averageRisks={averageRisks}
                       selectedTimeframe={selectedTimeframe}
                       onPatientClick={handlePatientClick}
+                    outcomeLabels={phenomModelsData?.outcomeLabelMap}
                     />
                   )}
                 </>

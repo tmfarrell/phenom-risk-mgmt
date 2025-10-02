@@ -27,15 +27,14 @@ export const usePatientDataLatest = () => {
       // First, fetch available outcomes from phenom_models
       const { data: phenomModels, error: modelsError } = await supabase
         .from('phenom_models')
-        .select('indication_code, prediction_timeframe_yrs')
-        .not('prediction_timeframe_yrs', 'is', null);
+        .select('indication_code, prediction_timeframe_yrs');
 
       if (modelsError) {
         console.error('Error fetching phenom models:', modelsError);
         throw modelsError;
       }
 
-      // Extract unique outcomes
+      // Extract unique outcomes (include models with and without timeframe)
       const availableOutcomes = [...new Set(phenomModels?.map(item => item.indication_code) || [])];
       console.log('Available outcomes:', availableOutcomes);
       
@@ -133,8 +132,43 @@ export const usePatientDataLatest = () => {
         });
       });
 
-      console.log('Transformed latest data:', transformedData);
-      return transformedData;
+      // Create synthetic 'today' entries using latest 1-year records as source (demo purpose)
+      const todayRecords: Person[] = (patients || []).flatMap((patient) => {
+        const assignedProvider = getRandomProvider(patient.patient_id);
+        const riskTypes: Array<'relative' | 'absolute'> = ['relative', 'absolute'];
+        return riskTypes.flatMap((rt) => {
+          const key = `${patient.patient_id}-${rt}-1`;
+          const sourceRisk: any = (latestRisks || {})[key];
+          if (!sourceRisk) return [];
+
+          const basePatient: Person = {
+            ...patient,
+            provider: assignedProvider.name,
+            provider_npi: assignedProvider.npi,
+            history: null,
+            composite_risk: sourceRisk.composite_risk || null,
+            recorded_date: sourceRisk.calculated_date,
+            prediction_timeframe_yrs: null, // mark as 'today'
+            risk_type: (rt as 'relative' | 'absolute'),
+            change_since: sourceRisk.change_since || null
+          };
+
+          const riskFields = ['EMERGENCY_VISIT', 'HOSPITALIZATION', 'FALL', 'STROKE', 'INFARCTION', 'DEATH'];
+          availableOutcomes.forEach(outcome => {
+            const randomField = riskFields[Math.floor(Math.random() * riskFields.length)];
+            const changeField = `${randomField}_change`;
+            basePatient[outcome] = sourceRisk[randomField] || null;
+            basePatient[`${outcome}_change`] = sourceRisk[changeField] || null;
+          });
+
+          return [basePatient];
+        });
+      });
+
+      const finalData = [...transformedData, ...todayRecords];
+
+      console.log('Transformed latest data (with today records):', finalData);
+      return finalData;
     }
   });
 };

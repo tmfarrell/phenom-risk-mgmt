@@ -28,6 +28,7 @@ interface ResultsTableProps {
   };
   selectedTimeframe: string;
   onPatientClick?: (patientId: number) => void;
+  outcomeLabels?: Record<string, string>;
 }
 
 export const ResultsTable = ({ 
@@ -36,7 +37,8 @@ export const ResultsTable = ({
   onSelectionChange,
   averageRisks,
   selectedTimeframe,
-  onPatientClick
+  onPatientClick,
+  outcomeLabels
 }: ResultsTableProps) => {
   const [sorting, setSorting] = useState<SortingState>([
     { id: 'composite_risk', desc: true } // Default sort by composite_risk descending (highest to lowest)
@@ -44,7 +46,7 @@ export const ResultsTable = ({
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
   const [rowSelection, setRowSelection] = useState<RowSelectionState>({});
 
-  const columns = useTableColumns(visibleRiskColumns, averageRisks[selectedTimeframe] || {}, onPatientClick);
+  const columns = useTableColumns(visibleRiskColumns, averageRisks[selectedTimeframe] || {}, onPatientClick, outcomeLabels);
 
   const table = useReactTable({
     data,

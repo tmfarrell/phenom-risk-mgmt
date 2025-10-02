@@ -18,7 +18,7 @@ export interface DetailViewProps {
   initialRiskType?: 'relative' | 'absolute' | null;
 }
 
-type RowConfig = { outcome: string; timeframe: string };
+type RowConfig = { outcome: string; timeframe: string, name?: string };
 
 export const DetailView = ({ person, initialOutcomes, initialTimeframe, initialRiskType }: DetailViewProps) => {
   const location = useLocation();
@@ -37,22 +37,21 @@ export const DetailView = ({ person, initialOutcomes, initialTimeframe, initialR
     queryFn: async () => {
       const { data, error } = await supabase
         .from('phenom_models')
-        .select('id, indication_code, prediction_timeframe_yrs')
-        .not('prediction_timeframe_yrs', 'is', null)
+        .select('id, indication_code, model_name, prediction_timeframe_yrs')
         .order('indication_code');
       if (error) {
         console.error('Error fetching phenom_models:', error);
         throw error;
       }
       const outcomeTimeframeMap: Record<string, number[]> = {};
-      const outcomeModelMap: Record<string, Array<{id: string, timeframe: number}>> = {};
+      const outcomeModelMap: Record<string, Array<{id: string, timeframe: number, name: string}>> = {};
       data?.forEach(item => {
         if (!outcomeTimeframeMap[item.indication_code]) outcomeTimeframeMap[item.indication_code] = [];
         if (!outcomeModelMap[item.indication_code]) outcomeModelMap[item.indication_code] = [];
         if (!outcomeTimeframeMap[item.indication_code].includes(item.prediction_timeframe_yrs)) {
           outcomeTimeframeMap[item.indication_code].push(item.prediction_timeframe_yrs);
         }
-        outcomeModelMap[item.indication_code].push({ id: item.id, timeframe: item.prediction_timeframe_yrs });
+        outcomeModelMap[item.indication_code].push({ id: item.id, timeframe: item.prediction_timeframe_yrs, name: item.model_name });
       });
       const uniqueTimeframes = [...new Set(data?.map(item => item.prediction_timeframe_yrs) || [])].filter(Boolean).sort();
       const availableOutcomes = Object.keys(outcomeTimeframeMap).sort();
@@ -77,7 +76,7 @@ export const DetailView = ({ person, initialOutcomes, initialTimeframe, initialR
       : (savedState?.selectedRiskColumns && savedState.selectedRiskColumns.length > 0)
         ? savedState.selectedRiskColumns
         : availableOutcomes.slice(0, Math.min(5, availableOutcomes.length));
-    return outcomes.map(o => ({ outcome: o, timeframe: tf }));
+    return outcomes.map(o => ({ outcome: o, timeframe: tf, name: phenomModelsData.outcomeModelMap[o][0]?.name }));
   }, [phenomModelsData, initialOutcomes, initialTimeframe, availableOutcomes, savedState?.selectedRiskColumns, savedState?.selectedTimeframe]);
 
   // Set initial rows when ready
@@ -102,7 +101,9 @@ export const DetailView = ({ person, initialOutcomes, initialTimeframe, initialR
   const patientRisks = (patientData || []).filter(p => p.patient_id === person.patient_id);
   
   console.log("riskSummaries", riskSummaries);
-  
+  console.log("availableOutcomes", availableOutcomes);
+  console.log("rowConfigs", rowConfigs);
+
   return (
     <div className="space-y-6">
       <Card className="p-6">

@@ -41,7 +41,7 @@ interface TableControlsProps {
   onTimeframeChange: (value: string) => void;
   selectedRiskColumns: string[];
   onRiskColumnsChange: (value: string[]) => void;
-  timeframes: number[];
+  timeframes: Array<number | 'today'>;
   selectedRiskType: 'relative' | 'absolute';
   onRiskTypeChange: (value: 'relative' | 'absolute') => void;
   providerList: ProviderList;
@@ -50,6 +50,7 @@ interface TableControlsProps {
   onShowSelectedOnlyChange: (value: boolean) => void;
   availableOutcomes?: string[]; // Dynamic outcomes from phenom_models
   availableModels?: Array<{outcome: string, modelId: string}>; // Model info for each outcome
+  outcomeLabels?: Record<string, string>; // Map from indication_code -> model_name
 }
 
 export const TableControls = ({
@@ -68,6 +69,7 @@ export const TableControls = ({
   onShowSelectedOnlyChange,
   availableOutcomes = [],
   availableModels = [],
+  outcomeLabels,
 }: TableControlsProps) => {
   const [open, setOpen] = useState(false);
   const [providerOpen, setProviderOpen] = useState(false);
@@ -161,12 +163,14 @@ export const TableControls = ({
               className="w-28 justify-between"
               id="risk-timeframe"
             >
-              {(() => {
-                const timeframe = parseInt(selectedTimeframe);
-                const displayTimeframe = useMonthsForTimeframe ? timeframe * 12 : timeframe;
-                const timeUnit = useMonthsForTimeframe ? "month" : "year";
-                return `${displayTimeframe} ${timeUnit}${displayTimeframe > 1 ? 's' : ''}`;
-              })()}
+              {selectedTimeframe === 'today'
+                ? 'Today'
+                : (() => {
+                    const timeframe = parseInt(selectedTimeframe);
+                    const displayTimeframe = useMonthsForTimeframe ? timeframe * 12 : timeframe;
+                    const timeUnit = useMonthsForTimeframe ? "month" : "year";
+                    return `${displayTimeframe} ${timeUnit}${displayTimeframe > 1 ? 's' : ''}`;
+                  })()}
               <ChevronDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
             </Button>
           </PopoverTrigger>
@@ -175,23 +179,42 @@ export const TableControls = ({
               <CommandList>
                 <CommandGroup>
                   {timeframes.map((timeframe) => {
-                    // Convert years to months if necessary
-                    const displayTimeframe = useMonthsForTimeframe ? timeframe * 12 : timeframe;
+                    if (timeframe === 'today') {
+                      return (
+                        <CommandItem
+                          key={'today'}
+                          value={'today'}
+                          onSelect={() => {
+                            onTimeframeChange('today');
+                            setTimeframeOpen(false);
+                          }}
+                        >
+                          <Check
+                            className={cn(
+                              "mr-2 h-4 w-4",
+                              selectedTimeframe === 'today' ? "opacity-100" : "opacity-0"
+                            )}
+                          />
+                          Today
+                        </CommandItem>
+                      );
+                    }
+                    const numeric = timeframe as number;
+                    const displayTimeframe = useMonthsForTimeframe ? numeric * 12 : numeric;
                     const timeUnit = useMonthsForTimeframe ? "month" : "year";
-                    
                     return (
                       <CommandItem
-                        key={timeframe}
-                        value={timeframe.toString()}
+                        key={numeric}
+                        value={numeric.toString()}
                         onSelect={() => {
-                          onTimeframeChange(timeframe.toString());
+                          onTimeframeChange(numeric.toString());
                           setTimeframeOpen(false);
                         }}
                       >
                         <Check
                           className={cn(
                             "mr-2 h-4 w-4",
-                            selectedTimeframe === timeframe.toString() ? "opacity-100" : "opacity-0"
+                            selectedTimeframe === numeric.toString() ? "opacity-100" : "opacity-0"
                           )}
                         />
                         {displayTimeframe} {timeUnit}{displayTimeframe > 1 ? 's' : ''}
@@ -228,9 +251,18 @@ export const TableControls = ({
               <CommandList>
                 <CommandEmpty>No column found.</CommandEmpty>
                 <CommandGroup>
-                  {/* Use availableOutcomes if provided, otherwise fall back to RISK_COLUMNS */}
-                  {(availableOutcomes.length > 0 ? availableOutcomes : RISK_COLUMNS).map((column) => {
+                  {/* Use availableOutcomes if provided, otherwise fall back to RISK_COLUMNS; sort by display label */}
+                  {(() => {
+                    const options = (availableOutcomes.length > 0 ? availableOutcomes : RISK_COLUMNS).slice();
+                    options.sort((a, b) => {
+                      const aLabel = outcomeLabels?.[a] || a;
+                      const bLabel = outcomeLabels?.[b] || b;
+                      return aLabel.localeCompare(bLabel);
+                    });
+                    return options;
+                  })().map((column) => {
                     const modelInfo = availableModels.find(m => m.outcome === column);
+                    const label = outcomeLabels?.[column] || column;
                     return (
                       <CommandItem
                         key={column}
@@ -249,7 +281,7 @@ export const TableControls = ({
                             currentSelectedColumns.includes(column) ? "opacity-100" : "opacity-0"
                           )}
                         />
-                        <span className="flex-1">{column}</span>
+                        <span className="flex-1">{label}</span>
                         {modelInfo && (
                           <button
                             type="button"

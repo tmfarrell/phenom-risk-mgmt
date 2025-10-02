@@ -6,10 +6,18 @@ import { getRiskColumns } from './columns/riskColumns';
 export const useTableColumns = (
   visibleRiskColumns: string[],
   averageRisks: { [key: string]: string },
-  onPatientClick?: (patientId: number) => void
+  onPatientClick?: (patientId: number) => void,
+  outcomeLabels?: Record<string, string>
 ) => {
   const baseColumns = getBaseColumns(onPatientClick);
-  const riskColumns = getRiskColumns(visibleRiskColumns, averageRisks);
+  // Ensure risk columns are ordered alphabetically by display label (model name),
+  // falling back to outcome code when label is unavailable
+  const orderedVisibleRiskColumns = [...visibleRiskColumns].sort((a, b) => {
+    const aLabel = outcomeLabels?.[a] || a;
+    const bLabel = outcomeLabels?.[b] || b;
+    return aLabel.localeCompare(bLabel);
+  });
+  const riskColumns = getRiskColumns(orderedVisibleRiskColumns, averageRisks, outcomeLabels);
 
   return [...baseColumns, ...riskColumns];
 };

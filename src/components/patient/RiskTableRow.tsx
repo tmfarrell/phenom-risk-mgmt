@@ -27,6 +27,7 @@ interface RiskTableRowProps {
   summary: string | null;
   onRemove?: () => void;
   modelId?: string;
+  displayLabel?: string;
 }
 
 const riskDetails: Record<string, { fullName: string; description: string }> = {
@@ -71,13 +72,15 @@ export const RiskTableRow = ({
   yAxisDomain,
   summary,
   onRemove,
-  modelId
+  modelId,
+  displayLabel
 }: RiskTableRowProps) => {
   const [isExpanded, setIsExpanded] = useState(false);
   const details = riskDetails[risk] || { 
     fullName: risk, 
     description: `Risk of ${risk.toLowerCase()}`
   };
+  const labelToShow = displayLabel;
   
   // Check if all values for this risk factor are null
   const displayKey = valueKey || risk;
@@ -93,7 +96,7 @@ export const RiskTableRow = ({
   return (
     <>
       <TableRow className={`group ${hasValidRiskData ? 'cursor-pointer hover:bg-gray-50' : ''}`} onClick={() => hasValidRiskData && setIsExpanded(!isExpanded)}>
-        <TableCell className="font-medium">
+        <TableCell className="font-medium text-left">
           <div className="flex items-start gap-2">
             {hasValidRiskData && (
               <div className="mt-1 text-gray-400">
@@ -102,7 +105,7 @@ export const RiskTableRow = ({
             )}
             <div className="flex flex-col items-start">
               <div className="flex items-center gap-2">
-                <span className="text-lg">{details.fullName}</span>
+                <span className="text-base">{displayLabel}</span>
                 {modelId && (
                   <a
                     href={`/phenom-builder/${modelId}`}
@@ -120,7 +123,9 @@ export const RiskTableRow = ({
             </div>
           </div>
         </TableCell>
-        <TableCell className="whitespace-nowrap text-sm text-gray-600">{parseInt(timeframe)} year{timeframe !== '1' ? 's' : ''}</TableCell>
+        <TableCell className="whitespace-nowrap text-xs text-gray-600">
+          {isNaN(parseInt(timeframe)) ? 'Today' : `${parseInt(timeframe)} year${timeframe !== '1' ? 's' : ''}`}
+        </TableCell>
         <TableCell className="min-w-[220px]">
           <SparkLine 
             data={hasValidRiskData ? getRiskTrendData(allRisks, displayKey) : []}
@@ -129,7 +134,7 @@ export const RiskTableRow = ({
             riskType={selectedRiskType}
           />
         </TableCell>
-        <TableCell>
+        <TableCell className="text-sm">
           <div className="flex items-center gap-2">
             <div className="flex flex-col">
               <div className="flex items-center gap-1">
@@ -142,7 +147,7 @@ export const RiskTableRow = ({
                   changeSince={currentRisks?.change_since}
                 />
               </div>
-              <div className="text-xs text-blue-400/70 bg-white px-2 py-1 rounded mt-1 shadow-sm">
+              <div className="text-[10px] text-blue-400/70 bg-white px-2 py-1 rounded mt-1 shadow-sm">
                 Avg: {averageRisk}
               </div>
             </div>

@@ -14,7 +14,7 @@ export const TableHeader = ({ table }: TableHeaderProps) => {
           headerGroup.headers.map((header, index) => (
             <TableHead
               key={header.id}
-              className={`${index === 0 ? 'sticky left-0 bg-blue-50 z-20 shadow-[2px_0_5px_-2px_rgba(0,0,0,0.1)]' : ''}`}
+              className={`h-auto py-2 align-center ${index === 0 ? 'sticky left-0 bg-blue-50 z-20 shadow-[2px_0_5px_-2px_rgba(0,0,0,0.1)]' : ''}`}
             >
               {header.isPlaceholder
                 ? null

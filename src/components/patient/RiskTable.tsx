@@ -18,7 +18,7 @@ interface RiskTableProps {
   availableOutcomes: string[];
   timeframes: number[];
   outcomeTimeframeMap: Record<string, number[]>;
-  outcomeModelMap: Record<string, Array<{id: string, timeframe: number}>>;
+  outcomeModelMap: Record<string, Array<{id: string, timeframe: number, name?: string}>>;
 }
 
 export const RiskTable = ({ 
@@ -37,6 +37,8 @@ export const RiskTable = ({
   const [newOutcome, setNewOutcome] = useState<string>(availableOutcomes[0] || '');
   const [newTimeframe, setNewTimeframe] = useState<string>((timeframes[0]?.toString()) || '1');
 
+
+  console.log("outcomeModelMap", outcomeModelMap);
   // Exclude outcomes already on the table
   const existingOutcomes = useMemo(() => rowConfigs.map(r => r.outcome), [rowConfigs]);
   const selectableOutcomes = useMemo(
@@ -53,7 +55,7 @@ export const RiskTable = ({
 
   const newOutcomeTimeframes = useMemo(() => {
     const tf = outcomeTimeframeMap[newOutcome];
-    return (tf && tf.length > 0 ? tf : timeframes).map(t => t.toString());
+    return (tf && tf.length > 0 ? tf : timeframes).filter(t => t != null).map(t => t.toString());
   }, [newOutcome, outcomeTimeframeMap, timeframes]);
 
   // Ensure newTimeframe is valid when outcome changes
@@ -136,11 +138,11 @@ export const RiskTable = ({
   };
 
   return (
-    <div className="overflow-x-auto">
+    <div className="overflow-x-auto text-sm">
       <Table>
         <TableHeader>
           <TableRow>
-            <TableHead>Outcome</TableHead>
+            <TableHead className="text-left">Outcome</TableHead>
             <TableHead>Time Period</TableHead>
             <TableHead>Risk Trend</TableHead>
             <TableHead>Risk Value</TableHead>
@@ -148,7 +150,11 @@ export const RiskTable = ({
           </TableRow>
         </TableHeader>
         <TableBody>
-          {rowConfigs.map((cfg, index) => {
+          {[...rowConfigs].sort((a, b) => {
+            const modelNameA = (outcomeModelMap[a.outcome] || [])[0]?.name || a.outcome;
+            const modelNameB = (outcomeModelMap[b.outcome] || [])[0]?.name || b.outcome;
+            return modelNameA.localeCompare(modelNameB);
+          }).map((cfg, index) => {
             const timeframeNum = parseInt(cfg.timeframe);
             let risksForRow = patientRisks.filter(r => r.risk_type === selectedRiskType && r.prediction_timeframe_yrs === timeframeNum);
             // Fallback: if no data for requested timeframe, use all available timeframes for this risk type
@@ -166,6 +172,8 @@ export const RiskTable = ({
             const averageTimeframe = risksForRow.some(r => r.prediction_timeframe_yrs === timeframeNum)
               ? timeframeNum
               : (currentRisk?.prediction_timeframe_yrs || timeframeNum);
+            const modelName = outcomeModelMap[cfg.outcome][0]?.name;
+            const displayLabel = modelName ; //|| cfg.outcome.split('_').map(s => s.charAt(0).toUpperCase() + s.slice(1).toLowerCase()).join(' ');
             return (
               <RiskTableRow
                 key={`${cfg.outcome}-${cfg.timeframe}-${index}`}
@@ -180,6 +188,7 @@ export const RiskTable = ({
                 summary={getSummary(cfg.outcome)}
                 onRemove={() => onRemoveRow(index)}
                 modelId={modelId}
+                displayLabel={displayLabel}
               />
             );
           })}
