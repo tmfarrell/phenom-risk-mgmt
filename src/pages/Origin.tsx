@@ -120,9 +120,6 @@ export default function Origin() {
       <main className="flex-1 container max-w-7xl mx-auto py-8 px-4">
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-foreground mb-2">Origin</h1>
-          <p className="text-muted-foreground">
-            Upload datasets and map them to the OM1 data model with AI assistance
-          </p>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -134,7 +131,7 @@ export default function Origin() {
                 Upload Dataset
               </CardTitle>
               <CardDescription>
-                Upload CSV, Excel, or other data files to begin mapping
+                Upload CSV, Excel, or other data files
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
@@ -197,10 +194,7 @@ export default function Origin() {
           {/* Chat Interface */}
           <Card className="flex flex-col">
             <CardHeader>
-              <CardTitle>AI Mapping Assistant</CardTitle>
-              <CardDescription>
-                Chat with AI to map your data to the OM1 data model
-              </CardDescription>
+              <CardTitle>AI Assistant</CardTitle>
             </CardHeader>
             <CardContent className="flex-1 flex flex-col">
               <ScrollArea className="flex-1 h-[400px] pr-4 mb-4">
