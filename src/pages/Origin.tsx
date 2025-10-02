@@ -130,7 +130,7 @@ export default function Origin() {
                 <Upload className="h-5 w-5" />
                 Upload Dataset
               </CardTitle>
-              <CardDescription>
+              <CardDescription className="items-left">
                 Upload CSV, Excel, or other data files
               </CardDescription>
             </CardHeader>
