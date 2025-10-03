@@ -1,5 +1,5 @@
 import { NavLink, useLocation } from "react-router-dom"
-import { Users, ChevronLeft, Stethoscope, Fingerprint } from "lucide-react"
+import { Users, ChevronLeft, Stethoscope, Fingerprint, Upload } from "lucide-react"
 
 import {
   Sidebar,
@@ -23,6 +23,11 @@ const applications = [
     title: "Patient Risk Panel",
     url: "/",
     icon: Users,
+  },
+  {
+    title: "Origin",
+    url: "/origin",
+    icon: Upload,
   }
 ]
 
@@ -34,6 +39,7 @@ export function AppSidebar() {
   const isActive = (path: string) => {
     if (path === "/" && currentPath === "/") return true;
     if (path === "/phenom-builder" && currentPath.startsWith("/phenom-builder")) return true;
+    if (path === "/origin" && currentPath.startsWith("/origin")) return true;
     return currentPath === path;
   }
   const isExpanded = applications.some((app) => isActive(app.url))
