@@ -14,7 +14,8 @@ import { supabase } from "@/integrations/supabase/client"
 import { useContext } from "react"
 import { AuthContext } from "@/App"
 import { useToast } from "@/hooks/use-toast"
-import { Plus, X, Check, ExternalLink, Calendar, Search } from "lucide-react"
+import { Plus, X, Check, Calendar, Search, HelpCircle, InfoIcon } from "lucide-react"
+import { Tooltip as UITooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, ReferenceLine, ScatterChart, Scatter } from 'recharts'
 
 interface PreBuiltModel {
@@ -35,6 +36,9 @@ interface PreBuiltModel {
   updated_at: string
   patients_total: number | null
   patients_phenom: number | null
+  model_lift: number | null
+  risk_threshold_pct: number | null
+  patients_tp: number | null
   auc: number | null
   providers_total: number | null
   providers_phenom: number | null
@@ -847,187 +851,166 @@ export default function PhenomBuilder() {
                       </div>
                     )}
                   </div>
-
-                  <Separator />
-
-                  <div className="grid grid-cols-4 gap-4">
-                    <div className="text-left">
-                      <h4 className="font-medium text-gray-900 mb-1">Created</h4>
-                      <p className="flex items-center gap-1 text-sm text-gray-600">
-                        <Calendar className="h-4 w-4" />
-                        {formatDate(selectedModel.created_at)}
-                      </p>
-                    </div>
-                    <div className="text-left">
-                      <h4 className="font-medium text-gray-900 mb-1">Last Updated</h4>
-                      <p className="flex items-center gap-1 text-sm text-gray-600">
-                        <Calendar className="h-4 w-4" />
-                        {formatDate(selectedModel.updated_at)}
-                      </p>
-                    </div>
-                  </div>
                 </CardContent>
               </Card>
 
-              {/* Patient Identification Results - hidden when patient count is 0 */}
-              {selectedModel?.patients_total && selectedModel.patients_total > 0 && (
-                <Card>
-                  <CardContent className="p-0">
-                    <div className="overflow-x-auto rounded-b-xl">
-                      <table className="w-full">
-                        <thead className="bg-gray-50">
-                          <tr>
-                            <th className="px-4 py-3 text-left text-sm font-semibold text-blue-900 border-b border-blue-200"></th>
-                            <th className="px-4 py-3 text-center text-sm font-semibold text-blue-900 border-b border-blue-200">
-                              <div className="flex flex-col items-center gap-1">
-                                <span>Traditional Coding</span>
-                                <Badge variant="outline" className="text-xs bg-gray-100 text-gray-700">Diagnosis or Medication codes</Badge>
-                              </div>
-                            </th>
-                            <th className="px-4 py-3 text-center text-sm font-semibold text-blue-900 border-b border-blue-200">
-                              <div className="flex flex-col items-center gap-1">
-                                <span>PhenOM</span>
-                                <Badge variant="outline" className="text-xs bg-blue-100 text-blue-700">AI-Identified</Badge>
-                              </div>
-                            </th>
-                            <th className="px-4 py-3 text-center text-sm font-semibold text-blue-900 border-b border-blue-200">
-                              <div className="flex flex-col items-center gap-1">
-                                <span>Improvement</span>
-                              </div>
-                            </th>
-                          </tr>
-                        </thead>
-                        <tbody>
-                          {(() => {
-                            const traditional = (selectedModel.patients_total || 0) - (selectedModel.patients_phenom || 0)
-                            const phenom = selectedModel.patients_total || 0
-                            const improvement = traditional > 0 ? Math.round(((phenom - traditional) / traditional) * 100) : 0
-                            return (
-                              <tr className="hover:bg-gray-50 transition-colors">
-                                <td className="px-4 py-2 border-b border-gray-200">
-                                  <div>
-                                    <div className="font-medium text-gray-900 text-sm">Patients Identified</div>
-                                  </div>
-                                </td>
-                                <td className="px-4 py-2 border-b border-gray-200 text-center">
-                                  <div className="text-lg font-bold text-gray-700">
-                                    {traditional.toLocaleString()}
-                                  </div>
-                                </td>
-                                <td className="px-4 py-2 border-b border-gray-200 text-center">
-                                  <div className="text-lg font-bold text-indigo-600">
-                                    {phenom.toLocaleString()}
-                                  </div>
-                                </td>
-                                <td className="px-4 py-2 border-b border-gray-200 text-center">
-                                  <div className="flex items-center justify-center gap-1 text-green-600">
-                                    <span className="font-semibold">+{improvement}%</span>
-                                    <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7l4-4m0 0l4 4m-4-4v18" />
-                                    </svg>
-                                  </div>
-                                </td>
-                              </tr>
-                            )
-                          })()}
-                        </tbody>
-                      </table>
-                    </div>
-                  </CardContent>
-                </Card>
+              {(selectedModel?.patients_total ?? 0) > 0 && (
+                <>
+                  {/* Patient Identification Results */}
+                  <Card>
+                    <CardContent className="p-0">
+                      <div className="overflow-x-auto rounded-b-xl">
+                        <table className="w-full">
+                          <thead className="bg-gray-50">
+                            <tr>
+                              <th className="px-4 py-3 text-left text-sm font-semibold text-blue-900 border-b border-blue-200"></th>
+                              <th className="px-4 py-3 text-center text-sm font-semibold text-blue-900 border-b border-blue-200">
+                                <div className="flex flex-col items-center gap-1">
+                                  <span>{selectedModel.indication_type == "diagnosis" ? "Diagnosed" : "Treated"} Cohort</span>
+                                </div>
+                              </th>
+                              <th className="px-4 py-3 text-center text-sm font-semibold text-blue-900 border-b border-blue-200">
+                                <div className="flex flex-col items-center gap-1">
+                                  <span>High Risk PhenOM Cohort</span>
+                                </div>
+                              </th>
+                              {/*<th className="px-4 py-3 text-center text-sm font-semibold text-blue-900 border-b border-blue-200">
+                                <div className="flex flex-col items-center gap-1">
+                                  <span>Improvement</span>
+                                </div>
+                              </th>*/}
+                            </tr>
+                          </thead>
+                          <tbody>
+                            {[
+                              {
+                                category: 'Patients Identified',
+                                traditional: selectedModel?.patients_tp ? selectedModel?.patients_tp : 0,
+                                phenom: selectedModel?.patients_phenom || 0,
+                              }
+                            ].map((metric, index) => {
+                              const improvement = metric.traditional > 0
+                                ? Math.round(((metric.phenom - metric.traditional) / metric.traditional) * 100)
+                                : 0;
+
+                              return (
+                                <tr key={metric.category} className="hover:bg-gray-50 transition-colors">
+                                  <td className="px-4 py-2 border-b border-gray-200">
+                                    <div>
+                                      <div className="font-medium text-gray-900 text-sm">{metric.category}</div>
+                                    </div>
+                                  </td>
+                                  <td className="px-4 py-2 border-b border-gray-200 text-center">
+                                    <div className="text-lg font-bold text-gray-700">
+                                      {metric.traditional.toLocaleString()}
+                                    </div>
+                                  </td>
+                                  <td className="px-4 py-2 border-b border-gray-200 text-center">
+                                    <div className="text-lg font-bold text-indigo-600">
+                                      {metric.phenom.toLocaleString()}
+                                    </div>
+                                  </td>
+                                  {/*<td className="px-4 py-2 border-b border-gray-200 text-center">
+                                    <div className="flex items-center justify-center gap-1 text-green-600">
+                                      <span className="font-semibold">+{improvement}%</span>
+                                      <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7l4-4m0 0l4 4m-4-4v18" />
+                                      </svg>
+                                    </div>
+                                  </td>*/}
+                                </tr>
+                              );
+                            })}
+                          </tbody>
+                        </table>
+                      </div>
+                    </CardContent>
+                  </Card>
+                </>
               )}
 
               {/* Analysis Toggle removed - only performance view */}
 
               {/* Only performance content remains */}
                 {/* Model Performance and ROC Curve Row */}
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <div className="grid grid-cols-2 lg:grid-cols-2 gap-6">
                   {/* Model Performance */}
-                  <Card>
+                  <Card className="col-span-2">
                     <CardHeader>
-                      <CardTitle className="text-lg">Model Performance</CardTitle>
+                      <CardTitle className="text-lg text-left">Model Performance</CardTitle>
                     </CardHeader>
                     <CardContent className="space-y-4">
                       {/* Key Metrics */}
-                      <div className="grid grid-cols-2 gap-4">
-                         <div className="text-center p-3 rounded-lg">
-                           <p className="text-2xl font-bold text-blue-600">{selectedModel?.auc?.toFixed(3) || 'N/A'}</p>
-                           <p className="text-sm text-blue-800">AUC Score</p>
-                         </div>
-                         {selectedModel?.patients_total && selectedModel.patients_total > 0 && (
-                           <div className="text-center p-3 rounded-lg">
-                             <p className="text-2xl font-bold text-blue-600">{(selectedModel.patients_total - (selectedModel.patients_phenom || 0)).toLocaleString()}</p>
-                             <p className="text-sm text-blue-800">Cohort Size</p>
-                           </div>
-                         )}
+                      <div className="grid grid-cols-1 sm:grid-cols-4 gap-4">
+                          <div className="text-center p-3 rounded-lg">
+                            <p className="text-2xl font-bold text-blue-600">{selectedModel?.auc?.toFixed(3) || 'N/A'}</p>
+                            <p className="text-sm text-blue-800">AUC</p>
+                          </div>
+                          {/* Cohort Size */}
+                          {selectedModel.patients_total > 0 && (
+                          <div className="text-center p-3 rounded-lg">
+                            <p className="text-2xl font-bold text-blue-600">{(selectedModel?.patients_total ? selectedModel.patients_total - (selectedModel.patients_phenom || 0) : 0).toLocaleString()}</p>
+                            <p className="text-sm text-blue-800">Baseline Cohort</p>
+                          </div>
+                          )}
+                          {typeof selectedModel.risk_threshold_pct === 'number' && (
+                            <div className="text-center p-3 rounded-lg">
+                              <p className="text-2xl font-bold text-blue-600">{selectedModel.risk_threshold_pct.toFixed(1)}%</p>
+                              <p className="text-sm text-blue-800 flex items-center justify-center gap-1">
+                                High Risk Threshold
+                                <UITooltip>
+                                  <TooltipTrigger asChild>
+                                    <span className="inline-flex items-center cursor-help text-blue-600">
+                                      <InfoIcon className="h-4 w-4" />
+                                    </span>
+                                  </TooltipTrigger>
+                                  <TooltipContent>
+                                    <p>High risk patients are in the top {selectedModel.risk_threshold_pct.toFixed(1)}% of patients <br/>for this indication</p>
+                                  </TooltipContent>
+                                </UITooltip>
+                              </p>
+                            </div>
+                          )}
+                          {selectedModel.model_lift && (
+                            <div className="text-center p-3 rounded-lg">
+                              <p className="text-2xl font-bold text-blue-600">{selectedModel?.model_lift?.toFixed(1) || 'N/A'}x</p>
+                              <p className="text-sm text-blue-800 flex items-center justify-center gap-1">
+                                High Risk PhenOM Lift
+                                <UITooltip>
+                                  <TooltipTrigger asChild>
+                                    <span className="inline-flex items-center cursor-help text-blue-600">
+                                      <InfoIcon className="h-4 w-4" />
+                                    </span>
+                                  </TooltipTrigger>
+                                  <TooltipContent>
+                                    <p>High risk patients are {(selectedModel?.model_lift ?? 0).toFixed(1)}x as likely <br/>to have the indication as the general population</p>
+                                  </TooltipContent>
+                                </UITooltip>
+                              </p>
+                            </div>
+                          )}
                       </div>
 
                       <Separator />
 
-                      <div>
-                        <h4 className="font-medium text-gray-900 mb-2">Training Information</h4>
-                        <div className="text-sm text-gray-600 space-y-1">
-                          <p>Validation Split: {(performance?.validationSplit * 100)}%</p>
-                          <p>Training Date: {performance?.trainingDate ? formatDate(performance.trainingDate) : 'N/A'}</p>
+                      <div className="grid grid-cols-4 gap-4">
+                        <div className="text-left">
+                          <h4 className="font-medium text-gray-900 mb-1">Created</h4>
+                          <p className="flex items-center gap-1 text-sm text-gray-600">
+                            <Calendar className="h-4 w-4" />
+                            {formatDate(selectedModel.created_at)}
+                          </p>
+                        </div>
+                        <div className="text-left">
+                          <h4 className="font-medium text-gray-900 mb-1">Last Updated</h4>
+                          <p className="flex items-center gap-1 text-sm text-gray-600">
+                            <Calendar className="h-4 w-4" />
+                            {formatDate(selectedModel.updated_at)}
+                          </p>
                         </div>
                       </div>
                     </CardContent>
                   </Card>
-
-                  {/* ROC Curve - Commented out per user request */}
-                  {/* <Card>
-                    <CardHeader>
-                      <CardTitle className="text-lg">ROC Curve Analysis</CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                      <div className="h-80 pb-2">
-                        <ResponsiveContainer width="100%" height="100%">
-                          <LineChart 
-                            data={performance?.rocCurve || []}
-                            margin={{ top: 5, left: 5, bottom: 5 }}
-                          >
-                            <CartesianGrid strokeDasharray="3 3" />
-                            <XAxis 
-                              dataKey="fpr" 
-                              label={{ value: 'False Positive Rate', position: 'insideBottom', offset: -5 }}
-                              tick={{ fontSize: 12 }}
-                              domain={[0, 1]}
-                              tickFormatter={(value) => value.toFixed(1)}
-                            />
-                            <YAxis 
-                              label={{ value: 'True Positive Rate', angle: -90, position: 'insideLeft', offset: -10 }}
-                              tick={{ fontSize: 12 }}
-                              domain={[0, 1]}
-                              tickFormatter={(value) => value.toFixed(1)}
-                            />
-                            <Tooltip 
-                              formatter={(value: number) => value.toFixed(3)}
-                              contentStyle={{ backgroundColor: 'rgba(255, 255, 255, 0.95)', border: '1px solid #ccc', borderRadius: '4px' }}
-                            />
-                            <ReferenceLine 
-                              stroke="#999" 
-                              strokeDasharray="5 5" 
-                              segment={[{ x: 0, y: 0 }, { x: 1, y: 1 }]}
-                              strokeWidth={2}
-                            />
-                            <Line 
-                              type="monotone" 
-                              dataKey="tpr" 
-                              stroke="#3b82f6" 
-                              strokeWidth={3}
-                              dot={false}
-                              name="ROC Curve"
-                            />
-                          </LineChart>
-                        </ResponsiveContainer>
-                      </div>
-                      <div className="mt-4 text-sm text-gray-600">
-                        <p>• The closer the curve is to the top-left corner, the better the model performance</p>
-                        <p>• The diagonal dashed line represents a random classifier (AUC = 0.5)</p>
-                        <p>• Current model AUC of {selectedModel?.auc?.toFixed(3) || 'N/A'} indicates {(selectedModel?.auc || 0) > 0.8 ? 'excellent' : (selectedModel?.auc || 0) > 0.7 ? 'good' : 'fair'} discrimination ability</p>
-                      </div>
-                    </CardContent>
-                  </Card> */}
                 </div>
             </div>
           </div>

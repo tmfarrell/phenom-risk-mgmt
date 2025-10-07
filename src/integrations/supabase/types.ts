@@ -173,13 +173,16 @@ export type Database = {
           min_patient_age: number | null
           model_name: string
           patient_sex: string | null
+          patients_tp: number | null
           patients_phenom: number | null
           patients_total: number | null
           prediction_timeframe_yrs: number | null
+          risk_threshold_pct: number | null
           providers_phenom: number | null
           providers_total: number | null
           updated_at: string
           user_id: string | null
+          model_lift: number | null
         }
         Insert: {
           auc?: number | null
@@ -195,13 +198,16 @@ export type Database = {
           min_patient_age?: number | null
           model_name: string
           patient_sex?: string | null
+          patients_tp?: number | null
           patients_phenom?: number | null
           patients_total?: number | null
           prediction_timeframe_yrs?: number | null
+          risk_threshold_pct?: number | null
           providers_phenom?: number | null
           providers_total?: number | null
           updated_at?: string
           user_id?: string | null
+          model_lift?: number | null
         }
         Update: {
           auc?: number | null
@@ -217,13 +223,16 @@ export type Database = {
           min_patient_age?: number | null
           model_name?: string
           patient_sex?: string | null
+          patients_tp?: number | null
           patients_phenom?: number | null
           patients_total?: number | null
           prediction_timeframe_yrs?: number | null
+          risk_threshold_pct?: number | null
           providers_phenom?: number | null
           providers_total?: number | null
           updated_at?: string
           user_id?: string | null
+          model_lift?: number | null
         }
         Relationships: []
       }
