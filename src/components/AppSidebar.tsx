@@ -1,5 +1,5 @@
 import { NavLink, useLocation } from "react-router-dom"
-import { Users, ChevronLeft, Stethoscope, Fingerprint, Upload } from "lucide-react"
+import { Users, ChevronLeft, Stethoscope, Fingerprint, Upload, Brain } from "lucide-react"
 
 import {
   Sidebar,
@@ -28,6 +28,11 @@ const applications = [
     title: "Origin",
     url: "/origin",
     icon: Upload,
+  },
+  {
+    title: "Prediction Builder",
+    url: "/prediction-builder",
+    icon: Brain,
   }
 ]
 
@@ -40,6 +45,7 @@ export function AppSidebar() {
     if (path === "/" && currentPath === "/") return true;
     if (path === "/phenom-builder" && currentPath.startsWith("/phenom-builder")) return true;
     if (path === "/origin" && currentPath.startsWith("/origin")) return true;
+    if (path === "/prediction-builder" && currentPath.startsWith("/prediction-builder")) return true;
     return currentPath === path;
   }
   const isExpanded = applications.some((app) => isActive(app.url))
