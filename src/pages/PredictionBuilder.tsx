@@ -9,7 +9,7 @@ export default function PredictionBuilder() {
       <Header />
       <main className="p-6 space-y-6 max-w-5xl">
         <div>
-          <h1 className="text-3xl font-bold mb-2">Prediction API Documentation</h1>
+          <h1 className="text-3xl font-bold mb-2">PhenOM API Documentation</h1>
           <p className="text-muted-foreground">
             REST API for generating clinical risk predictions based on patient codes
           </p>
@@ -20,10 +20,9 @@ export default function PredictionBuilder() {
             <TabsTrigger value="overview">Overview</TabsTrigger>
             <TabsTrigger value="endpoint">Endpoint</TabsTrigger>
             <TabsTrigger value="examples">Examples</TabsTrigger>
-            <TabsTrigger value="response">Response</TabsTrigger>
           </TabsList>
 
-          <TabsContent value="overview" className="space-y-4">
+          <TabsContent value="overview" className="space-y-4 text-left">
             <Card>
               <CardHeader>
                 <CardTitle>API Overview</CardTitle>
@@ -33,7 +32,7 @@ export default function PredictionBuilder() {
                 <div>
                   <h3 className="font-semibold mb-2">Base URL</h3>
                   <code className="block bg-muted p-3 rounded-md">
-                    https://api.om1.com/v1
+                    https://api.om1.com/phenom/v1
                   </code>
                 </div>
                 
@@ -51,7 +50,7 @@ export default function PredictionBuilder() {
                   <h3 className="font-semibold mb-2">Rate Limits</h3>
                   <ul className="list-disc list-inside text-sm text-muted-foreground space-y-1">
                     <li>1000 requests per hour per API key</li>
-                    <li>Maximum 100 patients per batch request</li>
+                    <li>Maximum 1000 patients per batch request</li>
                     <li>Rate limit headers included in all responses</li>
                   </ul>
                 </div>
@@ -59,7 +58,7 @@ export default function PredictionBuilder() {
             </Card>
           </TabsContent>
 
-          <TabsContent value="endpoint" className="space-y-4">
+          <TabsContent value="endpoint" className="space-y-4 text-left">
             <Card>
               <CardHeader>
                 <CardTitle>POST /predictions/generate</CardTitle>
@@ -117,14 +116,22 @@ export default function PredictionBuilder() {
             </Card>
           </TabsContent>
 
-          <TabsContent value="examples" className="space-y-4">
-            <Card>
-              <CardHeader>
-                <CardTitle>cURL Example</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <pre className="bg-muted p-4 rounded-md overflow-x-auto text-sm">
-{`curl -X POST https://api.om1.com/v1/predictions/generate \\
+          <TabsContent value="examples" className="space-y-4 text-left">
+            <Tabs defaultValue="curl" className="w-full">
+              <TabsList>
+                <TabsTrigger value="curl">cURL</TabsTrigger>
+                <TabsTrigger value="python">Python</TabsTrigger>
+                <TabsTrigger value="javascript">JavaScript</TabsTrigger>
+              </TabsList>
+
+              <TabsContent value="curl" className="space-y-4">
+                <Card>
+                  <CardHeader>
+                    <CardTitle>cURL Example</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <pre className="bg-muted p-4 rounded-md overflow-x-auto text-sm">
+{`curl -X POST https://api.om1.com/phenom/v1/predictions/generate \\
   -H "Authorization: Bearer YOUR_API_KEY" \\
   -H "Content-Type: application/json" \\
   -d '{
@@ -142,19 +149,21 @@ export default function PredictionBuilder() {
       "timeHorizon": "90d"
     }
   }'`}
-                </pre>
-              </CardContent>
-            </Card>
+                    </pre>
+                  </CardContent>
+                </Card>
+              </TabsContent>
 
-            <Card>
-              <CardHeader>
-                <CardTitle>Python Example</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <pre className="bg-muted p-4 rounded-md overflow-x-auto text-sm">
+              <TabsContent value="python" className="space-y-4">
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Python Example</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <pre className="bg-muted p-4 rounded-md overflow-x-auto text-sm">
 {`import requests
 
-url = "https://api.om1.com/v1/predictions/generate"
+url = "https://api.om1.com/phenom/v1/predictions/generate"
 headers = {
     "Authorization": "Bearer YOUR_API_KEY",
     "Content-Type": "application/json"
@@ -175,17 +184,19 @@ payload = {
 
 response = requests.post(url, headers=headers, json=payload)
 print(response.json())`}
-                </pre>
-              </CardContent>
-            </Card>
+                    </pre>
+                  </CardContent>
+                </Card>
+              </TabsContent>
 
-            <Card>
-              <CardHeader>
-                <CardTitle>JavaScript Example</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <pre className="bg-muted p-4 rounded-md overflow-x-auto text-sm">
-{`const response = await fetch('https://api.om1.com/v1/predictions/generate', {
+              <TabsContent value="javascript" className="space-y-4">
+                <Card>
+                  <CardHeader>
+                    <CardTitle>JavaScript Example</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <pre className="bg-muted p-4 rounded-md overflow-x-auto text-sm">
+{`const response = await fetch('https://api.om1.com/phenom/v1/predictions/generate', {
   method: 'POST',
   headers: {
     'Authorization': 'Bearer YOUR_API_KEY',
@@ -208,109 +219,11 @@ print(response.json())`}
 
 const data = await response.json();
 console.log(data);`}
-                </pre>
-              </CardContent>
-            </Card>
-          </TabsContent>
-
-          <TabsContent value="response" className="space-y-4">
-            <Card>
-              <CardHeader>
-                <CardTitle>Success Response (200 OK)</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <pre className="bg-muted p-4 rounded-md overflow-x-auto text-sm">
-{`{
-  "status": "success",
-  "requestId": "req_abc123xyz",
-  "processedAt": "2024-10-09T12:34:56Z",
-  "results": [
-    {
-      "patientId": "P123456",
-      "predictions": {
-        "hospitalization": {
-          "risk": "high",
-          "probability": 0.78,
-          "confidence": 0.92,
-          "timeHorizon": "90d"
-        },
-        "readmission": {
-          "risk": "medium",
-          "probability": 0.45,
-          "confidence": 0.87,
-          "timeHorizon": "90d"
-        },
-        "mortality": {
-          "risk": "low",
-          "probability": 0.12,
-          "confidence": 0.95,
-          "timeHorizon": "90d"
-        }
-      },
-      "riskFactors": [
-        {
-          "code": "E11.9",
-          "type": "diagnosis",
-          "description": "Type 2 diabetes mellitus",
-          "impact": 0.34
-        },
-        {
-          "code": "I10",
-          "type": "diagnosis",
-          "description": "Essential hypertension",
-          "impact": 0.28
-        }
-      ]
-    }
-  ]
-}`}
-                </pre>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader>
-                <CardTitle>Error Responses</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div>
-                  <h3 className="font-semibold mb-2">400 Bad Request</h3>
-                  <pre className="bg-muted p-3 rounded-md text-sm">
-{`{
-  "status": "error",
-  "code": "INVALID_REQUEST",
-  "message": "Patient ID is required",
-  "details": {
-    "field": "patients[0].patientId"
-  }
-}`}
-                  </pre>
-                </div>
-
-                <div>
-                  <h3 className="font-semibold mb-2">401 Unauthorized</h3>
-                  <pre className="bg-muted p-3 rounded-md text-sm">
-{`{
-  "status": "error",
-  "code": "UNAUTHORIZED",
-  "message": "Invalid or missing API key"
-}`}
-                  </pre>
-                </div>
-
-                <div>
-                  <h3 className="font-semibold mb-2">429 Too Many Requests</h3>
-                  <pre className="bg-muted p-3 rounded-md text-sm">
-{`{
-  "status": "error",
-  "code": "RATE_LIMIT_EXCEEDED",
-  "message": "Rate limit exceeded. Try again in 3600 seconds",
-  "retryAfter": 3600
-}`}
-                  </pre>
-                </div>
-              </CardContent>
-            </Card>
+                    </pre>
+                  </CardContent>
+                </Card>
+              </TabsContent>
+            </Tabs>
           </TabsContent>
         </Tabs>
       </main>

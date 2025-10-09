@@ -25,14 +25,14 @@ const applications = [
     icon: Users,
   },
   {
-    title: "Origin",
-    url: "/origin",
-    icon: Upload,
-  },
-  {
     title: "Prediction API",
     url: "/prediction-builder",
     icon: FileCode,
+  },
+  {
+    title: "Origin",
+    url: "/origin",
+    icon: Upload,
   }
 ]
 
