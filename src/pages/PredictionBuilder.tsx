@@ -1,362 +1,318 @@
-import { useState } from 'react';
 import { Header } from '@/components/Header';
-import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Loader2, Plus, X, Play } from 'lucide-react';
-import { useToast } from '@/hooks/use-toast';
-
-interface PatientCodes {
-  patientId: string;
-  diagnosis: string[];
-  procedures: string[];
-  medications: string[];
-  labs: string[];
-}
 
 export default function PredictionBuilder() {
-  const { toast } = useToast();
-  const [patients, setPatients] = useState<PatientCodes[]>([]);
-  const [currentPatient, setCurrentPatient] = useState<PatientCodes>({
-    patientId: '',
-    diagnosis: [],
-    procedures: [],
-    medications: [],
-    labs: []
-  });
-  const [isGenerating, setIsGenerating] = useState(false);
-  const [predictions, setPredictions] = useState<any>(null);
-
-  const [inputValues, setInputValues] = useState({
-    diagnosis: '',
-    procedure: '',
-    medication: '',
-    lab: ''
-  });
-
-  const addCode = (type: 'diagnosis' | 'procedures' | 'medications' | 'labs', value: string) => {
-    if (!value.trim()) return;
-    
-    setCurrentPatient(prev => ({
-      ...prev,
-      [type]: [...prev[type], value.trim()]
-    }));
-    
-    setInputValues(prev => ({
-      ...prev,
-      [type === 'diagnosis' ? 'diagnosis' : type === 'procedures' ? 'procedure' : type === 'medications' ? 'medication' : 'lab']: ''
-    }));
-  };
-
-  const removeCode = (type: 'diagnosis' | 'procedures' | 'medications' | 'labs', index: number) => {
-    setCurrentPatient(prev => ({
-      ...prev,
-      [type]: prev[type].filter((_, i) => i !== index)
-    }));
-  };
-
-  const addPatient = () => {
-    if (!currentPatient.patientId.trim()) {
-      toast({
-        title: "Patient ID required",
-        description: "Please enter a patient ID",
-        variant: "destructive"
-      });
-      return;
-    }
-
-    setPatients(prev => [...prev, currentPatient]);
-    setCurrentPatient({
-      patientId: '',
-      diagnosis: [],
-      procedures: [],
-      medications: [],
-      labs: []
-    });
-    
-    toast({
-      title: "Patient added",
-      description: `Patient ${currentPatient.patientId} has been added to the prediction batch`
-    });
-  };
-
-  const removePatient = (index: number) => {
-    setPatients(prev => prev.filter((_, i) => i !== index));
-  };
-
-  const generatePredictions = async () => {
-    if (patients.length === 0) {
-      toast({
-        title: "No patients",
-        description: "Please add at least one patient before generating predictions",
-        variant: "destructive"
-      });
-      return;
-    }
-
-    setIsGenerating(true);
-    try {
-      // TODO: Call your prediction API here
-      // const response = await supabase.functions.invoke('generate-predictions', {
-      //   body: { patients }
-      // });
-      
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 2000));
-      
-      setPredictions({
-        status: 'success',
-        totalPatients: patients.length,
-        completedAt: new Date().toISOString()
-      });
-      
-      toast({
-        title: "Predictions generated",
-        description: `Successfully generated predictions for ${patients.length} patient(s)`
-      });
-    } catch (error) {
-      console.error('Error generating predictions:', error);
-      toast({
-        title: "Generation failed",
-        description: "Failed to generate predictions. Please try again.",
-        variant: "destructive"
-      });
-    } finally {
-      setIsGenerating(false);
-    }
-  };
-
   return (
     <div className="min-h-screen bg-background">
       <Header />
       <main className="container mx-auto p-6 space-y-6">
         <div>
-          <h1 className="text-3xl font-bold mb-2">Prediction Builder</h1>
+          <h1 className="text-3xl font-bold mb-2">Prediction API Documentation</h1>
           <p className="text-muted-foreground">
-            Generate predictions for patients based on their clinical codes
+            REST API for generating clinical risk predictions based on patient codes
           </p>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          {/* Input Form */}
-          <Card>
-            <CardHeader>
-              <CardTitle>Add Patient Data</CardTitle>
-              <CardDescription>
-                Enter patient ID and associated clinical codes
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor="patientId">Patient ID</Label>
-                <Input
-                  id="patientId"
-                  placeholder="Enter patient ID"
-                  value={currentPatient.patientId}
-                  onChange={(e) => setCurrentPatient(prev => ({ ...prev, patientId: e.target.value }))}
-                />
-              </div>
+        <Tabs defaultValue="overview" className="w-full">
+          <TabsList>
+            <TabsTrigger value="overview">Overview</TabsTrigger>
+            <TabsTrigger value="endpoint">Endpoint</TabsTrigger>
+            <TabsTrigger value="examples">Examples</TabsTrigger>
+            <TabsTrigger value="response">Response</TabsTrigger>
+          </TabsList>
 
-              <Tabs defaultValue="diagnosis" className="w-full">
-                <TabsList className="grid w-full grid-cols-4">
-                  <TabsTrigger value="diagnosis">Diagnosis</TabsTrigger>
-                  <TabsTrigger value="procedures">Procedures</TabsTrigger>
-                  <TabsTrigger value="medications">Medications</TabsTrigger>
-                  <TabsTrigger value="labs">Labs</TabsTrigger>
-                </TabsList>
-
-                <TabsContent value="diagnosis" className="space-y-4">
-                  <div className="flex gap-2">
-                    <Input
-                      placeholder="Enter ICD-10 code"
-                      value={inputValues.diagnosis}
-                      onChange={(e) => setInputValues(prev => ({ ...prev, diagnosis: e.target.value }))}
-                      onKeyPress={(e) => e.key === 'Enter' && addCode('diagnosis', inputValues.diagnosis)}
-                    />
-                    <Button size="icon" onClick={() => addCode('diagnosis', inputValues.diagnosis)}>
-                      <Plus className="h-4 w-4" />
-                    </Button>
-                  </div>
-                  <div className="flex flex-wrap gap-2">
-                    {currentPatient.diagnosis.map((code, idx) => (
-                      <Badge key={idx} variant="secondary" className="gap-1">
-                        {code}
-                        <X className="h-3 w-3 cursor-pointer" onClick={() => removeCode('diagnosis', idx)} />
-                      </Badge>
-                    ))}
-                  </div>
-                </TabsContent>
-
-                <TabsContent value="procedures" className="space-y-4">
-                  <div className="flex gap-2">
-                    <Input
-                      placeholder="Enter CPT code"
-                      value={inputValues.procedure}
-                      onChange={(e) => setInputValues(prev => ({ ...prev, procedure: e.target.value }))}
-                      onKeyPress={(e) => e.key === 'Enter' && addCode('procedures', inputValues.procedure)}
-                    />
-                    <Button size="icon" onClick={() => addCode('procedures', inputValues.procedure)}>
-                      <Plus className="h-4 w-4" />
-                    </Button>
-                  </div>
-                  <div className="flex flex-wrap gap-2">
-                    {currentPatient.procedures.map((code, idx) => (
-                      <Badge key={idx} variant="secondary" className="gap-1">
-                        {code}
-                        <X className="h-3 w-3 cursor-pointer" onClick={() => removeCode('procedures', idx)} />
-                      </Badge>
-                    ))}
-                  </div>
-                </TabsContent>
-
-                <TabsContent value="medications" className="space-y-4">
-                  <div className="flex gap-2">
-                    <Input
-                      placeholder="Enter medication code"
-                      value={inputValues.medication}
-                      onChange={(e) => setInputValues(prev => ({ ...prev, medication: e.target.value }))}
-                      onKeyPress={(e) => e.key === 'Enter' && addCode('medications', inputValues.medication)}
-                    />
-                    <Button size="icon" onClick={() => addCode('medications', inputValues.medication)}>
-                      <Plus className="h-4 w-4" />
-                    </Button>
-                  </div>
-                  <div className="flex flex-wrap gap-2">
-                    {currentPatient.medications.map((code, idx) => (
-                      <Badge key={idx} variant="secondary" className="gap-1">
-                        {code}
-                        <X className="h-3 w-3 cursor-pointer" onClick={() => removeCode('medications', idx)} />
-                      </Badge>
-                    ))}
-                  </div>
-                </TabsContent>
-
-                <TabsContent value="labs" className="space-y-4">
-                  <div className="flex gap-2">
-                    <Input
-                      placeholder="Enter lab code"
-                      value={inputValues.lab}
-                      onChange={(e) => setInputValues(prev => ({ ...prev, lab: e.target.value }))}
-                      onKeyPress={(e) => e.key === 'Enter' && addCode('labs', inputValues.lab)}
-                    />
-                    <Button size="icon" onClick={() => addCode('labs', inputValues.lab)}>
-                      <Plus className="h-4 w-4" />
-                    </Button>
-                  </div>
-                  <div className="flex flex-wrap gap-2">
-                    {currentPatient.labs.map((code, idx) => (
-                      <Badge key={idx} variant="secondary" className="gap-1">
-                        {code}
-                        <X className="h-3 w-3 cursor-pointer" onClick={() => removeCode('labs', idx)} />
-                      </Badge>
-                    ))}
-                  </div>
-                </TabsContent>
-              </Tabs>
-
-              <Button onClick={addPatient} className="w-full">
-                <Plus className="h-4 w-4 mr-2" />
-                Add Patient to Batch
-              </Button>
-            </CardContent>
-          </Card>
-
-          {/* Patient List */}
-          <Card>
-            <CardHeader>
-              <CardTitle>Patient Batch ({patients.length})</CardTitle>
-              <CardDescription>
-                Patients ready for prediction generation
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="space-y-3 max-h-[400px] overflow-y-auto">
-                {patients.length === 0 ? (
-                  <p className="text-muted-foreground text-center py-8">
-                    No patients added yet
+          <TabsContent value="overview" className="space-y-4">
+            <Card>
+              <CardHeader>
+                <CardTitle>API Overview</CardTitle>
+                <CardDescription>Generate predictions for patient risk based on clinical codes</CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div>
+                  <h3 className="font-semibold mb-2">Base URL</h3>
+                  <code className="block bg-muted p-3 rounded-md">
+                    https://api.om1.com/v1
+                  </code>
+                </div>
+                
+                <div>
+                  <h3 className="font-semibold mb-2">Authentication</h3>
+                  <p className="text-sm text-muted-foreground mb-2">
+                    All API requests require authentication via Bearer token in the Authorization header.
                   </p>
-                ) : (
-                  patients.map((patient, idx) => (
-                    <Card key={idx}>
-                      <CardHeader className="pb-3">
-                        <div className="flex items-center justify-between">
-                          <CardTitle className="text-sm">{patient.patientId}</CardTitle>
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            onClick={() => removePatient(idx)}
-                          >
-                            <X className="h-4 w-4" />
-                          </Button>
-                        </div>
-                      </CardHeader>
-                      <CardContent className="text-xs space-y-2">
-                        {patient.diagnosis.length > 0 && (
-                          <div>
-                            <span className="font-semibold">Diagnosis:</span> {patient.diagnosis.join(', ')}
-                          </div>
-                        )}
-                        {patient.procedures.length > 0 && (
-                          <div>
-                            <span className="font-semibold">Procedures:</span> {patient.procedures.join(', ')}
-                          </div>
-                        )}
-                        {patient.medications.length > 0 && (
-                          <div>
-                            <span className="font-semibold">Medications:</span> {patient.medications.join(', ')}
-                          </div>
-                        )}
-                        {patient.labs.length > 0 && (
-                          <div>
-                            <span className="font-semibold">Labs:</span> {patient.labs.join(', ')}
-                          </div>
-                        )}
-                      </CardContent>
-                    </Card>
-                  ))
-                )}
-              </div>
+                  <code className="block bg-muted p-3 rounded-md text-sm">
+                    Authorization: Bearer YOUR_API_KEY
+                  </code>
+                </div>
 
-              <Button
-                onClick={generatePredictions}
-                disabled={patients.length === 0 || isGenerating}
-                className="w-full"
-              >
-                {isGenerating ? (
-                  <>
-                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                    Generating Predictions...
-                  </>
-                ) : (
-                  <>
-                    <Play className="h-4 w-4 mr-2" />
-                    Generate Predictions
-                  </>
-                )}
-              </Button>
-            </CardContent>
-          </Card>
-        </div>
+                <div>
+                  <h3 className="font-semibold mb-2">Rate Limits</h3>
+                  <ul className="list-disc list-inside text-sm text-muted-foreground space-y-1">
+                    <li>1000 requests per hour per API key</li>
+                    <li>Maximum 100 patients per batch request</li>
+                    <li>Rate limit headers included in all responses</li>
+                  </ul>
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
 
-        {/* Results */}
-        {predictions && (
-          <Card>
-            <CardHeader>
-              <CardTitle>Prediction Results</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-2">
-                <p>Status: <Badge variant="default">{predictions.status}</Badge></p>
-                <p>Total Patients: {predictions.totalPatients}</p>
-                <p>Completed At: {new Date(predictions.completedAt).toLocaleString()}</p>
-              </div>
-            </CardContent>
-          </Card>
-        )}
+          <TabsContent value="endpoint" className="space-y-4">
+            <Card>
+              <CardHeader>
+                <CardTitle>POST /predictions/generate</CardTitle>
+                <CardDescription>Generate risk predictions for a batch of patients</CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div>
+                  <h3 className="font-semibold mb-2">Request Body</h3>
+                  <pre className="bg-muted p-4 rounded-md overflow-x-auto text-sm">
+{`{
+  "patients": [
+    {
+      "patientId": "string",
+      "diagnosis": ["string"],      // ICD-10 codes
+      "procedures": ["string"],     // CPT codes
+      "medications": ["string"],    // RxNorm codes
+      "labs": ["string"]            // LOINC codes
+    }
+  ],
+  "options": {
+    "includeConfidence": true,
+    "includeProbabilities": true,
+    "timeHorizon": "90d"            // 30d, 90d, 180d, 365d
+  }
+}`}
+                  </pre>
+                </div>
+
+                <div>
+                  <h3 className="font-semibold mb-2">Parameters</h3>
+                  <div className="space-y-3">
+                    <div className="border-l-2 border-primary pl-3">
+                      <p className="font-medium text-sm">patientId <Badge variant="outline">required</Badge></p>
+                      <p className="text-xs text-muted-foreground">Unique identifier for the patient</p>
+                    </div>
+                    <div className="border-l-2 border-muted pl-3">
+                      <p className="font-medium text-sm">diagnosis <Badge variant="secondary">optional</Badge></p>
+                      <p className="text-xs text-muted-foreground">Array of ICD-10 diagnosis codes</p>
+                    </div>
+                    <div className="border-l-2 border-muted pl-3">
+                      <p className="font-medium text-sm">procedures <Badge variant="secondary">optional</Badge></p>
+                      <p className="text-xs text-muted-foreground">Array of CPT procedure codes</p>
+                    </div>
+                    <div className="border-l-2 border-muted pl-3">
+                      <p className="font-medium text-sm">medications <Badge variant="secondary">optional</Badge></p>
+                      <p className="text-xs text-muted-foreground">Array of RxNorm medication codes</p>
+                    </div>
+                    <div className="border-l-2 border-muted pl-3">
+                      <p className="font-medium text-sm">labs <Badge variant="secondary">optional</Badge></p>
+                      <p className="text-xs text-muted-foreground">Array of LOINC lab codes</p>
+                    </div>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          <TabsContent value="examples" className="space-y-4">
+            <Card>
+              <CardHeader>
+                <CardTitle>cURL Example</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <pre className="bg-muted p-4 rounded-md overflow-x-auto text-sm">
+{`curl -X POST https://api.om1.com/v1/predictions/generate \\
+  -H "Authorization: Bearer YOUR_API_KEY" \\
+  -H "Content-Type: application/json" \\
+  -d '{
+    "patients": [
+      {
+        "patientId": "P123456",
+        "diagnosis": ["E11.9", "I10"],
+        "procedures": ["99213", "80053"],
+        "medications": ["314076", "197361"],
+        "labs": ["2339-0", "2345-7"]
+      }
+    ],
+    "options": {
+      "includeConfidence": true,
+      "timeHorizon": "90d"
+    }
+  }'`}
+                </pre>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader>
+                <CardTitle>Python Example</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <pre className="bg-muted p-4 rounded-md overflow-x-auto text-sm">
+{`import requests
+
+url = "https://api.om1.com/v1/predictions/generate"
+headers = {
+    "Authorization": "Bearer YOUR_API_KEY",
+    "Content-Type": "application/json"
+}
+payload = {
+    "patients": [{
+        "patientId": "P123456",
+        "diagnosis": ["E11.9", "I10"],
+        "procedures": ["99213", "80053"],
+        "medications": ["314076", "197361"],
+        "labs": ["2339-0", "2345-7"]
+    }],
+    "options": {
+        "includeConfidence": True,
+        "timeHorizon": "90d"
+    }
+}
+
+response = requests.post(url, headers=headers, json=payload)
+print(response.json())`}
+                </pre>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader>
+                <CardTitle>JavaScript Example</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <pre className="bg-muted p-4 rounded-md overflow-x-auto text-sm">
+{`const response = await fetch('https://api.om1.com/v1/predictions/generate', {
+  method: 'POST',
+  headers: {
+    'Authorization': 'Bearer YOUR_API_KEY',
+    'Content-Type': 'application/json'
+  },
+  body: JSON.stringify({
+    patients: [{
+      patientId: 'P123456',
+      diagnosis: ['E11.9', 'I10'],
+      procedures: ['99213', '80053'],
+      medications: ['314076', '197361'],
+      labs: ['2339-0', '2345-7']
+    }],
+    options: {
+      includeConfidence: true,
+      timeHorizon: '90d'
+    }
+  })
+});
+
+const data = await response.json();
+console.log(data);`}
+                </pre>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          <TabsContent value="response" className="space-y-4">
+            <Card>
+              <CardHeader>
+                <CardTitle>Success Response (200 OK)</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <pre className="bg-muted p-4 rounded-md overflow-x-auto text-sm">
+{`{
+  "status": "success",
+  "requestId": "req_abc123xyz",
+  "processedAt": "2024-10-09T12:34:56Z",
+  "results": [
+    {
+      "patientId": "P123456",
+      "predictions": {
+        "hospitalization": {
+          "risk": "high",
+          "probability": 0.78,
+          "confidence": 0.92,
+          "timeHorizon": "90d"
+        },
+        "readmission": {
+          "risk": "medium",
+          "probability": 0.45,
+          "confidence": 0.87,
+          "timeHorizon": "90d"
+        },
+        "mortality": {
+          "risk": "low",
+          "probability": 0.12,
+          "confidence": 0.95,
+          "timeHorizon": "90d"
+        }
+      },
+      "riskFactors": [
+        {
+          "code": "E11.9",
+          "type": "diagnosis",
+          "description": "Type 2 diabetes mellitus",
+          "impact": 0.34
+        },
+        {
+          "code": "I10",
+          "type": "diagnosis",
+          "description": "Essential hypertension",
+          "impact": 0.28
+        }
+      ]
+    }
+  ]
+}`}
+                </pre>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader>
+                <CardTitle>Error Responses</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div>
+                  <h3 className="font-semibold mb-2">400 Bad Request</h3>
+                  <pre className="bg-muted p-3 rounded-md text-sm">
+{`{
+  "status": "error",
+  "code": "INVALID_REQUEST",
+  "message": "Patient ID is required",
+  "details": {
+    "field": "patients[0].patientId"
+  }
+}`}
+                  </pre>
+                </div>
+
+                <div>
+                  <h3 className="font-semibold mb-2">401 Unauthorized</h3>
+                  <pre className="bg-muted p-3 rounded-md text-sm">
+{`{
+  "status": "error",
+  "code": "UNAUTHORIZED",
+  "message": "Invalid or missing API key"
+}`}
+                  </pre>
+                </div>
+
+                <div>
+                  <h3 className="font-semibold mb-2">429 Too Many Requests</h3>
+                  <pre className="bg-muted p-3 rounded-md text-sm">
+{`{
+  "status": "error",
+  "code": "RATE_LIMIT_EXCEEDED",
+  "message": "Rate limit exceeded. Try again in 3600 seconds",
+  "retryAfter": 3600
+}`}
+                  </pre>
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+        </Tabs>
       </main>
     </div>
   );
