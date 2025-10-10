@@ -1,5 +1,5 @@
 import { NavLink, useLocation } from "react-router-dom"
-import { Users, ChevronLeft, Stethoscope, Fingerprint, Upload, FileCode } from "lucide-react"
+import { Users, ChevronLeft, Stethoscope, Fingerprint, Upload, CodeXml } from "lucide-react"
 
 import {
   Sidebar,
@@ -25,14 +25,14 @@ const applications = [
     icon: Users,
   },
   {
-    title: "Prediction API",
-    url: "/prediction-builder",
-    icon: FileCode,
-  },
-  {
     title: "Origin",
     url: "/origin",
     icon: Upload,
+  }, 
+  {
+    title: "Prediction API",
+    url: "/prediction-builder",
+    icon: CodeXml,
   }
 ]
 
