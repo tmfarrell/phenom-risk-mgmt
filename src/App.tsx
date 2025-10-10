@@ -88,7 +88,7 @@ function App() {
           <Route path="phenom-builder" element={<PhenomBuilder />} />
           <Route path="phenom-builder/:modelId" element={<PhenomBuilder />} />
           <Route path="origin" element={<Origin />} />
-          <Route path="prediction-builder" element={<PredictionBuilder />} />
+          <Route path="api-docs" element={<PredictionBuilder />} />
         </Route>
       </Routes>
     </Router>

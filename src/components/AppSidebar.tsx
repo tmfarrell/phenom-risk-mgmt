@@ -31,7 +31,7 @@ const applications = [
   }, 
   {
     title: "Prediction API",
-    url: "/prediction-builder",
+    url: "/api-docs",
     icon: CodeXml,
   }
 ]
@@ -45,7 +45,7 @@ export function AppSidebar() {
     if (path === "/" && currentPath === "/") return true;
     if (path === "/phenom-builder" && currentPath.startsWith("/phenom-builder")) return true;
     if (path === "/origin" && currentPath.startsWith("/origin")) return true;
-    if (path === "/prediction-builder" && currentPath.startsWith("/prediction-builder")) return true;
+    if (path === "/api-docs" && currentPath.startsWith("/api-docs")) return true;
     return currentPath === path;
   }
   const isExpanded = applications.some((app) => isActive(app.url))
