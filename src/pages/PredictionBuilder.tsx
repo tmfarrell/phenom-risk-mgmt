@@ -5,15 +5,16 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
 export default function PredictionBuilder() {
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-gray-50">
       <Header />
-      <main className="p-6 space-y-6 max-w-5xl">
-        <div>
-          <h1 className="text-3xl font-bold mb-2">PhenOM API Documentation</h1>
-          <p className="text-muted-foreground">
-            REST API for generating clinical risk predictions based on patient codes
-          </p>
+      <div className="flex items-start">
+        <div className="px-6 pt-6">
+          <h1 className="text-2xl font-bold text-blue-900 text-left">PhenOM API</h1>
         </div>
+      </div>
+      <div className="p-6">
+        <div className="max-w-[1250px] mx-auto">
+          <div className="flex flex-col space-y-6">
 
         <Tabs defaultValue="overview" className="w-full">
           <TabsList>
@@ -117,7 +118,7 @@ export default function PredictionBuilder() {
           </TabsContent>
 
           <TabsContent value="examples" className="space-y-4 text-left">
-            <Tabs defaultValue="curl" className="w-full">
+            <Tabs defaultValue="curl" className="w-full ">
               <TabsList>
                 <TabsTrigger value="curl">cURL</TabsTrigger>
                 <TabsTrigger value="python">Python</TabsTrigger>
@@ -226,7 +227,9 @@ console.log(data);`}
             </Tabs>
           </TabsContent>
         </Tabs>
-      </main>
+          </div>
+        </div>
+      </div>
     </div>
   );
 }
