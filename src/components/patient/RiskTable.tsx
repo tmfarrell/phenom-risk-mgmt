@@ -36,9 +36,27 @@ export const RiskTable = ({
   const { data: patientData } = usePatientData();
   const [newOutcome, setNewOutcome] = useState<string>(availableOutcomes[0] || '');
   const [newTimeframe, setNewTimeframe] = useState<string>((timeframes[0]?.toString()) || '1');
+  
+  console.log("timeframes", timeframes);
+
+  // Helper function to format timeframe for display
+  const formatTimeframe = (timeframe: string | number): string => {
+    // Handle 'today' string value
+    if (timeframe === 'today') return 'Today';
+    
+    const num = typeof timeframe === 'string' ? parseFloat(timeframe) : timeframe;
+    
+    if (num === 0.25) return '3 months';
+    if (num === 0.5) return '6 months';
+    if (num === 1) return '1 year';
+    if (num === 5) return '5 years';
+    if (num === 0) return 'Today';
+    
+    // For other values, show as years
+    return `${num} year${num !== 1 ? 's' : ''}`;
+  };
 
 
-  console.log("outcomeModelMap", outcomeModelMap);
   // Exclude outcomes already on the table
   const existingOutcomes = useMemo(() => rowConfigs.map(r => r.outcome), [rowConfigs]);
   const selectableOutcomes = useMemo(
@@ -55,7 +73,10 @@ export const RiskTable = ({
 
   const newOutcomeTimeframes = useMemo(() => {
     const tf = outcomeTimeframeMap[newOutcome];
-    return (tf && tf.length > 0 ? tf : timeframes).filter(t => t != null).map(t => t.toString());
+    const timeframesToUse = tf && tf.length > 0 ? tf : timeframes;
+    
+    // Include null values and convert to strings, handling null as 'today'
+    return timeframesToUse.map(t => t === null ? 'today' : t.toString());
   }, [newOutcome, outcomeTimeframeMap, timeframes]);
 
   // Ensure newTimeframe is valid when outcome changes
@@ -131,9 +152,6 @@ export const RiskTable = ({
       s.fact_type === factType
     );
     
-    console.log(`Looking for summary: factor=${riskFactor}, fact_type=${factType}, risk_type=${selectedRiskType}`);
-    console.log('Found summary:', summary);
-    
     return summary?.summary || null;
   };
 
@@ -155,8 +173,14 @@ export const RiskTable = ({
             const modelNameB = (outcomeModelMap[b.outcome] || [])[0]?.name || b.outcome;
             return modelNameA.localeCompare(modelNameB);
           }).map((cfg, index) => {
-            const timeframeNum = parseInt(cfg.timeframe);
-            let risksForRow = patientRisks.filter(r => r.risk_type === selectedRiskType && r.prediction_timeframe_yrs === timeframeNum);
+            const timeframeNum = cfg.timeframe === 'today' ? null : parseFloat(cfg.timeframe);
+            let risksForRow = patientRisks.filter(r => {
+              if (cfg.timeframe === 'today') {
+                return r.risk_type === selectedRiskType && (r.prediction_timeframe_yrs === null || r.prediction_timeframe_yrs === undefined);
+              } else {
+                return r.risk_type === selectedRiskType && r.prediction_timeframe_yrs === timeframeNum;
+              }
+            });
             // Fallback: if no data for requested timeframe, use all available timeframes for this risk type
             if (risksForRow.length === 0) {
               risksForRow = patientRisks.filter(r => r.risk_type === selectedRiskType);
@@ -168,8 +192,20 @@ export const RiskTable = ({
             })[0];
             const valueKey = rowKeyToSourceField[`${cfg.outcome}-${cfg.timeframe}`] || cfg.outcome;
             // Find model id for this outcome and timeframe (first match)
-            const modelId = (outcomeModelMap[cfg.outcome] || []).find(m => m.timeframe === timeframeNum)?.id;
-            const averageTimeframe = risksForRow.some(r => r.prediction_timeframe_yrs === timeframeNum)
+            const modelId = (outcomeModelMap[cfg.outcome] || []).find(m => {
+              if (cfg.timeframe === 'today') {
+                return m.timeframe === null || m.timeframe === undefined;
+              } else {
+                return m.timeframe === timeframeNum;
+              }
+            })?.id;
+            const averageTimeframe = risksForRow.some(r => {
+              if (cfg.timeframe === 'today') {
+                return r.prediction_timeframe_yrs === null || r.prediction_timeframe_yrs === undefined;
+              } else {
+                return r.prediction_timeframe_yrs === timeframeNum;
+              }
+            })
               ? timeframeNum
               : (currentRisk?.prediction_timeframe_yrs || timeframeNum);
             const modelName = outcomeModelMap[cfg.outcome][0]?.name;
@@ -216,12 +252,15 @@ export const RiskTable = ({
                     </SelectTrigger>
                     <SelectContent>
                       {newOutcomeTimeframes.map(tf => (
-                        <SelectItem key={tf} value={tf}>{tf} year{tf !== '1' ? 's' : ''}</SelectItem>
+                        <SelectItem key={tf} value={tf}>{formatTimeframe(tf)}</SelectItem>
                       ))}
                     </SelectContent>
                   </Select>
                 </div>
-                <Button onClick={() => onAddRow(newOutcome, newTimeframe)} disabled={!newOutcome || !newTimeframe || existingOutcomes.includes(newOutcome)}>
+                <Button onClick={() => {
+                  const timeframeValue = newTimeframe === 'today' ? 'today' : newTimeframe;
+                  onAddRow(newOutcome, timeframeValue);
+                }} disabled={!newOutcome || !newTimeframe || existingOutcomes.includes(newOutcome)}>
                   Add
                 </Button>
               </div>

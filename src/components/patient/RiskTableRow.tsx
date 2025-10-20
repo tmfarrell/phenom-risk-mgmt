@@ -124,7 +124,16 @@ export const RiskTableRow = ({
           </div>
         </TableCell>
         <TableCell className="whitespace-nowrap text-xs text-gray-600">
-          {isNaN(parseInt(timeframe)) ? 'Today' : `${parseInt(timeframe)} year${timeframe !== '1' ? 's' : ''}`}
+          {(() => {
+            console.log("timeframe", timeframe);
+            const num = parseFloat(timeframe);
+            if (isNaN(num)) return 'Today';
+            if (num === 0.25) return '3 months';
+            if (num === 0.5) return '6 months';
+            if (num === 1) return '1 year';
+            if (num === 5) return '5 years';
+            return `${num} year${num !== 1 ? 's' : ''}`;
+          })()}
         </TableCell>
         <TableCell className="min-w-[220px]">
           <SparkLine 
