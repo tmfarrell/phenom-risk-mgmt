@@ -140,10 +140,6 @@ export default function Index() {
     }
   }, [timePeriods]);
 
-  console.log('timePeriods', timePeriods);
-  console.log('selectedTimeframe', selectedTimeframe);
-  console.log('phenomModelsData', phenomModelsData);
-
   // Get available outcomes with model info for the selected timeframe
   const availableOutcomesForTimeframe = phenomModelsData?.outcomeTimeframeMap 
     ? Object.entries(phenomModelsData.outcomeTimeframeMap)
@@ -153,8 +149,6 @@ export default function Index() {
         .map(([outcome]) => outcome)
         .sort()
     : [];
-
-    console.log('availableOutcomesForTimeframe', availableOutcomesForTimeframe);
     
   // Get model data for available outcomes
   const availableModelsForTimeframe = phenomModelsData?.outcomeModelMap
