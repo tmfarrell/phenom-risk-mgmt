@@ -112,6 +112,16 @@ export default function Index() {
   // Use timeframes from phenom_models
   const timePeriods = (phenomModelsData?.timeframes as Array<number | 'today'>) || [1, 2];
 
+  // Helper function to convert timeframe string to decimal years for database comparison
+  const parseTimeframeToYears = (timeframe: string): number => {
+    if (timeframe === 'today') return 0;
+    if (timeframe.includes('months')) {
+      const months = parseInt(timeframe);
+      return months / 12;
+    }
+    return parseFloat(timeframe); // For years (including decimal values like 0.25)
+  };
+
   // Make sure we have a valid initial timeframe selection
   const [selectedTimeframe, setSelectedTimeframe] = useState<string>(savedState?.selectedTimeframe || '1');
   
@@ -130,15 +140,21 @@ export default function Index() {
     }
   }, [timePeriods]);
 
+  console.log('timePeriods', timePeriods);
+  console.log('selectedTimeframe', selectedTimeframe);
+  console.log('phenomModelsData', phenomModelsData);
+
   // Get available outcomes with model info for the selected timeframe
   const availableOutcomesForTimeframe = phenomModelsData?.outcomeTimeframeMap 
     ? Object.entries(phenomModelsData.outcomeTimeframeMap)
         .filter(([_, timeframes]) => selectedTimeframe === 'today'
           ? (timeframes as Array<number | 'today'>).includes('today')
-          : (timeframes as Array<number | 'today'>).includes(parseInt(selectedTimeframe)))
+          : (timeframes as Array<number | 'today'>).includes(parseTimeframeToYears(selectedTimeframe)))
         .map(([outcome]) => outcome)
         .sort()
     : [];
+
+    console.log('availableOutcomesForTimeframe', availableOutcomesForTimeframe);
     
   // Get model data for available outcomes
   const availableModelsForTimeframe = phenomModelsData?.outcomeModelMap
@@ -147,7 +163,7 @@ export default function Index() {
           const modelsForTimeframe = models.filter(m =>
             selectedTimeframe === 'today'
               ? m.timeframe === 'today'
-              : m.timeframe === parseInt(selectedTimeframe)
+              : m.timeframe === parseTimeframeToYears(selectedTimeframe)
           );
           if (modelsForTimeframe.length > 0) {
             acc.push({
@@ -196,7 +212,7 @@ export default function Index() {
 
     const timeframeMatches = selectedTimeframe === 'today'
       ? (patient.prediction_timeframe_yrs === null || patient.prediction_timeframe_yrs === undefined)
-      : patient.prediction_timeframe_yrs === Number(selectedTimeframe);
+      : patient.prediction_timeframe_yrs === parseTimeframeToYears(selectedTimeframe);
     const riskTypeMatches = patient.risk_type === selectedRiskType;
     const selectedFilter = showSelectedOnly ? selectedPatients.some(p => p.patient_id === patient.patient_id) : true;
     

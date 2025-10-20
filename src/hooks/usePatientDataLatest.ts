@@ -165,9 +165,52 @@ export const usePatientDataLatest = () => {
         });
       });
 
-      const finalData = [...transformedData, ...todayRecords];
+      // Create synthetic 3-month and 6-month entries using 1-year records as source (demo purpose)
+      const syntheticTimeframeRecords: Person[] = (patients || []).flatMap((patient) => {
+        const assignedProvider = getRandomProvider(patient.patient_id);
+        const riskTypes: Array<'relative' | 'absolute'> = ['relative', 'absolute'];
+        const timeframes = [0.25, 0.5]; // 3 months and 6 months
+        
+        return riskTypes.flatMap((rt) => {
+          const key = `${patient.patient_id}-${rt}-1`;
+          const sourceRisk: any = (latestRisks || {})[key];
+          if (!sourceRisk) return [];
 
-      console.log('Transformed latest data (with today records):', finalData);
+          return timeframes.flatMap((timeframe) => {
+            const basePatient: Person = {
+              ...patient,
+              provider: assignedProvider.name,
+              provider_npi: assignedProvider.npi,
+              history: null,
+              composite_risk: sourceRisk.composite_risk ? sourceRisk.composite_risk * (timeframe / 1) : null, // Scale composite risk
+              recorded_date: sourceRisk.calculated_date,
+              prediction_timeframe_yrs: timeframe,
+              risk_type: (rt as 'relative' | 'absolute'),
+              change_since: sourceRisk.change_since || null
+            };
+
+            const riskFields = ['EMERGENCY_VISIT', 'HOSPITALIZATION', 'FALL', 'STROKE', 'INFARCTION', 'DEATH'];
+            availableOutcomes.forEach(outcome => {
+              const randomField = riskFields[Math.floor(Math.random() * riskFields.length)];
+              const changeField = `${randomField}_change`;
+              
+              // Scale risk values based on timeframe (shorter timeframes = lower risk)
+              const scalingFactor = timeframe / 1; // 0.25 for 3 months, 0.5 for 6 months
+              const baseValue = sourceRisk[randomField] || null;
+              const changeValue = sourceRisk[changeField] || null;
+              
+              basePatient[outcome] = baseValue ? baseValue * scalingFactor : null;
+              basePatient[`${outcome}_change`] = changeValue ? changeValue * scalingFactor : null;
+            });
+
+            return [basePatient];
+          });
+        });
+      });
+
+      const finalData = [...transformedData, ...todayRecords, ...syntheticTimeframeRecords];
+
+      console.log('Transformed latest data (with today and synthetic timeframe records):', finalData);
       return finalData;
     }
   });

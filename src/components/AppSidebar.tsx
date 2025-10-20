@@ -30,7 +30,7 @@ const applications = [
     icon: Upload,
   }, 
   {
-    title: "Prediction API",
+    title: "PhenOM API",
     url: "/api-docs",
     icon: CodeXml,
   }

@@ -3,13 +3,15 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
+
+
 export default function PredictionBuilder() {
   return (
     <div className="min-h-screen bg-gray-50">
       <Header />
       <div className="flex items-start">
         <div className="px-6 pt-6">
-          <h1 className="text-2xl font-bold text-blue-900 text-left">PhenOM API</h1>
+          <h1 className="text-2xl font-bold text-blue-900 text-left">PhenOM API Docs</h1>
         </div>
       </div>
       <div className="p-6">

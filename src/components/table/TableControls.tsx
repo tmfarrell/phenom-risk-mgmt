@@ -166,7 +166,7 @@ export const TableControls = ({
               {selectedTimeframe === 'today'
                 ? 'Today'
                 : (() => {
-                    const timeframe = parseInt(selectedTimeframe);
+                    const timeframe = parseFloat(selectedTimeframe);
                     const displayTimeframe = useMonthsForTimeframe ? timeframe * 12 : timeframe;
                     const timeUnit = useMonthsForTimeframe ? "month" : "year";
                     return `${displayTimeframe} ${timeUnit}${displayTimeframe > 1 ? 's' : ''}`;

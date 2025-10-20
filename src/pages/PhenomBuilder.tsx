@@ -124,6 +124,18 @@ const generateMockSignalData = (modelId: string) => {
   return signals.sort((a, b) => b.importance - a.importance) // Sort by importance
 }
 
+// Helper function to format prediction timeframe
+const formatPredictionTimeframe = (years: number | null) => {
+  if (!years) return null
+  
+  if (years < 1) {
+    const months = Math.round(years * 12)
+    return `${months} month${months !== 1 ? 's' : ''}`
+  }
+  
+  return `${years} yr${years > 1 ? 's' : ''}`
+}
+
 export default function PhenomBuilder() {
   const { session } = useContext(AuthContext)
   const user = session?.user
@@ -455,7 +467,7 @@ export default function PhenomBuilder() {
                         )}
                         {model.prediction_timeframe_yrs && (
                           <Badge variant="secondary" className="text-xs">
-                            {model.prediction_timeframe_yrs} yr{model.prediction_timeframe_yrs > 1 ? 's' : ''}
+                            {formatPredictionTimeframe(model.prediction_timeframe_yrs)}
                           </Badge>
                         )}
                       </div>
@@ -804,7 +816,7 @@ export default function PhenomBuilder() {
                         </p>
                         {selectedModel.prediction_timeframe_yrs && (
                           <p className="text-sm">
-                            <span className="font-medium">Prediction timeframe:</span> {selectedModel.prediction_timeframe_yrs} year{selectedModel.prediction_timeframe_yrs > 1 ? 's' : ''}
+                            <span className="font-medium">Prediction timeframe:</span> {formatPredictionTimeframe(selectedModel.prediction_timeframe_yrs)}
                           </p>
                         )}
                         {selectedModel.indication_new_onset && (
@@ -854,7 +866,7 @@ export default function PhenomBuilder() {
                 </CardContent>
               </Card>
 
-              {(selectedModel?.patients_total ?? 0) > 0 && (
+              {(selectedModel?.patients_total ?? 0) > 0 && (selectedModel.patients_tp > 0) && (
                 <>
                   {/* Patient Identification Results */}
                   <Card>
