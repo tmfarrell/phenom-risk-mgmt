@@ -14,6 +14,7 @@ import { supabase } from "@/integrations/supabase/client"
 import { useContext } from "react"
 import { AuthContext } from "@/App"
 import { useToast } from "@/hooks/use-toast"
+import { useROCCurveData } from "@/hooks/useROCCurveData"
 import { Plus, X, Check, Calendar, Search, HelpCircle, InfoIcon } from "lucide-react"
 import { Tooltip as UITooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, ReferenceLine, ScatterChart, Scatter } from 'recharts'
@@ -160,6 +161,9 @@ export default function PhenomBuilder() {
   // Performance data
   const [performance, setPerformance] = useState<any>(null)
   const [signalData, setSignalData] = useState<any[]>([])
+
+  // ROC curve data
+  const { data: rocData, isLoading: rocLoading, error: rocError } = useROCCurveData(selectedModel?.id || null)
   
   // Form state management
   const [modelName, setModelName] = useState("")
@@ -392,7 +396,7 @@ export default function PhenomBuilder() {
       <div className="flex h-screen">
         {/* Left Sidebar - Model List */}
         <div className="w-1/4 border-r border-gray-200 flex flex-col">
-          {/* Header  
+          {/* Header */}
           <div className="p-4 border-b border-gray-200">
             <Button 
               className="w-full mt-4 bg-blue-600 text-white hover:bg-blue-700" 
@@ -404,7 +408,7 @@ export default function PhenomBuilder() {
               <Plus className="h-4 w-4 mr-2" />
               Create Outcome
             </Button>
-          </div> */}
+          </div>
 
           {/* Search Bar */}
           <div className="p-4 border-b border-gray-200">
@@ -470,6 +474,13 @@ export default function PhenomBuilder() {
                             {formatPredictionTimeframe(model.prediction_timeframe_yrs)}
                           </Badge>
                         )}
+                        {(model.min_patient_age || model.max_patient_age) && (
+                          <div className="text-xs text-gray-500 mt-1">
+                            Age: {model.min_patient_age && !model.max_patient_age 
+                              ? `${model.min_patient_age}+` 
+                              : `${model.min_patient_age || '0'}-${model.max_patient_age}`}
+                          </div>
+                        )}
                       </div>
                     </div>
                   </CardContent>
@@ -508,13 +519,13 @@ export default function PhenomBuilder() {
 
               <Card>
                 <CardHeader>
-                  <CardTitle>Indication</CardTitle>
-                  <CardDescription>
+                  <CardTitle className="text-left">Indication</CardTitle>
+                  <CardDescription className="text-left">
                     Define the target diagnosis or treatment
                   </CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-4">
-                  <div className="space-y-3">
+                  <div className="space-y-3 text-left">
                     <Label>Indication*</Label>
                     <div className="flex gap-2 items-end">
                       <div className="flex-1">
@@ -545,13 +556,13 @@ export default function PhenomBuilder() {
                         checked={indication.newOnset}
                         onCheckedChange={(checked) => updateIndication("newOnset", checked)}
                       />
-                      <Label htmlFor="new-onset" className="text-sm font-normal">
+                      <Label htmlFor="new-onset" className="text-sm font-normal text-left">
                         New onset
                       </Label>
                     </div>
                     
                     <div className="space-y-2">
-                      <Label htmlFor="prediction-timeframe">Prediction timeframe</Label>
+                      <Label htmlFor="prediction-timeframe" className="text-left">Prediction timeframe</Label>
                       <Select
                         value={indication.predictionTimeframe || "no-timeframe"}
                         onValueChange={(value) => updateIndication("predictionTimeframe", value === "no-timeframe" ? "" : value)}
@@ -559,13 +570,13 @@ export default function PhenomBuilder() {
                         <SelectTrigger className="bg-background border border-input">
                           <span className={`${(indication.predictionTimeframe || "no-timeframe") === "no-timeframe" ? "text-gray-500" : ""}`}>
                             {(indication.predictionTimeframe || "no-timeframe") === "no-timeframe" ? "No requirement" : 
-                             indication.predictionTimeframe === "1" ? "1 year" : 
-                             indication.predictionTimeframe === "5" ? "5 years" : 
-                             indication.predictionTimeframe === "10" ? "10 years" : "Select timeframe"}
+                             formatPredictionTimeframe(parseFloat(indication.predictionTimeframe)) || "Select timeframe"}
                           </span>
                         </SelectTrigger>
                         <SelectContent className="bg-background border border-input z-50">
                           <SelectItem className="text-gray-500" value="no-timeframe">No requirement</SelectItem>
+                          <SelectItem value="0.25">3 months</SelectItem>
+                          <SelectItem value="0.5">6 months</SelectItem>
                           <SelectItem value="1">1 year</SelectItem>
                           <SelectItem value="5">5 years</SelectItem>
                           <SelectItem value="10">10 years</SelectItem>
@@ -578,9 +589,9 @@ export default function PhenomBuilder() {
 
               <Card>
                 <CardHeader>
-                  <CardTitle>Patient characteristics (optional)</CardTitle>
+                  <CardTitle className="text-left">Patient characteristics (optional)</CardTitle>
                 </CardHeader>
-                <CardContent className="space-y-4">
+                <CardContent className="space-y-4 text-left">
                   <div className="space-y-2">
                     <Label htmlFor="min-age">Minimum patient age</Label>
                     <Input
@@ -627,8 +638,8 @@ export default function PhenomBuilder() {
                   <div className="space-y-4">
                     {/* History of section */}
                     <div className="space-y-3">
-                      <Label className="flex items-center gap-2">
-                        <Check className="h-4 w-4 text-green-600" />
+                      <Label className="flex items-center gap-2 text-left whitespace-nowrap">
+                        <Check className="h-4 w-4 text-green-600 flex-shrink-0" />
                         History of
                       </Label>
                       <div className="flex gap-2 items-end">
@@ -665,8 +676,8 @@ export default function PhenomBuilder() {
 
                     {/* No history of section */}
                     <div className="space-y-3">
-                      <Label className="flex items-center gap-2">
-                        <X className="h-4 w-4 text-red-600" />
+                      <Label className="flex items-center gap-2 text-left whitespace-nowrap">
+                        <X className="h-4 w-4 text-red-600 flex-shrink-0" />
                         No history of
                       </Label>
                       <div className="flex gap-2 items-end">
@@ -710,10 +721,10 @@ export default function PhenomBuilder() {
 
               <Card>
                 <CardHeader>
-                  <CardTitle className="text-blue-900">Outcome Preview</CardTitle>
+                  <CardTitle className="text-blue-900 text-left">Outcome Preview</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <div className="space-y-4">
+                  <div className="space-y-4 text-left">
                     <div>
                       <h4 className="font-medium text-gray-900">Outcome Name:</h4>
                       <p className="text-gray-600">{modelName || "Not specified"}</p>
@@ -727,34 +738,31 @@ export default function PhenomBuilder() {
                       </p>
                       {indication.predictionTimeframe && (
                         <p className="text-gray-600 text-sm">
-                          Prediction timeframe: {indication.predictionTimeframe === "1" ? "1 year" : 
-                                                 indication.predictionTimeframe === "5" ? "5 years" : 
-                                                 indication.predictionTimeframe === "10" ? "10 years" : 
-                                                 indication.predictionTimeframe}
+                          Prediction timeframe: {formatPredictionTimeframe(parseFloat(indication.predictionTimeframe))}
                         </p>
                       )}
                     </div>
                     {minPatientAge && (
                       <div>
-                        <h4 className="font-medium text-gray-900">Minimum patient age:</h4>
+                        <h4 className="font-medium text-gray-900 text-left">Minimum patient age:</h4>
                         <p className="text-gray-600">{minPatientAge}</p>
                       </div>
                     )}
                     {maxPatientAge && (
                       <div>
-                        <h4 className="font-medium text-gray-900">Maximum patient age:</h4>
+                        <h4 className="font-medium text-gray-900 text-left">Maximum patient age:</h4>
                         <p className="text-gray-600">{maxPatientAge}</p>
                       </div>
                     )}
                     {patientSex && (
                       <div>
-                        <h4 className="font-medium text-gray-900">Patient sex:</h4>
+                        <h4 className="font-medium text-gray-900 text-left">Patient sex:</h4>
                         <p className="text-gray-600">{patientSex}</p>
                       </div>
                     )}
                     {historyCriteria.type && historyCriteria.code && (
                       <div>
-                        <h4 className="font-medium text-gray-900">History of:</h4>
+                        <h4 className="font-medium text-gray-900 text-left">History of:</h4>
                         <p className="text-gray-600">
                           {`${historyCriteria.type}: ${historyCriteria.code}`}
                         </p>
@@ -762,7 +770,7 @@ export default function PhenomBuilder() {
                     )}
                     {noHistoryCriteria.type && noHistoryCriteria.code && (
                       <div>
-                        <h4 className="font-medium text-gray-900">No history of:</h4>
+                        <h4 className="font-medium text-gray-900 text-left">No history of:</h4>
                         <p className="text-gray-600">
                           {`${noHistoryCriteria.type}: ${noHistoryCriteria.code}`}
                         </p>
@@ -958,18 +966,11 @@ export default function PhenomBuilder() {
                             <p className="text-2xl font-bold text-blue-600">{selectedModel?.auc?.toFixed(3) || 'N/A'}</p>
                             <p className="text-sm text-blue-800">AUC</p>
                           </div>
-                          {/* Cohort Size */}
-                          {selectedModel.patients_total > 0 && (
-                          <div className="text-center p-3 rounded-lg">
-                            <p className="text-2xl font-bold text-blue-600">{(selectedModel?.patients_total ? selectedModel.patients_total - (selectedModel.patients_phenom || 0) : 0).toLocaleString()}</p>
-                            <p className="text-sm text-blue-800">Baseline Cohort</p>
-                          </div>
-                          )}
                           {typeof selectedModel.risk_threshold_pct === 'number' && (
                             <div className="text-center p-3 rounded-lg">
-                              <p className="text-2xl font-bold text-blue-600">{selectedModel.risk_threshold_pct.toFixed(1)}%</p>
+                              <p className="text-2xl font-bold text-blue-600">Top {selectedModel.risk_threshold_pct.toFixed(1)}%</p>
                               <p className="text-sm text-blue-800 flex items-center justify-center gap-1">
-                                High Risk Threshold
+                                {selectedModel.indication_type == "diagnosis" ? "Risk Threshold" : "Probability Threshold"}
                                 <UITooltip>
                                   <TooltipTrigger asChild>
                                     <span className="inline-flex items-center cursor-help text-blue-600">
@@ -977,7 +978,7 @@ export default function PhenomBuilder() {
                                     </span>
                                   </TooltipTrigger>
                                   <TooltipContent>
-                                    <p>High risk patients are in the top {selectedModel.risk_threshold_pct.toFixed(1)}% of patients <br/>for this indication</p>
+                                    <p>Patients are in the top {selectedModel.risk_threshold_pct.toFixed(1)}% {selectedModel.indication_type == "diagnosis" ? "risk" : "probability"} <br/>for this outcome</p>
                                   </TooltipContent>
                                 </UITooltip>
                               </p>
@@ -987,7 +988,7 @@ export default function PhenomBuilder() {
                             <div className="text-center p-3 rounded-lg">
                               <p className="text-2xl font-bold text-blue-600">{selectedModel?.model_lift?.toFixed(1) || 'N/A'}x</p>
                               <p className="text-sm text-blue-800 flex items-center justify-center gap-1">
-                                High Risk PhenOM Lift
+                                {selectedModel.indication_type == "diagnosis" ? "Risk Lift" : "Model Lift"}
                                 <UITooltip>
                                   <TooltipTrigger asChild>
                                     <span className="inline-flex items-center cursor-help text-blue-600">
@@ -995,13 +996,73 @@ export default function PhenomBuilder() {
                                     </span>
                                   </TooltipTrigger>
                                   <TooltipContent>
-                                    <p>High risk patients are {(selectedModel?.model_lift ?? 0).toFixed(1)}x as likely <br/>to have the indication as the general population</p>
+                                    <p>Patients are {(selectedModel?.model_lift ?? 0).toFixed(1)}x as likely to have <br/> this outcome as the baseline population</p>
                                   </TooltipContent>
                                 </UITooltip>
                               </p>
                             </div>
                           )}
+                          {/* Cohort Size */}
+                          {selectedModel.patients_total > 0 && (
+                          <div className="text-center p-3 rounded-lg">
+                            <p className="text-2xl font-bold text-gray-600">{(selectedModel?.patients_total ? selectedModel.patients_total - (selectedModel.patients_phenom || 0) : 0).toLocaleString()}</p>
+                            <p className="text-sm text-gray-800">Baseline Cohort</p>
+                          </div>
+                          )}
                       </div>
+
+                      {rocData && Array.isArray(rocData) && rocData.length > 0 && (
+                          <>
+                          <h4 className="pt-4 font-medium text-gray-900 mb-1 text-center">ROC Curve</h4>
+                          <div className="h-96 flex items-center justify-center pb-6 ">
+                                <ResponsiveContainer width="75%" height="100%">
+                                  <LineChart data={rocData as any[]}>
+                                    <CartesianGrid strokeDasharray="3 3" />
+                                    <XAxis 
+                                      dataKey="fpr" 
+                                      type="number"
+                                      label={{ value: 'False Positive Rate', position: 'insideBottom', offset: -5 }}
+                                      domain={[0, 1]}
+                                      tickCount={5}
+                                      tickFormatter={(value) => value.toFixed(2)}
+                                    />
+                                    <YAxis 
+                                      dataKey="tpr"
+                                      label={{ value: 'True Positive Rate', angle: -90, position: 'insideLeft', style: { textAnchor: 'middle' }}}
+                                      domain={[0, 1]}
+                                      tickFormatter={(value) => value.toFixed(1)}
+                                    />
+                                    <Tooltip 
+                                      formatter={(value: number, name: string, props: any) => {
+                                        const payload = props.payload;
+                                        if (payload) {
+                                          return [
+                                            `${payload.tpr?.toFixed(3) || value.toFixed(3)}`,
+                                            'TPR'
+                                          ];
+                                        }
+                                        return [value.toFixed(3), 'TPR'];
+                                      }}
+                                      labelFormatter={(value: number) => `FPR : ${value.toFixed(3)}`}
+                                    />
+                                    <Line 
+                                      type="monotone" 
+                                      dataKey="tpr" 
+                                      stroke="#2563eb" 
+                                      strokeWidth={2}
+                                      dot={false}
+                                      name="ROC Curve"
+                                    />
+                                    <ReferenceLine 
+                                      segment={[{ x: 0, y: 0 }, { x: 1, y: 1 }]}
+                                      stroke="#ef4444" 
+                                      strokeDasharray="5 5" 
+                                    />
+                                  </LineChart>
+                                </ResponsiveContainer>
+                              </div>  
+                          </>
+                          )}
 
                       <Separator />
 
