@@ -1,0 +1,2823 @@
+
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8"/>
+    <title>API Docs (ReDoc - single file)</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1"/>
+    <script src="https://cdn.jsdelivr.net/npm/redoc@next/bundles/redoc.standalone.js"></script>
+    <style>html,body,#redoc{height:100%;margin:0}</style>
+  </head>
+  <body>
+    <div id="redoc"></div>
+    <script id="spec" type="application/json">
+    {
+  "openapi": "3.1.0",
+  "info": {
+    "title": "OM1 Phenom API",
+    "description": "# Phenom Inference API \u2014 Overview\n\nThis API lets you run **large, batch inference jobs** against the Phenom platform using a predictable, multi-tenant workflow that healthcare teams already understand:\n\n1. **Create a batch** to reserve a staging area\n2. **Upload files** (S3 presigned multipart or SFTP) into typed folders\n3. **Finalize** to snapshot an immutable manifest\n4. **Validate** (optional) using the same rules as run\n5. **Start the job** (async, idempotent)\n6. **Poll for status**; then **fetch results** (paginated API or S3 presigned download)\n\nFuture endpoints will support **real-time** inference with the _same schema_, for low-latency scenarios.\n\n---\n\n## Who this is for\n\n- **Internal Teams** Any OM1 internal application that requires foundation model inferences\n- **External Clients and Partners** Any contracted client or partner that needs a stable, HIPAA-aligned inference pipeline\n\n---\n\n## Security & Tenancy\n\n- **Auth**: OAuth2 (Auth0). Send `Authorization: Bearer <jwt>`.\n- **Tenant scope**: Resolved from a JWT claim (e.g., `org_id`). All resources are scoped to the caller\u2019s tenant.\n- **Network**: Public API Gateway fronted by WAF (no IP allowlists).\n- **Encryption**: SSE-S3 at rest; TLS in transit.\n- **PHI/PII**: Accepted under BAA. **Never** place PHI in resource names or metadata fields; PHI may appear only in uploaded data. Logs are scrubbed of PHI.\n\n---\n",
+    "version": "1.0"
+  },
+  "paths": {
+    "/v1/health": {
+      "get": {
+        "tags": [
+          "health"
+        ],
+        "summary": "Liveness probe",
+        "description": "Lightweight probe; never hits network. Suitable for k8s `livenessProbe`.",
+        "operationId": "liveness_v1_health_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HealthResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/health/ready": {
+      "get": {
+        "tags": [
+          "health"
+        ],
+        "summary": "Readiness probe",
+        "description": "Readiness with optional dependency checks (S3, DynamoDB, Auth0 JWKS).\n\nOnly checks that are configured in env (see Settings).",
+        "operationId": "readiness_v1_health_ready_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HealthResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/batch": {
+      "post": {
+        "tags": [
+          "batches"
+        ],
+        "summary": "Create Batch",
+        "operationId": "create_batch_v1_batch_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BatchCreateRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BatchCreateResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/batch/{batch_id}": {
+      "get": {
+        "tags": [
+          "batches"
+        ],
+        "summary": "Get Batch",
+        "operationId": "get_batch_v1_batch__batch_id__get",
+        "parameters": [
+          {
+            "name": "batch_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Batch Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BatchGetResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/batch/{batch_id}/finalize": {
+      "post": {
+        "tags": [
+          "batches"
+        ],
+        "summary": "Finalize Batch",
+        "operationId": "finalize_batch_v1_batch__batch_id__finalize_post",
+        "parameters": [
+          {
+            "name": "batch_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Batch Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FinalizeResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/batch/{batch_id}/validate": {
+      "post": {
+        "tags": [
+          "batches"
+        ],
+        "summary": "Validate Batch",
+        "operationId": "validate_batch_v1_batch__batch_id__validate_post",
+        "parameters": [
+          {
+            "name": "batch_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Batch Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BatchValidateRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "202": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ValidateAcceptedResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/batch/{batch_id}/start": {
+      "post": {
+        "tags": [
+          "batches"
+        ],
+        "summary": "Start Batch",
+        "operationId": "start_batch_v1_batch__batch_id__start_post",
+        "parameters": [
+          {
+            "name": "batch_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Batch Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BatchStartRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "202": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StartAcceptedResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/jobs/from-patient": {
+      "post": {
+        "tags": [
+          "jobs"
+        ],
+        "summary": "Create Job From Patient",
+        "description": "Create a singleton patient job from an input patient history json object.",
+        "operationId": "create_job_from_patient_v1_jobs_from_patient_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/JobCreateRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/JobCreateResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/jobs/{job_id}": {
+      "get": {
+        "tags": [
+          "jobs"
+        ],
+        "summary": "Get Job",
+        "description": "Get job metadata. Shows the status of the job.",
+        "operationId": "get_job_v1_jobs__job_id__get",
+        "parameters": [
+          {
+            "name": "job_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Job Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/JobGetResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/jobs/{job_id}/results": {
+      "get": {
+        "tags": [
+          "jobs"
+        ],
+        "summary": "Get Job Results",
+        "description": "Get paginated results back for the status of the batch. The results are by outcome and by patient id.",
+        "operationId": "get_job_results_v1_jobs__job_id__results_get",
+        "parameters": [
+          {
+            "name": "job_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Job Id"
+            }
+          },
+          {
+            "name": "page_size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "maximum": 5000,
+              "minimum": 1,
+              "default": 1000,
+              "title": "Page Size"
+            }
+          },
+          {
+            "name": "page_token",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Page Token"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Page_JobResult_"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/jobs/{job_id}/results/download": {
+      "get": {
+        "tags": [
+          "jobs"
+        ],
+        "summary": "Get Job Results Download",
+        "description": "Get links to download the result file directly. May be sharded into multiple parts.",
+        "operationId": "get_job_results_download_v1_jobs__job_id__results_download_get",
+        "parameters": [
+          {
+            "name": "job_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Job Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DownloadResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/jobs/{job_id}/exclusions": {
+      "get": {
+        "tags": [
+          "jobs"
+        ],
+        "summary": "Get Job Exclusions",
+        "description": "Return patients not scored for a given outcome and the reasons.",
+        "operationId": "get_job_exclusions_v1_jobs__job_id__exclusions_get",
+        "parameters": [
+          {
+            "name": "job_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Job Id"
+            }
+          },
+          {
+            "name": "page_size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "maximum": 5000,
+              "minimum": 1,
+              "default": 1000,
+              "title": "Page Size"
+            }
+          },
+          {
+            "name": "page_token",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Page Token"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Page_JobExclusion_"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/jobs/{job_id}/errors": {
+      "get": {
+        "tags": [
+          "jobs"
+        ],
+        "summary": "Get Job Errors",
+        "description": "Return errors associated with the job.",
+        "operationId": "get_job_errors_v1_jobs__job_id__errors_get",
+        "parameters": [
+          {
+            "name": "job_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Job Id"
+            }
+          },
+          {
+            "name": "page_size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "maximum": 5000,
+              "minimum": 1,
+              "default": 1000,
+              "title": "Page Size"
+            }
+          },
+          {
+            "name": "page_token",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Page Token"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Page_JobError_"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/batch/{batch_id}/uploads": {
+      "post": {
+        "tags": [
+          "batches"
+        ],
+        "summary": "Create Upload",
+        "description": "Create a new upload session (single or multipart).",
+        "operationId": "create_upload_v1_batch__batch_id__uploads_post",
+        "parameters": [
+          {
+            "name": "batch_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Batch Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UploadRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UploadResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/batch/{batch_id}/uploads/{upload_id}/parts/{part_number}/url": {
+      "post": {
+        "tags": [
+          "batches"
+        ],
+        "summary": "Get Part Url",
+        "description": "Get presigned URL for uploading a specific part.",
+        "operationId": "get_part_url_v1_batch__batch_id__uploads__upload_id__parts__part_number__url_post",
+        "parameters": [
+          {
+            "name": "batch_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Batch Id"
+            }
+          },
+          {
+            "name": "upload_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Upload Id"
+            }
+          },
+          {
+            "name": "part_number",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Part Number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PartUrlResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/batch/{batch_id}/uploads/{upload_id}/complete": {
+      "post": {
+        "tags": [
+          "batches"
+        ],
+        "summary": "Complete Upload",
+        "description": "Complete a multipart upload.",
+        "operationId": "complete_upload_v1_batch__batch_id__uploads__upload_id__complete_post",
+        "parameters": [
+          {
+            "name": "batch_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Batch Id"
+            }
+          },
+          {
+            "name": "upload_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Upload Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CompleteRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CompleteResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/batch/{batch_id}/uploads/{upload_id}": {
+      "delete": {
+        "tags": [
+          "batches"
+        ],
+        "summary": "Abort Upload",
+        "description": "Abort an upload session.",
+        "operationId": "abort_upload_v1_batch__batch_id__uploads__upload_id__delete",
+        "parameters": [
+          {
+            "name": "batch_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Batch Id"
+            }
+          },
+          {
+            "name": "upload_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Upload Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AbortUploadResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "get": {
+        "tags": [
+          "batches"
+        ],
+        "summary": "Get Upload Status",
+        "description": "Get the status of an upload session.",
+        "operationId": "get_upload_status_v1_batch__batch_id__uploads__upload_id__get",
+        "parameters": [
+          {
+            "name": "batch_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Batch Id"
+            }
+          },
+          {
+            "name": "upload_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Upload Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UploadStatusResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "AbortUploadResponse": {
+        "properties": {
+          "message": {
+            "type": "string",
+            "title": "Message",
+            "description": "Confirmation message for the abort operation.",
+            "example": "Upload aborted successfully"
+          }
+        },
+        "type": "object",
+        "required": [
+          "message"
+        ],
+        "title": "AbortUploadResponse",
+        "description": "Response for upload abort operation."
+      },
+      "BatchCreateRequest": {
+        "properties": {
+          "name": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 256
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Name",
+            "description": "Human-friendly name for the batch. If not provided, a timestamp will be used.",
+            "default": "2025-10-21T19:35:09.996846+00:00",
+            "example": "october_data_load"
+          },
+          "upload_method": {
+            "anyOf": [
+              {
+                "type": "string",
+                "const": "s3_multipart"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Upload Method",
+            "description": "Upload method to use for the batch. Defaults to s3_multipart.",
+            "default": "s3_multipart",
+            "example": "s3_multipart"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "title": "BatchCreateRequest",
+        "description": "Request payload to create a new batch for uploading data."
+      },
+      "BatchCreateResponse": {
+        "properties": {
+          "batch_id": {
+            "type": "string",
+            "title": "Batch Id",
+            "description": "Unique identifier for the created batch.",
+            "example": "batch_0199bb07-3b87-7e83-8842-ad9d52a3c472"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "CREATED",
+              "UPLOADING",
+              "FINALIZED"
+            ],
+            "title": "Status",
+            "description": "Current status of the batch.",
+            "example": "CREATED"
+          },
+          "name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Name",
+            "description": "Human-friendly name of the batch, if provided.",
+            "example": "october_data_load"
+          },
+          "s3": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/S3"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "S3 upload configuration to use for this batch."
+          },
+          "discovery_rules": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/DiscoveryRules"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Discovery configuration applied to this batch."
+          },
+          "limits": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/Limits"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Enforced limits for this batch.",
+            "example": {
+              "max_files": 1000,
+              "max_total_size_bytes": 1073741824
+            }
+          },
+          "retention": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/Retention"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Retention policy for this batch.",
+            "example": {
+              "created_at": "2025-10-21T19:35:09.997986+00:00",
+              "expires_at": "2025-11-20T19:35:09.997990+00:00",
+              "ttl_days": 30
+            }
+          },
+          "links": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/Links"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Hypermedia links for next actions on this batch.",
+            "example": {
+              "finalize": "https://development.api.phenom.om1.com/batches/batch_0199bb07-3b87-7e83-8842-ad9d52a3c472/finalize",
+              "multipart_start": "https://development.api.phenom.om1.com/batches/batch_0199bb07-3b87-7e83-8842-ad9d52a3c472/uploads/multipart/start",
+              "self": "https://development.api.phenom.om1.com/batches/batch_0199bb07-3b87-7e83-8842-ad9d52a3c472",
+              "start": "https://development.api.phenom.om1.com/batches/batch_0199bb07-3b87-7e83-8842-ad9d52a3c472/start",
+              "validate": "https://development.api.phenom.om1.com/batches/batch_0199bb07-3b87-7e83-8842-ad9d52a3c472/validate"
+            }
+          }
+        },
+        "type": "object",
+        "required": [
+          "batch_id",
+          "status"
+        ],
+        "title": "BatchCreateResponse",
+        "description": "Details of the newly created batch and related resource links."
+      },
+      "BatchGetResponse": {
+        "properties": {
+          "batch_id": {
+            "type": "string",
+            "title": "Batch Id",
+            "description": "Unique identifier of the batch.",
+            "example": "batch_0199bb07-3b87-7e83-8842-ad9d52a3c472"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "CREATED",
+              "UPLOADING",
+              "FINALIZED"
+            ],
+            "title": "Status",
+            "description": "Current status of the batch.",
+            "example": "UPLOADING"
+          },
+          "retention": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/Retention"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Retention policy for this batch, if configured."
+          },
+          "links": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/Links"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Hypermedia links for available operations on this batch."
+          }
+        },
+        "type": "object",
+        "required": [
+          "batch_id",
+          "status"
+        ],
+        "title": "BatchGetResponse",
+        "description": "Current state and summary information for an existing batch."
+      },
+      "BatchStartRequest": {
+        "properties": {
+          "outcome_ids": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "minItems": 1,
+            "title": "Outcome Ids",
+            "description": "Outcome catalog IDs to use when executing the batch job.",
+            "example": [
+              "v0p3_65plus_fixed_anchor_2023_JanToDec_04012025_any_time_hospitalization_future_1month"
+            ]
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "outcome_ids"
+        ],
+        "title": "BatchStartRequest",
+        "description": "Request to start processing a batch after validation."
+      },
+      "BatchValidateRequest": {
+        "properties": {
+          "outcome_ids": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "minItems": 1,
+            "title": "Outcome Ids",
+            "description": "Outcome catalog IDs to validate against.",
+            "example": [
+              "v0p3_65plus_fixed_anchor_2023_JanToDec_04012025_any_time_hospitalization_future_1month"
+            ]
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "outcome_ids"
+        ],
+        "title": "BatchValidateRequest",
+        "description": "Request to validate a batch against the specified outcome catalog."
+      },
+      "CompletePart": {
+        "properties": {
+          "part_number": {
+            "type": "integer",
+            "minimum": 1.0,
+            "title": "Part Number",
+            "description": "Part number (1-based).",
+            "example": 1
+          },
+          "etag": {
+            "type": "string",
+            "title": "Etag",
+            "description": "ETag returned after successful part upload.",
+            "example": "\"etag1\""
+          }
+        },
+        "type": "object",
+        "required": [
+          "part_number",
+          "etag"
+        ],
+        "title": "CompletePart",
+        "description": "Information about a completed upload part."
+      },
+      "CompleteRequest": {
+        "properties": {
+          "parts": {
+            "items": {
+              "$ref": "#/components/schemas/CompletePart"
+            },
+            "type": "array",
+            "title": "Parts",
+            "description": "List of completed parts with their ETags.",
+            "example": [
+              {
+                "etag": "\"etag1\"",
+                "part_number": 1
+              },
+              {
+                "etag": "\"etag2\"",
+                "part_number": 2
+              }
+            ]
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "parts"
+        ],
+        "title": "CompleteRequest",
+        "description": "Request to complete a multipart upload."
+      },
+      "CompleteResponse": {
+        "properties": {
+          "upload_id": {
+            "type": "string",
+            "title": "Upload Id",
+            "description": "Unique identifier for the upload session.",
+            "example": "u_abc123"
+          },
+          "key": {
+            "type": "string",
+            "title": "Key",
+            "description": "S3 key of the completed object.",
+            "example": "tenants/org/batches/batch_0199bb07-3b87-7e83-8842-ad9d52a3c472/patients/patients_2025_10.csv"
+          },
+          "etag": {
+            "type": "string",
+            "title": "Etag",
+            "description": "ETag of the completed object.",
+            "example": "\"final-mpu-etag-2\""
+          },
+          "size_bytes": {
+            "type": "integer",
+            "minimum": 0.0,
+            "title": "Size Bytes",
+            "description": "Total size of the uploaded object in bytes.",
+            "example": 21474836480
+          }
+        },
+        "type": "object",
+        "required": [
+          "upload_id",
+          "key",
+          "etag",
+          "size_bytes"
+        ],
+        "title": "CompleteResponse",
+        "description": "Response confirming successful upload completion."
+      },
+      "Diagnosis": {
+        "properties": {
+          "code": {
+            "type": "string",
+            "title": "Code",
+            "description": "Diagnosis code.",
+            "example": "I10"
+          },
+          "code_system": {
+            "type": "string",
+            "enum": [
+              "ICD10",
+              "ICD9",
+              "SNOMED"
+            ],
+            "title": "Code System",
+            "description": "Code system used for the diagnosis.",
+            "example": "ICD10"
+          },
+          "start_date": {
+            "type": "string",
+            "title": "Start Date",
+            "description": "Date when diagnosis was first recorded in YYYY-MM-DD format.",
+            "example": "2020-01-01"
+          },
+          "end_date": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "End Date",
+            "description": "Date when diagnosis was resolved in YYYY-MM-DD format. Null if ongoing.",
+            "example": "2025-01-01"
+          }
+        },
+        "type": "object",
+        "required": [
+          "code",
+          "code_system",
+          "start_date"
+        ],
+        "title": "Diagnosis",
+        "description": "Medical diagnosis information."
+      },
+      "DiscoveryRules": {
+        "properties": {
+          "object_types": {
+            "items": {
+              "type": "string",
+              "enum": [
+                "patients",
+                "lab_results",
+                "procedures",
+                "diagnosis",
+                "medications"
+              ]
+            },
+            "type": "array",
+            "title": "Object Types",
+            "description": "List of object types the batch accepts.",
+            "example": [
+              "patients",
+              "lab_results",
+              "procedures",
+              "diagnosis",
+              "medications"
+            ]
+          },
+          "file_patterns": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "File Patterns",
+            "description": "Allowed filename patterns used during discovery.",
+            "example": [
+              "*.csv"
+            ]
+          },
+          "max_object_size_bytes": {
+            "type": "integer",
+            "title": "Max Object Size Bytes",
+            "description": "Maximum size in bytes for a single discovered object.",
+            "example": 104857600
+          }
+        },
+        "type": "object",
+        "required": [
+          "object_types",
+          "file_patterns",
+          "max_object_size_bytes"
+        ],
+        "title": "DiscoveryRules",
+        "description": "Rules that control file discovery and acceptance for the batch."
+      },
+      "DownloadManifest": {
+        "properties": {
+          "job_id": {
+            "type": "string",
+            "title": "Job Id",
+            "description": "Job identifier.",
+            "example": "job_01J90Q2TTM"
+          },
+          "total_rows": {
+            "type": "integer",
+            "minimum": 0.0,
+            "title": "Total Rows",
+            "description": "Total number of result rows.",
+            "example": 101234
+          },
+          "shards": {
+            "items": {
+              "$ref": "#/components/schemas/DownloadShard"
+            },
+            "type": "array",
+            "title": "Shards",
+            "description": "List of shards containing the results."
+          }
+        },
+        "type": "object",
+        "required": [
+          "job_id",
+          "total_rows",
+          "shards"
+        ],
+        "title": "DownloadManifest",
+        "description": "Manifest for downloading job results."
+      },
+      "DownloadResponse": {
+        "properties": {
+          "mode": {
+            "type": "string",
+            "const": "manifest",
+            "title": "Mode",
+            "description": "Download mode.",
+            "example": "manifest"
+          },
+          "format": {
+            "type": "string",
+            "const": "csv",
+            "title": "Format",
+            "description": "File format.",
+            "example": "csv"
+          },
+          "manifest": {
+            "$ref": "#/components/schemas/DownloadManifest",
+            "description": "Download manifest with shard information."
+          }
+        },
+        "type": "object",
+        "required": [
+          "mode",
+          "format",
+          "manifest"
+        ],
+        "title": "DownloadResponse",
+        "description": "Response for downloading job results."
+      },
+      "DownloadShard": {
+        "properties": {
+          "key": {
+            "type": "string",
+            "title": "Key",
+            "description": "S3 key for the shard.",
+            "example": "om1-results/tenants/org_abc/jobs/job_01J90Q2TTM/part-0001.csv"
+          },
+          "size": {
+            "type": "integer",
+            "minimum": 0.0,
+            "title": "Size",
+            "description": "Size of the shard in bytes.",
+            "example": 18432412
+          },
+          "etag": {
+            "type": "string",
+            "title": "Etag",
+            "description": "ETag of the shard.",
+            "example": "\"a1b2c3...\""
+          },
+          "url": {
+            "type": "string",
+            "title": "Url",
+            "description": "Presigned URL to download the shard.",
+            "example": "https://s3.amazonaws.com/....X-Amz-Signature=..."
+          },
+          "expires_at": {
+            "type": "string",
+            "title": "Expires At",
+            "description": "ISO 8601 timestamp when the URL expires.",
+            "example": "2025-10-06T17:10:00Z"
+          }
+        },
+        "type": "object",
+        "required": [
+          "key",
+          "size",
+          "etag",
+          "url",
+          "expires_at"
+        ],
+        "title": "DownloadShard",
+        "description": "Individual shard in a download manifest."
+      },
+      "ExclusionsByReason": {
+        "properties": {
+          "demographic_ineligible": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Demographic Ineligible",
+            "description": "Number of patients excluded due to demographic ineligibility.",
+            "example": 986
+          },
+          "insufficient_history": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Insufficient History",
+            "description": "Number of patients excluded due to insufficient history.",
+            "example": 137
+          }
+        },
+        "type": "object",
+        "title": "ExclusionsByReason",
+        "description": "Exclusion counts grouped by reason."
+      },
+      "FinalizeResponse": {
+        "properties": {
+          "batch_id": {
+            "type": "string",
+            "title": "Batch Id",
+            "description": "Identifier of the finalized batch.",
+            "example": "batch_0199bb07-3b87-7e83-8842-ad9d52a3c472"
+          },
+          "status": {
+            "type": "string",
+            "const": "FINALIZED",
+            "title": "Status",
+            "description": "Final status indicating the batch is finalized.",
+            "example": "FINALIZED"
+          },
+          "manifest_key": {
+            "type": "string",
+            "title": "Manifest Key",
+            "description": "S3 key of the generated manifest for the finalized batch.",
+            "example": "batches/batch_0199bb07-3b87-7e83-8842-ad9d52a3c472/manifest.json"
+          }
+        },
+        "type": "object",
+        "required": [
+          "batch_id",
+          "status",
+          "manifest_key"
+        ],
+        "title": "FinalizeResponse",
+        "description": "Response returned when a batch is successfully finalized."
+      },
+      "HTTPValidationError": {
+        "properties": {
+          "detail": {
+            "items": {
+              "$ref": "#/components/schemas/ValidationError"
+            },
+            "type": "array",
+            "title": "Detail"
+          }
+        },
+        "type": "object",
+        "title": "HTTPValidationError"
+      },
+      "HealthResponse": {
+        "properties": {
+          "status": {
+            "type": "string",
+            "enum": [
+              "ok",
+              "degraded",
+              "fail"
+            ],
+            "title": "Status"
+          },
+          "version": {
+            "type": "string",
+            "title": "Version"
+          },
+          "env": {
+            "type": "string",
+            "title": "Env"
+          },
+          "uptime_s": {
+            "type": "integer",
+            "title": "Uptime S"
+          },
+          "checks": {
+            "items": {
+              "$ref": "#/components/schemas/ProbeResult"
+            },
+            "type": "array",
+            "title": "Checks",
+            "default": []
+          }
+        },
+        "type": "object",
+        "required": [
+          "status",
+          "version",
+          "env",
+          "uptime_s"
+        ],
+        "title": "HealthResponse",
+        "description": "Response from health check endpoints."
+      },
+      "JobCreateRequest": {
+        "properties": {
+          "outcome_ids": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "minItems": 1,
+            "title": "Outcome Ids",
+            "description": "List of outcome IDs to run against this patient.",
+            "example": [
+              "v0p3_65plus_fixed_anchor_2023_JanToDec_04012025_any_time_hospitalization_future_1month",
+              "v0p3_65plus_fixed_anchor_2023_JanToDec_04012025_any_time_hospitalization_future_3month"
+            ]
+          },
+          "patient_history": {
+            "$ref": "#/components/schemas/PatientHistory"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "outcome_ids",
+          "patient_history"
+        ],
+        "title": "JobCreateRequest",
+        "description": "Request to create a job from patient history."
+      },
+      "JobCreateResponse": {
+        "properties": {
+          "job_id": {
+            "type": "string",
+            "title": "Job Id",
+            "description": "Unique identifier for the created job.",
+            "example": "job_01J90Q2TTM"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "QUEUED",
+              "RUNNING",
+              "SUCCEEDED",
+              "SUCCEEDED_WITH_EXCLUSIONS",
+              "FAILED"
+            ],
+            "title": "Status",
+            "description": "Current status of the job.",
+            "example": "QUEUED"
+          }
+        },
+        "type": "object",
+        "required": [
+          "job_id",
+          "status"
+        ],
+        "title": "JobCreateResponse",
+        "description": "Response when creating a job from patient history."
+      },
+      "JobError": {
+        "properties": {
+          "object_type": {
+            "type": "string",
+            "title": "Object Type",
+            "description": "Type of object that had the error.",
+            "example": "lab_results"
+          },
+          "file": {
+            "type": "string",
+            "title": "File",
+            "description": "Name of the file containing the error.",
+            "example": "lab_03.csv"
+          },
+          "row": {
+            "type": "integer",
+            "minimum": 1.0,
+            "title": "Row",
+            "description": "Row number where the error occurred.",
+            "example": 42
+          },
+          "code": {
+            "type": "string",
+            "title": "Code",
+            "description": "Error code.",
+            "example": "parse_error"
+          },
+          "message": {
+            "type": "string",
+            "title": "Message",
+            "description": "Human-readable error message.",
+            "example": "Invalid number in result_value"
+          }
+        },
+        "type": "object",
+        "required": [
+          "object_type",
+          "file",
+          "row",
+          "code",
+          "message"
+        ],
+        "title": "JobError",
+        "description": "Job error information."
+      },
+      "JobExclusion": {
+        "properties": {
+          "patient_id": {
+            "type": "string",
+            "title": "Patient Id",
+            "description": "Patient identifier.",
+            "example": "def456"
+          },
+          "reason": {
+            "type": "string",
+            "title": "Reason",
+            "description": "Reason for exclusion.",
+            "example": "demographic_ineligible"
+          },
+          "detail": {
+            "type": "string",
+            "title": "Detail",
+            "description": "Detailed explanation of the exclusion.",
+            "example": "Age outside outcome cohort range"
+          },
+          "outcomes_affected": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Outcomes Affected",
+            "description": "List of outcome IDs affected by this exclusion.",
+            "example": [
+              "heart_failure_1y"
+            ]
+          }
+        },
+        "type": "object",
+        "required": [
+          "patient_id",
+          "reason",
+          "detail",
+          "outcomes_affected"
+        ],
+        "title": "JobExclusion",
+        "description": "Patient exclusion information."
+      },
+      "JobGetResponse": {
+        "properties": {
+          "job_id": {
+            "type": "string",
+            "title": "Job Id",
+            "description": "Unique identifier of the job.",
+            "example": "job_01J90Q2TTM"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "QUEUED",
+              "RUNNING",
+              "SUCCEEDED",
+              "SUCCEEDED_WITH_EXCLUSIONS",
+              "FAILED"
+            ],
+            "title": "Status",
+            "description": "Current status of the job.",
+            "example": "SUCCEEDED_WITH_EXCLUSIONS"
+          },
+          "metrics": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/JobMetrics"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Job execution metrics, available when job is completed."
+          },
+          "results": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/ResultLinks"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Links to access results, available when job is completed."
+          }
+        },
+        "type": "object",
+        "required": [
+          "job_id",
+          "status"
+        ],
+        "title": "JobGetResponse",
+        "description": "Response when retrieving job metadata."
+      },
+      "JobMetrics": {
+        "properties": {
+          "records_processed": {
+            "type": "integer",
+            "title": "Records Processed",
+            "description": "Total number of records processed.",
+            "example": 1245678
+          },
+          "patients_scored": {
+            "type": "integer",
+            "title": "Patients Scored",
+            "description": "Number of patients successfully scored.",
+            "example": 101234
+          },
+          "patients_excluded": {
+            "type": "integer",
+            "title": "Patients Excluded",
+            "description": "Number of patients excluded from scoring.",
+            "example": 1123
+          },
+          "exclusions_by_reason": {
+            "$ref": "#/components/schemas/ExclusionsByReason",
+            "description": "Breakdown of exclusions by reason."
+          },
+          "error_rows": {
+            "type": "integer",
+            "title": "Error Rows",
+            "description": "Number of rows with errors.",
+            "example": 0
+          }
+        },
+        "type": "object",
+        "required": [
+          "records_processed",
+          "patients_scored",
+          "patients_excluded",
+          "exclusions_by_reason",
+          "error_rows"
+        ],
+        "title": "JobMetrics",
+        "description": "Metrics about job execution."
+      },
+      "JobResult": {
+        "properties": {
+          "patient_id": {
+            "type": "string",
+            "title": "Patient Id",
+            "description": "Patient identifier.",
+            "example": "abc123"
+          },
+          "outcome_id": {
+            "type": "string",
+            "title": "Outcome Id",
+            "description": "Outcome identifier.",
+            "example": "heart_failure_1y"
+          },
+          "probability": {
+            "type": "number",
+            "maximum": 1.0,
+            "minimum": 0.0,
+            "title": "Probability",
+            "description": "Predicted probability (0.0 to 1.0).",
+            "example": 0.7421
+          },
+          "prob_upper_95_percent_bound": {
+            "type": "number",
+            "maximum": 1.0,
+            "minimum": 0.0,
+            "title": "Prob Upper 95 Percent Bound",
+            "description": "Upper 95% confidence bound for probability.",
+            "example": 0.7934
+          },
+          "prob_lower_95_percent_bound": {
+            "type": "number",
+            "maximum": 1.0,
+            "minimum": 0.0,
+            "title": "Prob Lower 95 Percent Bound",
+            "description": "Lower 95% confidence bound for probability.",
+            "example": 0.6912
+          },
+          "relative_probability": {
+            "type": "number",
+            "minimum": 0.0,
+            "title": "Relative Probability",
+            "description": "Relative probability compared to baseline.",
+            "example": 2.18
+          },
+          "rel_upper_95_percent_bound": {
+            "type": "number",
+            "minimum": 0.0,
+            "title": "Rel Upper 95 Percent Bound",
+            "description": "Upper 95% confidence bound for relative probability.",
+            "example": 2.36
+          },
+          "rel_lower_95_percent_bound": {
+            "type": "number",
+            "minimum": 0.0,
+            "title": "Rel Lower 95 Percent Bound",
+            "description": "Lower 95% confidence bound for relative probability.",
+            "example": 2.02
+          },
+          "bin_id": {
+            "type": "integer",
+            "minimum": 1.0,
+            "title": "Bin Id",
+            "description": "Risk bin identifier.",
+            "example": 9
+          },
+          "num_bins": {
+            "type": "integer",
+            "minimum": 1.0,
+            "title": "Num Bins",
+            "description": "Total number of risk bins.",
+            "example": 100
+          }
+        },
+        "type": "object",
+        "required": [
+          "patient_id",
+          "outcome_id",
+          "probability",
+          "prob_upper_95_percent_bound",
+          "prob_lower_95_percent_bound",
+          "relative_probability",
+          "rel_upper_95_percent_bound",
+          "rel_lower_95_percent_bound",
+          "bin_id",
+          "num_bins"
+        ],
+        "title": "JobResult",
+        "description": "Individual job result for a patient and outcome."
+      },
+      "LabResult": {
+        "properties": {
+          "lab_code": {
+            "type": "string",
+            "title": "Lab Code",
+            "description": "Laboratory test code (e.g., LOINC code).",
+            "example": "718-7"
+          },
+          "result_value": {
+            "type": "number",
+            "title": "Result Value",
+            "description": "Numeric result value.",
+            "example": 12.8
+          },
+          "result_units": {
+            "type": "string",
+            "title": "Result Units",
+            "description": "Units of measurement for the result.",
+            "example": "g/dL"
+          },
+          "result_date": {
+            "type": "string",
+            "title": "Result Date",
+            "description": "Date when the test was performed in YYYY-MM-DD format.",
+            "example": "2025-07-03"
+          }
+        },
+        "type": "object",
+        "required": [
+          "lab_code",
+          "result_value",
+          "result_units",
+          "result_date"
+        ],
+        "title": "LabResult",
+        "description": "Laboratory test result."
+      },
+      "Limits": {
+        "properties": {
+          "max_files": {
+            "type": "integer",
+            "title": "Max Files",
+            "description": "Maximum number of files permitted in the batch.",
+            "example": 1000
+          },
+          "max_total_size_bytes": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Max Total Size Bytes",
+            "description": "Maximum total size in bytes across all files.",
+            "example": 1073741824
+          }
+        },
+        "type": "object",
+        "required": [
+          "max_files"
+        ],
+        "title": "Limits",
+        "description": "Server-enforced limits for the batch size and file counts."
+      },
+      "Links": {
+        "properties": {
+          "self": {
+            "type": "string",
+            "title": "Self",
+            "description": "URL to retrieve this batch resource.",
+            "example": "https://development.api.phenom.om1.com/batches/batch_0199bb07-3b87-7e83-8842-ad9d52a3c472"
+          },
+          "multipart_start": {
+            "type": "string",
+            "title": "Multipart Start",
+            "description": "URL to initiate S3 multipart uploads for this batch.",
+            "example": "https://development.api.phenom.om1.com/batches/batch_0199bb07-3b87-7e83-8842-ad9d52a3c472/uploads/multipart/start"
+          },
+          "finalize": {
+            "type": "string",
+            "title": "Finalize",
+            "description": "URL to finalize the batch once uploads complete.",
+            "example": "https://development.api.phenom.om1.com/batches/batch_0199bb07-3b87-7e83-8842-ad9d52a3c472/finalize"
+          },
+          "validate": {
+            "type": "string",
+            "title": "Validate",
+            "description": "URL to trigger validation of uploaded batch contents.",
+            "example": "https://development.api.phenom.om1.com/batches/batch_0199bb07-3b87-7e83-8842-ad9d52a3c472/validate"
+          },
+          "start": {
+            "type": "string",
+            "title": "Start",
+            "description": "URL to start processing the batch after validation.",
+            "example": "https://development.api.phenom.om1.com/batches/batch_0199bb07-3b87-7e83-8842-ad9d52a3c472/start"
+          }
+        },
+        "type": "object",
+        "required": [
+          "self",
+          "multipart_start",
+          "finalize",
+          "validate",
+          "start"
+        ],
+        "title": "Links",
+        "description": "Hypermedia links for performing next actions on the batch."
+      },
+      "Medication": {
+        "properties": {
+          "rx_code": {
+            "type": "string",
+            "title": "Rx Code",
+            "description": "Medication code.",
+            "example": "C09AA02"
+          },
+          "code_system": {
+            "type": "string",
+            "enum": [
+              "ATC",
+              "NDC",
+              "RXNORM"
+            ],
+            "title": "Code System",
+            "description": "Code system used for the medication.",
+            "example": "ATC"
+          },
+          "start_date": {
+            "type": "string",
+            "title": "Start Date",
+            "description": "Date when medication was started in YYYY-MM-DD format.",
+            "example": "2023-03-01"
+          },
+          "end_date": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "End Date",
+            "description": "Date when medication was discontinued in YYYY-MM-DD format. Null if ongoing.",
+            "example": "2025-01-01"
+          }
+        },
+        "type": "object",
+        "required": [
+          "rx_code",
+          "code_system",
+          "start_date"
+        ],
+        "title": "Medication",
+        "description": "Medication information."
+      },
+      "Page_JobError_": {
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/JobError"
+            },
+            "type": "array",
+            "title": "Items",
+            "description": "List of items for the current page."
+          },
+          "next_page_token": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Next Page Token",
+            "description": "Base64-encoded token for the next page. Null if this is the last page.",
+            "example": "eyJzaGFyZF9pZHMiOlszXSwi"
+          },
+          "total_rows": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Total Rows",
+            "description": "Total number of rows across all pages. May be omitted for performance reasons.",
+            "example": 101234
+          }
+        },
+        "type": "object",
+        "required": [
+          "items"
+        ],
+        "title": "Page[JobError]"
+      },
+      "Page_JobExclusion_": {
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/JobExclusion"
+            },
+            "type": "array",
+            "title": "Items",
+            "description": "List of items for the current page."
+          },
+          "next_page_token": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Next Page Token",
+            "description": "Base64-encoded token for the next page. Null if this is the last page.",
+            "example": "eyJzaGFyZF9pZHMiOlszXSwi"
+          },
+          "total_rows": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Total Rows",
+            "description": "Total number of rows across all pages. May be omitted for performance reasons.",
+            "example": 101234
+          }
+        },
+        "type": "object",
+        "required": [
+          "items"
+        ],
+        "title": "Page[JobExclusion]"
+      },
+      "Page_JobResult_": {
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/JobResult"
+            },
+            "type": "array",
+            "title": "Items",
+            "description": "List of items for the current page."
+          },
+          "next_page_token": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Next Page Token",
+            "description": "Base64-encoded token for the next page. Null if this is the last page.",
+            "example": "eyJzaGFyZF9pZHMiOlszXSwi"
+          },
+          "total_rows": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Total Rows",
+            "description": "Total number of rows across all pages. May be omitted for performance reasons.",
+            "example": 101234
+          }
+        },
+        "type": "object",
+        "required": [
+          "items"
+        ],
+        "title": "Page[JobResult]"
+      },
+      "PartUrlResponse": {
+        "properties": {
+          "upload_id": {
+            "type": "string",
+            "title": "Upload Id",
+            "description": "Unique identifier for the upload session.",
+            "example": "u_abc123"
+          },
+          "key": {
+            "type": "string",
+            "title": "Key",
+            "description": "S3 key where the object will be stored.",
+            "example": "tenants/org/batches/batch_0199bb07-3b87-7e83-8842-ad9d52a3c472/patients/patients_2025_10.csv"
+          },
+          "part_number": {
+            "type": "integer",
+            "minimum": 1.0,
+            "title": "Part Number",
+            "description": "Part number for this upload (1-based).",
+            "example": 1
+          },
+          "url": {
+            "type": "string",
+            "title": "Url",
+            "description": "Presigned URL for uploading the part.",
+            "example": "https://bucket.s3.amazonaws.com/key?X-Amz-Algorithm=..."
+          },
+          "expires_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Expires At",
+            "description": "ISO timestamp when the presigned URL expires.",
+            "example": "2025-01-15T10:30:00Z"
+          }
+        },
+        "type": "object",
+        "required": [
+          "upload_id",
+          "key",
+          "part_number",
+          "url",
+          "expires_at"
+        ],
+        "title": "PartUrlResponse",
+        "description": "Response containing presigned URL for part upload."
+      },
+      "Patient": {
+        "properties": {
+          "patient_id": {
+            "type": "string",
+            "maxLength": 100,
+            "minLength": 1,
+            "title": "Patient Id",
+            "description": "Unique identifier for the patient.",
+            "example": "abc123"
+          },
+          "birth_date": {
+            "type": "string",
+            "title": "Birth Date",
+            "description": "Patient's birth date in YYYY-MM-DD format.",
+            "example": "1964-05-18"
+          },
+          "sex": {
+            "type": "string",
+            "enum": [
+              "M",
+              "F",
+              "U"
+            ],
+            "title": "Sex",
+            "description": "Patient's sex: M (Male), F (Female), U (Unknown/Unspecified).",
+            "example": "F"
+          },
+          "zip3": {
+            "type": "string",
+            "maxLength": 5,
+            "minLength": 3,
+            "title": "Zip3",
+            "description": "Patient's ZIP code (3-5 digits).",
+            "example": "021"
+          }
+        },
+        "type": "object",
+        "required": [
+          "patient_id",
+          "birth_date",
+          "sex",
+          "zip3"
+        ],
+        "title": "Patient",
+        "description": "Patient demographic information."
+      },
+      "PatientHistory": {
+        "properties": {
+          "patient": {
+            "$ref": "#/components/schemas/Patient"
+          },
+          "lab_results": {
+            "anyOf": [
+              {
+                "items": {
+                  "$ref": "#/components/schemas/LabResult"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Lab Results",
+            "description": "List of laboratory test results."
+          },
+          "diagnosis": {
+            "anyOf": [
+              {
+                "items": {
+                  "$ref": "#/components/schemas/Diagnosis"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Diagnosis",
+            "description": "List of medical diagnoses."
+          },
+          "procedures": {
+            "anyOf": [
+              {
+                "items": {
+                  "$ref": "#/components/schemas/Procedure"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Procedures",
+            "description": "List of medical procedures."
+          },
+          "medications": {
+            "anyOf": [
+              {
+                "items": {
+                  "$ref": "#/components/schemas/Medication"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Medications",
+            "description": "List of medications."
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "patient"
+        ],
+        "title": "PatientHistory",
+        "description": "Complete patient history including demographics and clinical data."
+      },
+      "ProbeResult": {
+        "properties": {
+          "name": {
+            "type": "string",
+            "title": "Name",
+            "description": "Short, stable probe name"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "ok",
+              "degraded",
+              "fail"
+            ],
+            "title": "Status"
+          },
+          "latency_ms": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Latency Ms"
+          },
+          "detail": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Detail"
+          }
+        },
+        "type": "object",
+        "required": [
+          "name",
+          "status"
+        ],
+        "title": "ProbeResult",
+        "description": "Result of a health check probe."
+      },
+      "Procedure": {
+        "properties": {
+          "code": {
+            "type": "string",
+            "title": "Code",
+            "description": "Procedure code.",
+            "example": "93000"
+          },
+          "code_system": {
+            "type": "string",
+            "enum": [
+              "CPT",
+              "HCPCS",
+              "ICD10PCS"
+            ],
+            "title": "Code System",
+            "description": "Code system used for the procedure.",
+            "example": "CPT"
+          },
+          "date": {
+            "type": "string",
+            "title": "Date",
+            "description": "Date when procedure was performed in YYYY-MM-DD format.",
+            "example": "2024-12-15"
+          }
+        },
+        "type": "object",
+        "required": [
+          "code",
+          "code_system",
+          "date"
+        ],
+        "title": "Procedure",
+        "description": "Medical procedure information."
+      },
+      "ResultLinks": {
+        "properties": {
+          "api_pages": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "type": "object",
+            "title": "Api Pages",
+            "description": "Link to paginated API results.",
+            "example": {
+              "href": "/v1/jobs/job_01J90Q2TTM/results?page_size=1000"
+            }
+          },
+          "download": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "type": "object",
+            "title": "Download",
+            "description": "Link to download results.",
+            "example": {
+              "href": "/v1/jobs/job_01J90Q2TTM/results/download"
+            }
+          }
+        },
+        "type": "object",
+        "required": [
+          "api_pages",
+          "download"
+        ],
+        "title": "ResultLinks",
+        "description": "Links to access job results."
+      },
+      "Retention": {
+        "properties": {
+          "ttl_days": {
+            "type": "integer",
+            "maximum": 60.0,
+            "minimum": 1.0,
+            "title": "Ttl Days",
+            "description": "Number of days to retain batch data before expiration.",
+            "default": 30,
+            "example": 30
+          },
+          "created_at": {
+            "type": "string",
+            "title": "Created At",
+            "description": "ISO 8601 timestamp when the batch was created.",
+            "default": "2025-10-21T19:35:09.994733+00:00",
+            "example": "2025-10-21T19:35:09.994777+00:00"
+          },
+          "expires_at": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Expires At",
+            "description": "ISO 8601 timestamp when the batch will expire, if set.",
+            "example": "2025-11-20T19:35:09.994793+00:00"
+          }
+        },
+        "type": "object",
+        "title": "Retention",
+        "description": "Retention policy and computed expiration for batch data."
+      },
+      "S3": {
+        "properties": {
+          "bucket": {
+            "type": "string",
+            "title": "Bucket",
+            "description": "S3 bucket name where objects are stored.",
+            "example": "phenom-jobs-557690587445"
+          },
+          "key_prefix": {
+            "type": "string",
+            "title": "Key Prefix",
+            "description": "S3 key prefix under which batch files are organized.",
+            "example": "batches/batch_0199bb07-3b87-7e83-8842-ad9d52a3c472/"
+          },
+          "root_uri": {
+            "type": "string",
+            "title": "Root Uri",
+            "description": "Root S3 URI for batch storage.",
+            "example": "s3://phenom-jobs-557690587445/batches/batch_0199bb07-3b87-7e83-8842-ad9d52a3c472/"
+          }
+        },
+        "type": "object",
+        "required": [
+          "bucket",
+          "key_prefix",
+          "root_uri"
+        ],
+        "title": "S3",
+        "description": "S3 upload configuration for this batch."
+      },
+      "StartAcceptedResponse": {
+        "properties": {
+          "job_id": {
+            "type": "string",
+            "title": "Job Id",
+            "description": "Server-assigned identifier for the processing job.",
+            "example": "job_xyz789"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "QUEUED",
+              "RUNNING",
+              "SUCCEEDED",
+              "SUCCEEDED_WITH_EXCLUSIONS",
+              "FAILED"
+            ],
+            "title": "Status",
+            "description": "Current status of the processing job.",
+            "example": "QUEUED"
+          }
+        },
+        "type": "object",
+        "required": [
+          "job_id",
+          "status"
+        ],
+        "title": "StartAcceptedResponse",
+        "description": "Acknowledgement response for an asynchronously started processing job."
+      },
+      "UploadRequest": {
+        "properties": {
+          "object_type": {
+            "type": "string",
+            "enum": [
+              "patients",
+              "lab_results",
+              "procedures",
+              "diagnosis",
+              "medications"
+            ],
+            "minLength": 1,
+            "title": "Object Type",
+            "description": "The type of patient history object being uploaded.",
+            "example": "patients"
+          },
+          "filename": {
+            "type": "string",
+            "minLength": 1,
+            "title": "Filename",
+            "description": "Name of the file being uploaded.",
+            "example": "patients_2025_10.csv"
+          },
+          "content_type": {
+            "type": "string",
+            "title": "Content Type",
+            "description": "MIME type of the file content.",
+            "default": "text/csv",
+            "example": "text/csv"
+          },
+          "mode": {
+            "type": "string",
+            "enum": [
+              "single",
+              "multipart"
+            ],
+            "title": "Mode",
+            "description": "Upload mode: 'single' for one-shot uploads, 'multipart' for chunked uploads.",
+            "example": "single"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "object_type",
+          "filename",
+          "mode"
+        ],
+        "title": "UploadRequest",
+        "description": "Request to initiate an upload (single or multipart)."
+      },
+      "UploadResponse": {
+        "properties": {
+          "upload_id": {
+            "type": "string",
+            "title": "Upload Id",
+            "description": "Unique identifier for the upload session.",
+            "example": "u_abc123"
+          },
+          "key": {
+            "type": "string",
+            "title": "Key",
+            "description": "S3 key where the object will be stored.",
+            "example": "tenants/org/batches/batch_0199bb07-3b87-7e83-8842-ad9d52a3c472/patients/patients_2025_10.csv"
+          },
+          "mode": {
+            "type": "string",
+            "enum": [
+              "single",
+              "multipart"
+            ],
+            "title": "Mode",
+            "description": "Upload mode: 'single' or 'multipart'.",
+            "example": "single"
+          },
+          "expires_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Expires At",
+            "description": "ISO timestamp when the upload session expires.",
+            "example": "2025-01-15T10:30:00Z"
+          },
+          "url": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Url",
+            "description": "Presigned URL for single mode uploads.",
+            "example": "https://s3...sig..."
+          },
+          "part_size_bytes": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Part Size Bytes",
+            "description": "Size in bytes for each part in multipart uploads.",
+            "example": 134217728
+          }
+        },
+        "type": "object",
+        "required": [
+          "upload_id",
+          "key",
+          "mode",
+          "expires_at"
+        ],
+        "title": "UploadResponse",
+        "description": "Response for upload initiation."
+      },
+      "UploadStatusResponse": {
+        "properties": {
+          "upload_id": {
+            "type": "string",
+            "title": "Upload Id",
+            "description": "Unique identifier for the upload session.",
+            "example": "u_abc123"
+          },
+          "status": {
+            "type": "string",
+            "title": "Status",
+            "description": "Current status of the upload.",
+            "example": "in_progress"
+          },
+          "bytes_uploaded": {
+            "type": "integer",
+            "minimum": 0.0,
+            "title": "Bytes Uploaded",
+            "description": "Total bytes uploaded so far.",
+            "example": 1048576
+          },
+          "parts_uploaded": {
+            "items": {
+              "type": "integer"
+            },
+            "type": "array",
+            "title": "Parts Uploaded",
+            "description": "List of part numbers that have been uploaded.",
+            "example": [
+              1,
+              2
+            ]
+          }
+        },
+        "type": "object",
+        "required": [
+          "upload_id",
+          "status",
+          "bytes_uploaded",
+          "parts_uploaded"
+        ],
+        "title": "UploadStatusResponse",
+        "description": "Response for upload status check."
+      },
+      "ValidateAcceptedResponse": {
+        "properties": {
+          "validation_id": {
+            "type": "string",
+            "title": "Validation Id",
+            "description": "Server-assigned identifier for the validation job.",
+            "example": "val_abc123"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "QUEUED",
+              "RUNNING",
+              "SUCCEEDED",
+              "FAILED"
+            ],
+            "title": "Status",
+            "description": "Current status of the validation job.",
+            "example": "QUEUED"
+          }
+        },
+        "type": "object",
+        "required": [
+          "validation_id",
+          "status"
+        ],
+        "title": "ValidateAcceptedResponse",
+        "description": "Acknowledgement response for an asynchronously started validation job."
+      },
+      "ValidationError": {
+        "properties": {
+          "loc": {
+            "items": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "integer"
+                }
+              ]
+            },
+            "type": "array",
+            "title": "Location"
+          },
+          "msg": {
+            "type": "string",
+            "title": "Message"
+          },
+          "type": {
+            "type": "string",
+            "title": "Error Type"
+          }
+        },
+        "type": "object",
+        "required": [
+          "loc",
+          "msg",
+          "type"
+        ],
+        "title": "ValidationError"
+      }
+    }
+  }
+}
+    </script>
+    <script>
+      const spec = JSON.parse(document.getElementById('spec').textContent);
+      Redoc.init(spec, {}, document.getElementById('redoc'));
+    </script>
+  </body>
+</html>

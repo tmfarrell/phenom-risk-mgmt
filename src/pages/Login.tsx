@@ -182,9 +182,9 @@ export const Login = () => {
             {/* Hero Section */}
             <div className="text-center mb-16">
               <h1 className="text-5xl md:text-6xl font-bold text-blue-900 mt-6 mb-4">
-                Precision phenotyping for<br/> smarter patient risk management
-                <span className="block text-4xl font-normal text-gray-500 mt-6">
-                  AI-Powered Clinical Risk Prediction
+                Precision phenotyping for<br/> smarter care management
+                <span className="block text-4xl font-light text-gray-500 mt-6">
+                  Powered by Real-World Data and AI
                 </span>
               </h1>
               {/*<p className="text-xl text-gray-600 max-w-3xl mx-auto mb-8">
@@ -346,7 +346,7 @@ export const Login = () => {
             {/* CTA Section */}
             <div className="text-center bg-blue-900 rounded-2xl p-10 text-white">
               <h2 className="text-3xl font-bold mb-4">
-                Ready to Modernize Your Risk Management?
+                Ready to Modernize Your Care Management?
               </h2>
               {/*<p className="text-lg mb-6 text-blue-100">
                 See how the Patient Risk Panel can help you identify high-risk patients and improve outcomes.
