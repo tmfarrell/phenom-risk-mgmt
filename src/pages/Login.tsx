@@ -288,7 +288,7 @@ export const Login = () => {
                   </div>
                   <CardTitle>Real-World Data</CardTitle>
                   <CardDescription>
-                    Runs on data from real-world EHR or claims systems so you can generate predictions specific to your patients.
+                    Runs on data from your own real-world EHR or claims systems so you can generate predictions specific to your population.
                   </CardDescription>
                 </CardHeader>
               </Card>
