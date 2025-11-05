@@ -6,7 +6,63 @@
     <title>API Docs (ReDoc - single file)</title>
     <meta name="viewport" content="width=device-width, initial-scale=1"/>
     <script src="https://cdn.jsdelivr.net/npm/redoc@next/bundles/redoc.standalone.js"></script>
-    <style>html,body,#redoc{height:100%;margin:0}</style>
+    <style>
+      html,body,#redoc{height:100%;margin:0}
+      /* Force dark text in code blocks */
+      .redoc-json code,
+      .redoc-json pre,
+      .redoc-json span,
+      pre code,
+      pre span,
+      code span {
+        color: #000000 !important;
+      }
+      /* Syntax highlighting overrides */
+      .token.string,
+      .token.number,
+      .token.boolean,
+      .token.null,
+      .token.keyword,
+      .token.property,
+      .token.punctuation,
+      .token.operator {
+        color: #1f2937 !important;
+      }
+      /* Force dark text for all control characters and operators */
+      .redoc-json *,
+      pre *,
+      code * {
+        color: #000000 !important;
+      }
+      /* Specifically target operators like + - */
+      .token.operator,
+      span[class*="operator"] {
+        color: #000000 !important;
+      }
+      li.react-tabs__tab.react-tabs__tab--selected {
+        background-color: #f3f4f6 !important; /* light grey background */
+        color: #374151 !important;            /* dark grey text */
+        border: #d1d5db !important; /* light grey border */
+      }
+      /* Recolor Payload/Response tabs - target React Tabs */
+      li.tab-success {
+        background-color: #dcfce7 !important; /* light green background */
+        color: #065f46 !important;            /* dark green text */
+        border: #34d399 !important; /* green border */
+      }
+      /* Error status code tabs (4xx, 5xx) */
+      li.tab-error {
+        background-color: #fee2e2 !important; /* light red background */
+        color: #dc2626 !important;            /* dark red text */
+        border-color: #fca5a5 !important;     /* red border */
+      }
+      li.tab-success.react-tabs__tab--selected {
+        background-color: #c6f6da !important; /* light green background */
+      }
+      li.tab-error.react-tabs__tab--selected {
+        background-color: #f9b8b8 !important; /* light red background */
+      }
+    </style>
   </head>
   <body>
     <div id="redoc"></div>
@@ -15,7 +71,7 @@
   "openapi": "3.1.0",
   "info": {
     "title": "OM1 Phenom API",
-    "description": "# Phenom Inference API \u2014 Overview\n\nThis API lets you run **large, batch inference jobs** against the Phenom platform using a predictable, multi-tenant workflow that healthcare teams already understand:\n\n1. **Create a batch** to reserve a staging area\n2. **Upload files** (S3 presigned multipart or SFTP) into typed folders\n3. **Finalize** to snapshot an immutable manifest\n4. **Validate** (optional) using the same rules as run\n5. **Start the job** (async, idempotent)\n6. **Poll for status**; then **fetch results** (paginated API or S3 presigned download)\n\nFuture endpoints will support **real-time** inference with the _same schema_, for low-latency scenarios.\n\n---\n\n## Who this is for\n\n- **Internal Teams** Any OM1 internal application that requires foundation model inferences\n- **External Clients and Partners** Any contracted client or partner that needs a stable, HIPAA-aligned inference pipeline\n\n---\n\n## Security & Tenancy\n\n- **Auth**: OAuth2 (Auth0). Send `Authorization: Bearer <jwt>`.\n- **Tenant scope**: Resolved from a JWT claim (e.g., `org_id`). All resources are scoped to the caller\u2019s tenant.\n- **Network**: Public API Gateway fronted by WAF (no IP allowlists).\n- **Encryption**: SSE-S3 at rest; TLS in transit.\n- **PHI/PII**: Accepted under BAA. **Never** place PHI in resource names or metadata fields; PHI may appear only in uploaded data. Logs are scrubbed of PHI.\n\n---\n",
+    "description": "# Phenom Inference API \u2014 Overview\n\nThis API lets you run **large, batch inference jobs** against the Phenom platform using a predictable, multi-tenant workflow that healthcare teams already understand:\n\n1. **Create a batch** to reserve a staging area\n2. **Upload files** (S3 presigned multipart or SFTP) into typed folders\n3. **Finalize** to snapshot an immutable manifest\n4. **Validate** (optional) using the same rules as run\n5. **Start the job** (async, idempotent)\n6. **Poll for status**; then **fetch results** (paginated API or S3 presigned download)\n\nFuture endpoints will support **real-time** inference with the _same schema_, for low-latency scenarios.\n\n---\n\n## Who this is for\n\n- **External Clients and Partners** Any contracted client or partner that needs a stable, HIPAA-aligned inference API for PhenOM\n\n---\n\n## Security & Tenancy\n\n- **Auth**: OAuth2 (Auth0). Send `Authorization: Bearer <jwt>`.\n- **Tenant scope**: Resolved from a JWT claim (e.g., `org_id`). All resources are scoped to the caller\u2019s tenant.\n- **Network**: Public API Gateway fronted by WAF (no IP allowlists).\n- **Encryption**: SSE-S3 at rest; TLS in transit.\n- **PHI/PII**: Accepted under BAA. **Never** place PHI in resource names or metadata fields; PHI may appear only in uploaded data. Logs are scrubbed of PHI.\n\n---\n",
     "version": "1.0"
   },
   "paths": {
@@ -2817,7 +2873,33 @@
     </script>
     <script>
       const spec = JSON.parse(document.getElementById('spec').textContent);
-      Redoc.init(spec, {}, document.getElementById('redoc'));
+      Redoc.init(spec, {
+        theme: {
+          colors: {
+            primary: {
+              main: '#2563eb'
+            },
+            text: {
+              primary: '#000000',
+              secondary: '#374151'
+            }
+          },
+          rightPanel: {
+            backgroundColor: '#ffffff',
+            textColor: '#000000'
+          },
+          codeBlock: {
+            backgroundColor: '#f9fafb'
+          },
+          typography: {
+            code: {
+              color: '#000000',
+              backgroundColor: '#f3f4f6'
+            }
+          }
+        },
+        nativeScrollbars: true
+      }, document.getElementById('redoc'));
     </script>
   </body>
 </html>

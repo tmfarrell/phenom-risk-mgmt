@@ -730,6 +730,7 @@ curl https://api.om1.com/phenom/v1/jobs/{job_id}/results/download \\
               </Card>
             </div>
 
+            {/*
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
@@ -772,7 +773,7 @@ curl https://api.om1.com/phenom/v1/jobs/{job_id}/results/download \\
                 </div>
               </CardContent>
             </Card>
-            
+            */}
             {/*
             <Card>
               <CardHeader>
