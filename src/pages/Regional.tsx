@@ -65,6 +65,7 @@ const Regional = () => {
   const [isFiltersCollapsed, setIsFiltersCollapsed] = useState<boolean>(savedState?.isFiltersCollapsed ?? true);
   const [showCounts, setShowCounts] = useState<boolean>(savedState?.showCounts ?? true);
   const [viewMode, setViewMode] = useState<'individual' | 'geographical'>(savedState?.viewMode || 'individual');
+  const [selectedRegionId, setSelectedRegionId] = useState<string | null>(null);
   // Shared provider list sorting & pagination (controls table and map)
   const [providerSortField, setProviderSortField] = useState<'patients_phenom' | 'name' | 'npi' | 'location' | 'specialty'>('patients_phenom');
   const [providerSortDirection, setProviderSortDirection] = useState<'asc' | 'desc'>('desc');
@@ -213,6 +214,8 @@ const Regional = () => {
                 filters={geoFilters}
                 selectedModelData={selectedModelData}
                 selectedNpiListName={selectedNpiListName}
+                selectedRegionId={selectedRegionId}
+                onRegionClick={setSelectedRegionId}
               />
             </div>
             
@@ -225,6 +228,8 @@ const Regional = () => {
                 filters={geoFilters}
                 selectedModelData={selectedModelData}
                 selectedNpiListName={selectedNpiListName}
+                selectedRegionId={selectedRegionId}
+                onRegionClick={setSelectedRegionId}
               />
             </div>
             

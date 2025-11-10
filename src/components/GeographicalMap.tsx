@@ -13,27 +13,29 @@ import { useProvidersData } from '@/hooks/useProvidersData';
 import 'leaflet/dist/leaflet.css';
 
 // Create custom icon that matches individual provider map style
-const createCustomIcon = (potential: string) => {
+const createCustomIcon = (potential: string, isSelected: boolean = false) => {
   const colors = {
-    'High Potential': '#3b82f6', // blue-500
-    'Medium Potential': '#dbeafe', // blue-100
-    'Low Potential': '#6b7280' // gray-500
+    'High Risk': '#dc2626', // red-600
+    'Medium Risk': '#f97316', // orange-500
+    'Low Risk': '#facc15' // yellow-400
   };
   
-  const color = colors[potential as keyof typeof colors] || colors['Low Potential'];
+  const color = colors[potential as keyof typeof colors] || colors['Low Risk'];
+  const size = isSelected ? 28 : 20;
+  const borderWidth = isSelected ? 4 : 3;
   
   return L.divIcon({
     html: `<div style="
       background-color: ${color};
-      width: 20px;
-      height: 20px;
+      width: ${size}px;
+      height: ${size}px;
       border-radius: 50%;
-      border: 3px solid white;
-      box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+      border: ${borderWidth}px solid ${isSelected ? '#3b82f6' : 'white'};
+      box-shadow: 0 2px 6px rgba(0,0,0,${isSelected ? 0.5 : 0.3});
     "></div>`,
     className: 'custom-marker',
-    iconSize: [20, 20],
-    iconAnchor: [10, 10],
+    iconSize: [size, size],
+    iconAnchor: [size / 2, size / 2],
   });
 };
 
@@ -49,7 +51,7 @@ interface GeographicalMapData {
   highRiskPatients: number;
   topSpecialties: string[];
   phenomLiftScore: number;
-  phenomLiftPotential: 'Low Potential' | 'Medium Potential' | 'High Potential';
+  phenomLiftPotential: 'Low Risk' | 'Medium Risk' | 'High Risk';
 }
 
 interface GeographicalMapProps {
@@ -59,6 +61,8 @@ interface GeographicalMapProps {
   filters: GeographicalFilterValues;
   selectedModelData: { id: string; name: string } | null;
   selectedNpiListName?: string | null;
+  selectedRegionId?: string | null;
+  onRegionClick?: (regionId: string | null) => void;
 }
 
 // State/Region center coordinates for mapping
@@ -128,7 +132,9 @@ const GeographicalMap: React.FC<GeographicalMapProps> = ({
   hasNpiFile,
   filters,
   selectedModelData,
-  selectedNpiListName
+  selectedNpiListName,
+  selectedRegionId,
+  onRegionClick
 }) => {
   const [mapData, setMapData] = useState<GeographicalMapData[]>([]);
   const [dataLoading, setDataLoading] = useState(false);
@@ -224,10 +230,6 @@ const GeographicalMap: React.FC<GeographicalMapProps> = ({
         .slice(0, 3)
         .map(([specialty]) => specialty);
 
-      let potential: 'High Potential' | 'Medium Potential' | 'Low Potential' = 'Low Potential';
-      if (avgPhenomScore >= 20) potential = 'High Potential';
-      else if (avgPhenomScore >= 15) potential = 'Medium Potential';
-
       let displayName = groupName;
       if (filters.groupingLevel === 'zipcode') {
         displayName = `${groupName}`;
@@ -247,9 +249,35 @@ const GeographicalMap: React.FC<GeographicalMapProps> = ({
         highRiskPatients,
         topSpecialties,
         phenomLiftScore: avgPhenomScore,
-        phenomLiftPotential: potential
+        phenomLiftPotential: 'Low Risk' // Will be calculated after all data is aggregated
       });
     });
+
+    // Calculate risk levels based on percentiles of high-risk patient counts
+    if (aggregatedData.length > 0) {
+      // Sort by high-risk patient count to calculate percentiles
+      const sortedByHighRisk = [...aggregatedData].sort((a, b) => a.highRiskPatients - b.highRiskPatients);
+      
+      // Calculate percentile thresholds
+      const calculatePercentile = (percentile: number) => {
+        const index = Math.ceil((percentile / 100) * sortedByHighRisk.length) - 1;
+        return sortedByHighRisk[Math.max(0, index)].highRiskPatients;
+      };
+      
+      const p85 = calculatePercentile(85);
+      const p60 = calculatePercentile(60);
+      
+      // Assign risk levels based on percentiles
+      aggregatedData.forEach(area => {
+        if (area.highRiskPatients >= p85) {
+          area.phenomLiftPotential = 'High Risk';
+        } else if (area.highRiskPatients >= p60) {
+          area.phenomLiftPotential = 'Medium Risk';
+        } else {
+          area.phenomLiftPotential = 'Low Risk';
+        }
+      });
+    }
 
     setMapData(aggregatedData);
   }, [showData, isLoading, filters, selectedModelData, sharedData, isFetching, selectedNpiListName]);
@@ -340,11 +368,11 @@ const GeographicalMap: React.FC<GeographicalMapProps> = ({
 
   const getPotentialBadgeClass = (potential: string) => {
     const variants: Record<string, string> = {
-      'High Potential': 'bg-blue-700 text-white border-blue-800 hover:bg-blue-800 hover:text-white',
-      'Medium Potential': 'bg-blue-100 text-blue-700 border-blue-200 hover:bg-blue-200 hover:text-blue-800',
-      'Low Potential': 'bg-gray-100 text-gray-800 border-gray-300 hover:bg-gray-100 hover:text-gray-800'
+      'High Risk': 'bg-red-600 text-white border-red-700 hover:bg-red-700 hover:text-white',
+      'Medium Risk': 'bg-orange-500 text-white border-orange-600 hover:bg-orange-600 hover:text-white',
+      'Low Risk': 'bg-yellow-400 text-gray-900 border-yellow-500 hover:bg-yellow-500 hover:text-gray-900'
     };
-    return variants[potential] || variants['Low Potential'];
+    return variants[potential] || variants['Low Risk'];
   };
 
   // Component to handle map updates
@@ -354,6 +382,32 @@ const GeographicalMap: React.FC<GeographicalMapProps> = ({
     useEffect(() => {
       map.setView(center, zoom, { animate: true, duration: 0.5 });
     }, [center[0], center[1], zoom, map]);
+    
+    return null;
+  };
+
+  // Component to handle selected region focusing
+  const RegionFocuser = ({ selectedRegionId, mapData }: { selectedRegionId: string | null; mapData: GeographicalMapData[] }) => {
+    const map = useMap();
+    
+    useEffect(() => {
+      if (!selectedRegionId) return;
+      
+      const selectedArea = mapData.find(d => d.id === selectedRegionId);
+      if (selectedArea) {
+        // Determine zoom level based on grouping (less aggressive)
+        let targetZoom = 5;
+        if (filters.groupingLevel === 'city') targetZoom = 8;
+        else if (filters.groupingLevel === 'zipcode') targetZoom = 10;
+        else if (filters.groupingLevel === 'state') targetZoom = 5;
+        
+        // Fly to the selected region
+        map.flyTo([selectedArea.latitude, selectedArea.longitude], targetZoom, { 
+          animate: true, 
+          duration: 0.8 
+        });
+      }
+    }, [selectedRegionId, mapData, map]);
     
     return null;
   };
@@ -374,6 +428,7 @@ const GeographicalMap: React.FC<GeographicalMapProps> = ({
             attributionControl={false}
           >
             <MapUpdater center={mapBounds.center} zoom={mapBounds.zoom} />
+            <RegionFocuser selectedRegionId={selectedRegionId} mapData={mapData} />
             {/* eslint-disable-next-line @typescript-eslint/ban-ts-comment */}
             {/* @ts-ignore */}
             <TileLayer
@@ -383,13 +438,20 @@ const GeographicalMap: React.FC<GeographicalMapProps> = ({
             
             {mapData
               .filter(area => !isNaN(area.latitude) && !isNaN(area.longitude))
-              .map((area) => (
+              .map((area) => {
+                const isSelected = selectedRegionId === area.id;
+                return (
               /* eslint-disable-next-line @typescript-eslint/ban-ts-comment */
               /* @ts-ignore */
               <Marker
                 key={area.id}
                 position={[area.latitude, area.longitude]}
-                icon={createCustomIcon(area.phenomLiftPotential)}
+                icon={createCustomIcon(area.phenomLiftPotential, isSelected)}
+                eventHandlers={{
+                  click: () => {
+                    onRegionClick?.(isSelected ? null : area.id);
+                  }
+                }}
               >
                   <Popup>
                     <div className="p-3 min-w-64">
@@ -448,35 +510,36 @@ const GeographicalMap: React.FC<GeographicalMapProps> = ({
                   </div>
                 </Popup>
               </Marker>
-            ))}
+            );
+              })}
           </MapContainer>
         </div>
         
-        {/* Legend */}
-        <div className="p-4 bg-gray-50 border-t rounded-b-xl">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-6">
-              <div className="text-sm font-medium text-gray-700">Legend:</div>
-              <div className="flex items-center gap-4">
-                <div className="flex items-center gap-2">
-                  <div className="w-4 h-4 bg-blue-500 rounded-full border-2 border-white shadow"></div>
-                  <span className="text-xs text-gray-600">High Potential</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <div className="w-4 h-4 bg-blue-100 rounded-full border-2 border-white shadow"></div>
-                  <span className="text-xs text-gray-600">Medium Potential</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <div className="w-4 h-4 bg-gray-600 rounded-full border-2 border-white shadow"></div>
-                  <span className="text-xs text-gray-600">Low Potential</span>
+          {/* Legend */}
+          <div className="p-4 bg-gray-50 border-t rounded-b-xl">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-6">
+                <div className="text-sm font-medium text-gray-700">Legend:</div>
+                <div className="flex items-center gap-4">
+                  <div className="flex items-center gap-2">
+                    <div className="w-4 h-4 bg-red-600 rounded-full border-2 border-white shadow"></div>
+                    <span className="text-xs text-gray-600">High Risk</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <div className="w-4 h-4 bg-orange-500 rounded-full border-2 border-white shadow"></div>
+                    <span className="text-xs text-gray-600">Medium Risk</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <div className="w-4 h-4 bg-yellow-400 rounded-full border-2 border-white shadow"></div>
+                    <span className="text-xs text-gray-600">Low Risk</span>
+                  </div>
                 </div>
               </div>
-            </div>
-            <div className="text-xs text-gray-500">
-              Click markers for detailed geographical information
+              <div className="text-xs text-gray-500">
+                Click markers for detailed geographical information
+              </div>
             </div>
           </div>
-        </div>
       </CardContent>
     </Card>
     </TooltipProvider>

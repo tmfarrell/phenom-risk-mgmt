@@ -16,7 +16,7 @@ interface GeographicalData {
   totalPatients: number;
   highRiskPatients: number;
   phenomLiftScore: number; // as percentage
-  phenomLiftPotential: 'Low Potential' | 'Medium Potential' | 'High Potential';
+  phenomLiftPotential: 'Low Risk' | 'Medium Risk' | 'High Risk';
 }
 
 interface GeographicalTableProps {
@@ -26,6 +26,8 @@ interface GeographicalTableProps {
   filters: GeographicalFilterValues;
   selectedModelData: { id: string; name: string } | null;
   selectedNpiListName?: string | null;
+  selectedRegionId?: string | null;
+  onRegionClick?: (regionId: string) => void;
 }
 
 const GeographicalTable: React.FC<GeographicalTableProps> = ({
@@ -34,7 +36,9 @@ const GeographicalTable: React.FC<GeographicalTableProps> = ({
   hasNpiFile,
   filters,
   selectedModelData,
-  selectedNpiListName
+  selectedNpiListName,
+  selectedRegionId,
+  onRegionClick
 }) => {
   const [geographicalData, setGeographicalData] = useState<GeographicalData[]>([]);
   const [dataLoading, setDataLoading] = useState(false);
@@ -94,9 +98,6 @@ const GeographicalTable: React.FC<GeographicalTableProps> = ({
         const avgPhenom = Math.round(items.reduce((s, x) => s + (x.phenom_lift_potential || 0), 0) / items.length);
         const avgYears = Math.round(items.reduce((s, x) => s + (x.years_in_practice || 0), 0) / items.length);
         const newTargets = (selectedNpiListName ? items.filter(x => !x.is_client_target).length : 0);
-        let potential: GeographicalData['phenomLiftPotential'] = 'Low Potential';
-        if (avgPhenom >= 20) potential = 'High Potential';
-        else if (avgPhenom >= 15) potential = 'Medium Potential';
         aggregated.push({
           id: stateName,
           name: stateName,
@@ -107,7 +108,7 @@ const GeographicalTable: React.FC<GeographicalTableProps> = ({
           totalPatients,
           highRiskPatients,
           phenomLiftScore: avgPhenom,
-          phenomLiftPotential: potential
+          phenomLiftPotential: 'Low Risk' // Will be calculated after all data is aggregated
         });
       });
     } else if (filters.groupingLevel === 'city') {
@@ -127,9 +128,6 @@ const GeographicalTable: React.FC<GeographicalTableProps> = ({
           const avgPhenom = Math.round(items.reduce((s, x) => s + (x.phenom_lift_potential || 0), 0) / items.length);
           const avgYears = Math.round(items.reduce((s, x) => s + (x.years_in_practice || 0), 0) / items.length);
           const newTargets = (selectedNpiListName ? items.filter(x => !x.is_client_target).length : 0);
-          let potential: GeographicalData['phenomLiftPotential'] = 'Low Potential';
-          if (avgPhenom >= 20) potential = 'High Potential';
-          else if (avgPhenom >= 15) potential = 'Medium Potential';
           aggregated.push({
             id: cityName,
             name: cityName,
@@ -140,7 +138,7 @@ const GeographicalTable: React.FC<GeographicalTableProps> = ({
             totalPatients,
             highRiskPatients,
             phenomLiftScore: avgPhenom,
-            phenomLiftPotential: potential
+            phenomLiftPotential: 'Low Risk' // Will be calculated after all data is aggregated
           });
         });
     } else if (filters.groupingLevel === 'zipcode') {
@@ -160,9 +158,6 @@ const GeographicalTable: React.FC<GeographicalTableProps> = ({
           const avgPhenom = Math.round(items.reduce((s, x) => s + (x.phenom_lift_potential || 0), 0) / items.length);
           const avgYears = Math.round(items.reduce((s, x) => s + (x.years_in_practice || 0), 0) / items.length);
           const newTargets = (selectedNpiListName ? items.filter(x => !x.is_client_target).length : 0);
-          let potential: GeographicalData['phenomLiftPotential'] = 'Low Potential';
-          if (avgPhenom >= 20) potential = 'High Potential';
-          else if (avgPhenom >= 15) potential = 'Medium Potential';
           const locationName = `${zip}`;
           aggregated.push({
             id: zip,
@@ -174,12 +169,38 @@ const GeographicalTable: React.FC<GeographicalTableProps> = ({
             totalPatients,
             highRiskPatients,
             phenomLiftScore: avgPhenom,
-            phenomLiftPotential: potential
+            phenomLiftPotential: 'Low Risk' // Will be calculated after all data is aggregated
           });
         });
     }
 
-    aggregated.sort((a, b) => b.providerCount - a.providerCount);
+    // Calculate risk levels based on percentiles of high-risk patient counts
+    if (aggregated.length > 0) {
+      // Sort by high-risk patient count to calculate percentiles
+      const sortedByHighRisk = [...aggregated].sort((a, b) => a.highRiskPatients - b.highRiskPatients);
+      
+      // Calculate percentile thresholds
+      const calculatePercentile = (percentile: number) => {
+        const index = Math.ceil((percentile / 100) * sortedByHighRisk.length) - 1;
+        return sortedByHighRisk[Math.max(0, index)].highRiskPatients;
+      };
+      
+      const p85 = calculatePercentile(85);
+      const p60 = calculatePercentile(60);
+      
+      // Assign risk levels based on percentiles
+      aggregated.forEach(area => {
+        if (area.highRiskPatients >= p85) {
+          area.phenomLiftPotential = 'High Risk';
+        } else if (area.highRiskPatients >= p60) {
+          area.phenomLiftPotential = 'Medium Risk';
+        } else {
+          area.phenomLiftPotential = 'Low Risk';
+        }
+      });
+    }
+
+    aggregated.sort((a, b) => b.highRiskPatients - a.highRiskPatients);
     setGeographicalData(aggregated);
   }, [showData, isLoading, filters, selectedModelData, sharedData, isFetching, selectedNpiListName]);
   if (isLoading || dataLoading) {
@@ -227,11 +248,11 @@ const GeographicalTable: React.FC<GeographicalTableProps> = ({
 
   const getPotentialBadgeClass = (potential: string) => {
     const variants: Record<string, string> = {
-      'High Potential': 'bg-blue-700 text-white border-blue-800 hover:bg-blue-800 hover:text-white',
-      'Medium Potential': 'bg-blue-100 text-blue-700 border-blue-200 hover:bg-blue-200 hover:text-blue-800',
-      'Low Potential': 'bg-gray-100 text-gray-800 border-gray-300 hover:bg-gray-100 hover:text-gray-800'
+      'High Risk': 'bg-red-600 text-white border-red-700 hover:bg-red-700 hover:text-white',
+      'Medium Risk': 'bg-orange-500 text-white border-orange-600 hover:bg-orange-600 hover:text-white',
+      'Low Risk': 'bg-yellow-400 text-gray-900 border-yellow-500 hover:bg-yellow-500 hover:text-gray-900'
     };
-    return variants[potential] || variants['Low Potential'];
+    return variants[potential] || variants['Low Risk'];
   };
 
   return (
@@ -244,7 +265,13 @@ const GeographicalTable: React.FC<GeographicalTableProps> = ({
         </CardHeader>
         <CardContent className="space-y-4 max-h-[600px] overflow-y-auto">
         {geographicalData.map((area) => (
-          <Card key={area.id} className="p-4 hover:shadow-md transition-shadow cursor-pointer">
+          <Card 
+            key={area.id} 
+            className={`p-4 hover:shadow-md transition-all cursor-pointer ${
+              selectedRegionId === area.id ? 'ring-2 ring-blue-500 shadow-lg bg-blue-50' : ''
+            }`}
+            onClick={() => onRegionClick?.(area.id)}
+          >
             <div className="space-y-3">
               {/* Header */}
               <div className="flex justify-between items-start">
@@ -278,12 +305,6 @@ const GeographicalTable: React.FC<GeographicalTableProps> = ({
                   <span className="font-medium">{area.totalPatients.toLocaleString()}</span>
                   <span className="text-gray-600">patients</span>
                 </div>
-              </div>
-
-
-              {/* Average Experience */}
-              <div className="text-sm text-gray-600">
-                <span className="font-medium">Avg. Experience:</span> {area.avgYearsInPractice} years
               </div>
 
               {/* High Risk PhenOM Patients */}
