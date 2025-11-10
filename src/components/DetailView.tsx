@@ -99,9 +99,6 @@ export const DetailView = ({ person, initialOutcomes, initialTimeframe, initialR
   
   // Filter data for the current patient
   const patientRisks = (patientData || []).filter(p => p.patient_id === person.patient_id);
-  
-  console.log("availableOutcomes", availableOutcomes);
-  console.log("rowConfigs", rowConfigs);
 
   return (
     <div className="space-y-6">

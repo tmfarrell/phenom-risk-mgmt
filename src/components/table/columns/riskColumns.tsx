@@ -22,8 +22,8 @@ export const getRiskColumns = (
       // Access the column value directly using the outcome code from phenom_models
       return row[column as keyof Person];
     },
-    size: 120, // Set minimum width for risk columns
-    minSize: 120,
+    size: 100, // Set minimum width for risk columns
+    minSize: 100,
     header: ({ table, column: tableColumn }) => {      
       const isSorted = tableColumn.getIsSorted();
       const label = outcomeLabels?.[column] || column;
@@ -44,7 +44,7 @@ export const getRiskColumns = (
       };
       
       return (
-        <div className="flex flex-col align-center items-center pb-2 w-56 min-w-[14rem] max-w-[14rem]">
+        <div className="flex flex-col align-center items-center pb-2 w-40 min-w-[10rem] max-w-[10rem]">
           <Button
             variant="ghost"
             onClick={handleThreeStateSorting}
@@ -135,7 +135,7 @@ export const getRiskColumns = (
 
       if (riskType === 'absolute') {
         return (
-          <div className="flex items-center justify-center w-56 min-w-[14rem] max-w-[14rem]">
+          <div className="flex items-center justify-center w-40 min-w-[10rem] max-w-[10rem]">
             <div className="flex items-center w-full justify-center">
               <div className={`${Number(value) > 15 ? 'bg-red-100' : ''} w-16 text-center py-1 rounded`}>
                 <span>{Number(value).toFixed(1)}%</span>
@@ -148,7 +148,7 @@ export const getRiskColumns = (
         );
       } else {
         return (
-          <div className="flex items-center justify-center w-56 min-w-[14rem] max-w-[14rem]">
+          <div className="flex items-center justify-center w-40 min-w-[10rem] max-w-[10rem]">
             <div className="flex items-center w-full justify-center">
               <div className={`${isHighRisk(Number(value)) ? 'bg-red-100' : ''} w-16 text-center py-1 rounded`}>
                 <span>{Number(value).toFixed(2)}<span>×</span></span>

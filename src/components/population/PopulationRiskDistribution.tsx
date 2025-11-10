@@ -79,7 +79,6 @@ export function PopulationRiskDistribution({
         });
       });
       
-      console.log('Outcome to timeframe mapping for population view:', outcomeTimeframeMap);
       return { outcomeTimeframeMap, outcomeModelMap };
     }
   });
@@ -314,7 +313,7 @@ export function PopulationRiskDistribution({
       <div className="flex justify-end items-center space-x-8">
         <div className="grid grid-cols-3 gap-8 flex-1 mr-8">
           <div className="flex flex-col gap-2">
-            <Label className="mb-2 block">Outcome</Label>
+            <Label className="text-sm text-gray-600">Outcome</Label>
             <Popover open={outcomePopoverOpen} onOpenChange={setOutcomePopoverOpen}>
               <PopoverTrigger asChild>
                 <Button
@@ -377,8 +376,8 @@ export function PopulationRiskDistribution({
             </Popover>
           </div>
 
-          <div className="w-full">
-            <Label className="mb-2 block">Cohort</Label>
+          <div className="flex flex-col gap-2">
+            <Label className="text-sm text-gray-600">Cohort</Label>
             <Popover open={cohortsPopoverOpen} onOpenChange={setCohortsPopoverOpen}>
               <PopoverTrigger asChild>
                 <Button
@@ -454,7 +453,7 @@ export function PopulationRiskDistribution({
           </div>
 
           <div className="flex flex-col gap-2">
-            <Label className="text-sm text-gray-600 text-center mx-auto">Time Period</Label>
+            <Label className="text-sm text-gray-600">Time Period</Label>
             <ToggleGroup 
               type="single" 
               value={localTimeframe}

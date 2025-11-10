@@ -49,8 +49,6 @@ export const usePatientData = () => {
         throw risksError;
       }
 
-      console.log('Raw data:', { patients, risks });
-
       // Transform data to match Person interface
       const transformedData: Person[] = (patients || []).flatMap((patient) => {
         const patientRisks = risks?.filter(risk => risk.patient_id === patient.patient_id) || [];
@@ -120,7 +118,7 @@ export const usePatientData = () => {
         });
       });
 
-      console.log('Transformed data:', transformedData);
+      console.log('Fetched patient data successfully!');
       return transformedData;
     }
   });

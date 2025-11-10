@@ -123,7 +123,7 @@ export default function PhenomAPIDocs() {
                 <div>
                   <h3 className="font-semibold mb-2">Base URL</h3>
                   <code className="block bg-muted p-3 rounded-md">
-                    https://api.om1.com/phenom/v1
+                    https://phenom-api-sandbox.iddev.om1.com/redoc
                   </code>
                 </div>
                 
@@ -425,6 +425,7 @@ curl https://api.om1.com/phenom/v1/jobs/{job_id}/results/download \\
                     <CardDescription>Generate a prediction for a single patient</CardDescription>
                   </CardHeader>
                   <CardContent>
+                  <h4 className="font-semibold mb-2">Request</h4>
                     <pre className="bg-muted p-4 text-muted-foreground rounded-md overflow-x-auto text-sm">
 {`curl -X POST https://api.om1.com/phenom/v1/jobs/from-patient \\
   -H "Authorization: Bearer <jwt>" \\
@@ -451,15 +452,40 @@ curl https://api.om1.com/phenom/v1/jobs/{job_id}/results/download \\
       }]
     }
   }'
-
-# Response:
-{
+`}
+</pre>
+<h4 className="font-semibold mb-2">Response</h4>
+<pre className="bg-muted p-4 text-muted-foreground rounded-md overflow-x-auto text-sm">
+{`{
   "job_id": "job_01J90Q2TTM",
   "status": "QUEUED"
-}
-
-# Poll GET /v1/jobs/{job_id} for results`}
-                    </pre>
+}`}
+</pre>
+                    
+                    <div className="mt-4">
+                      <h4 className="font-semibold mb-2">Final Result</h4>
+                      <pre className="bg-muted p-4 text-muted-foreground rounded-md overflow-x-auto text-sm">
+{`# Poll GET /v1/jobs/job_01J90Q2TTM for results
+{
+  "items": [
+    {
+      "patient_id": "abc123",
+      "outcome_id": "heart_failure_1y",
+      "probability": 0.7421,
+      "prob_upper_95_percent_bound": 0.7934,
+      "prob_lower_95_percent_bound": 0.6912,
+      "relative_probability": 2.18,
+      "rel_upper_95_percent_bound": 2.36,
+      "rel_lower_95_percent_bound": 2.02,
+      "bin_id": 9,
+      "num_bins": 100
+    }
+  ],
+  "next_page_token": null,
+  "total_rows": 1
+}`}
+                      </pre>
+                    </div>
                   </CardContent>
                 </Card>
 
@@ -469,6 +495,7 @@ curl https://api.om1.com/phenom/v1/jobs/{job_id}/results/download \\
                     <CardDescription>Generate predictions for up to 10 patients</CardDescription>
                   </CardHeader>
                   <CardContent>
+                    <h4 className="font-semibold mb-2">Request</h4>
                     <pre className="bg-muted p-4 text-muted-foreground rounded-md overflow-x-auto text-sm">
 {`curl -X POST https://api.om1.com/phenom/v1/jobs/from-patients \\
   -H "Authorization: Bearer <jwt>" \\
@@ -523,15 +550,65 @@ curl https://api.om1.com/phenom/v1/jobs/{job_id}/results/download \\
       }
     ]
   }'
+`}
+</pre>
 
-# Response:
-{
+<h4 className="font-semibold mb-2">Response</h4>
+<pre className="bg-muted p-4 text-muted-foreground rounded-md overflow-x-auto text-sm">
+{`{
   "job_id": "job_01J90Q2UUZ",
   "status": "QUEUED"
-}
-
-# Poll GET /v1/jobs/{job_id} for results`}
-                    </pre>
+}`}
+</pre>
+                    
+                    <div className="mt-4">
+                      <h4 className="font-semibold mb-2">Final Result</h4>
+                      <pre className="bg-muted p-4 text-muted-foreground rounded-md overflow-x-auto text-sm">
+{`# Poll GET /v1/jobs/job_01J90Q2UUZ for results
+{
+  "items": [
+    {
+      "patient_id": "patient_001",
+      "outcome_id": "heart_failure_1y",
+      "probability": 0.7421,
+      "prob_upper_95_percent_bound": 0.7934,
+      "prob_lower_95_percent_bound": 0.6912,
+      "relative_probability": 2.18,
+      "rel_upper_95_percent_bound": 2.36,
+      "rel_lower_95_percent_bound": 2.02,
+      "bin_id": 9,
+      "num_bins": 100
+    },
+    {
+      "patient_id": "patient_002",
+      "outcome_id": "heart_failure_1y",
+      "probability": 0.3215,
+      "prob_upper_95_percent_bound": 0.3687,
+      "prob_lower_95_percent_bound": 0.2801,
+      "relative_probability": 0.94,
+      "rel_upper_95_percent_bound": 1.08,
+      "rel_lower_95_percent_bound": 0.82,
+      "bin_id": 4,
+      "num_bins": 100
+    },
+    {
+      "patient_id": "patient_003",
+      "outcome_id": "heart_failure_1y",
+      "probability": 0.5634,
+      "prob_upper_95_percent_bound": 0.6102,
+      "prob_lower_95_percent_bound": 0.5198,
+      "relative_probability": 1.65,
+      "rel_upper_95_percent_bound": 1.79,
+      "rel_lower_95_percent_bound": 1.52,
+      "bin_id": 7,
+      "num_bins": 100
+    }
+  ],
+  "next_page_token": null,
+  "total_rows": 3
+}`}
+                      </pre>
+                    </div>
                   </CardContent>
                 </Card>
               </TabsContent>

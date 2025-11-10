@@ -14,15 +14,13 @@ export const supabase = createClient<Database>(supabaseUrl, supabaseKey, {
 
 // Add debug logging for auth state and API calls
 supabase.auth.onAuthStateChange((event, session) => {
-  console.log('Supabase auth event:', event);
-  console.log('Session:', session);
+  //console.log('Supabase auth event:', event);
 });
 
 // Add debug logging for API calls using Promise methods
 void (async () => {
   try {
     const response = await supabase.from('patient').select('*');
-    console.log('Test API call response:', response);
   } catch (error) {
     console.error('Test API call error:', error);
   }

@@ -6,8 +6,6 @@ import { useState, useEffect, useRef } from 'react';
 import { Person } from '@/types/population';
 import { TableControls } from '@/components/table/TableControls';
 import { calculateAverageRisks } from '@/components/table/utils/riskCalculations';
-import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
-import { PopulationRiskDistribution } from '@/components/population/PopulationRiskDistribution';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useLocation, useNavigate } from 'react-router-dom';
@@ -26,7 +24,6 @@ export interface IndexPageState {
   selectedRiskColumns: string[];
   selectedPatients: Person[];
   showSelectedOnly: boolean;
-  viewMode: 'patient' | 'population';
   providerList: ProviderList;
   selectedTimeframe: string;
 }
@@ -38,11 +35,10 @@ export default function Index() {
 
   const { data: patientData, isLoading, error } = usePatientDataLatest();
   const [searchQuery, setSearchQuery] = useState(savedState?.searchQuery || '');
-  const [selectedRiskType, setSelectedRiskType] = useState<'relative' | 'absolute'>(savedState?.selectedRiskType || 'relative');
+  const [selectedRiskType, setSelectedRiskType] = useState<'relative' | 'absolute'>(savedState?.selectedRiskType || 'absolute');
   const [selectedRiskColumns, setSelectedRiskColumns] = useState<string[]>([]);
   const [selectedPatients, setSelectedPatients] = useState<Person[]>(savedState?.selectedPatients || []);
   const [showSelectedOnly, setShowSelectedOnly] = useState(savedState?.showSelectedOnly || false);
-  const [viewMode, setViewMode] = useState<'patient' | 'population'>(savedState?.viewMode || 'patient');
   const [providerList, setProviderList] = useState<ProviderList>(
     savedState?.providerList || {
       availableList: PROVIDERS,
@@ -224,7 +220,6 @@ export default function Index() {
       selectedRiskColumns,
       selectedPatients,
       showSelectedOnly,
-      viewMode,
       providerList,
       selectedTimeframe,
     };
@@ -234,7 +229,7 @@ export default function Index() {
   if (error) {
     console.error('Error loading patient data:', error);
     return (
-      <div className="min-h-screen bg-gradient-to-br from-indigo-50 to-slate-50">
+      <>
         <Header />
         <div className="p-6">
           <div className="max-w-[1600px] mx-auto">
@@ -243,12 +238,12 @@ export default function Index() {
             </div>
           </div>
         </div>
-      </div>
+      </>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <>
       <Header />
       <div className="flex items-start">
         <div className="px-6 pt-6">
@@ -260,107 +255,50 @@ export default function Index() {
         <div className="max-w-[1250px] mx-auto">
           <div className="flex flex-col space-y-6">
             <div className="glass-card p-4 overflow-hidden">
-              {viewMode === 'patient' ? (
-                <>
-                  <div className="flex justify-end mb-6">
-                    <ToggleGroup 
-                      type="single" 
-                      value={viewMode}
-                      onValueChange={(value) => {
-                        if (value) setViewMode(value as 'patient' | 'population');
-                      }}
-                      className="border rounded-lg"
-                    >
-                      <ToggleGroupItem 
-                        value="patient" 
-                        className="px-4 py-1 h-10 data-[state=on]:bg-primary data-[state=on]:text-white"
-                      >
-                        Patient
-                      </ToggleGroupItem>
-                      <ToggleGroupItem 
-                        value="population"
-                        className="px-4 py-1 h-10 data-[state=on]:bg-primary data-[state=on]:text-white"
-                      >
-                        Population
-                      </ToggleGroupItem>
-                    </ToggleGroup>
-                  </div>
-                  <TableControls
-                    searchQuery={searchQuery}
-                    onSearchChange={setSearchQuery}
-                    selectedTimeframe={selectedTimeframe}
-                    onTimeframeChange={setSelectedTimeframe}
-                    selectedRiskColumns={selectedRiskColumns}
-                    onRiskColumnsChange={setSelectedRiskColumns}
-                    timeframes={isModelsLoading ? [1, 2] : (timePeriods as Array<number | 'today'>)}
-                    selectedRiskType={selectedRiskType}
-                    onRiskTypeChange={setSelectedRiskType}
-                    providerList={providerList}
-                    onProviderSelection={setProviderList}
-                    showSelectedOnly={showSelectedOnly}
-                    onShowSelectedOnlyChange={setShowSelectedOnly}
-                    availableOutcomes={availableOutcomesForTimeframe}
-                    availableModels={availableModelsForTimeframe}
-                    outcomeLabels={phenomModelsData?.outcomeLabelMap}
-                  />
-                  <div className='flex justify-end mb-4'>
-                      <p className='text-sm text-gray-600'>
-                          {/* TODO: this will need to be replaced with a date from an endpoint */}
-                          Data current as of: <span className='font-bold'>2025-09-12</span>
-                      </p>
-                  </div>
-                  {isLoading ? (
-                    <div className="space-y-3">
-                      <Skeleton className="h-[40px] w-full" />
-                      <Skeleton className="h-[400px] w-full" />
-                    </div>
-                  ) : (
-                    <ResultsTable
-                      data={filteredData || []}
-                      visibleRiskColumns={selectedRiskColumns}
-                      onSelectionChange={setSelectedPatients}
-                      averageRisks={averageRisks}
-                      selectedTimeframe={selectedTimeframe}
-                      onPatientClick={handlePatientClick}
-                    outcomeLabels={phenomModelsData?.outcomeLabelMap}
-                    />
-                  )}
-                </>
+              <TableControls
+                searchQuery={searchQuery}
+                onSearchChange={setSearchQuery}
+                selectedTimeframe={selectedTimeframe}
+                onTimeframeChange={setSelectedTimeframe}
+                selectedRiskColumns={selectedRiskColumns}
+                onRiskColumnsChange={setSelectedRiskColumns}
+                timeframes={isModelsLoading ? [1, 2] : (timePeriods as Array<number | 'today'>)}
+                selectedRiskType={selectedRiskType}
+                onRiskTypeChange={setSelectedRiskType}
+                providerList={providerList}
+                onProviderSelection={setProviderList}
+                showSelectedOnly={showSelectedOnly}
+                onShowSelectedOnlyChange={setShowSelectedOnly}
+                availableOutcomes={availableOutcomesForTimeframe}
+                availableModels={availableModelsForTimeframe}
+                outcomeLabels={phenomModelsData?.outcomeLabelMap}
+              />
+              <div className='flex justify-end mb-4'>
+                  <p className='text-sm text-gray-600'>
+                      {/* TODO: this will need to be replaced with a date from an endpoint */}
+                      Data current as of: <span className='font-bold'>2025-09-12</span>
+                  </p>
+              </div>
+              {isLoading ? (
+                <div className="space-y-3">
+                  <Skeleton className="h-[40px] w-full" />
+                  <Skeleton className="h-[400px] w-full" />
+                </div>
               ) : (
-                <>
-                  <div className="flex justify-end mb-6">
-                    <ToggleGroup 
-                      type="single" 
-                      value={viewMode}
-                      onValueChange={(value) => {
-                        if (value) setViewMode(value as 'patient' | 'population');
-                      }}
-                      className="border rounded-lg"
-                    >
-                      <ToggleGroupItem 
-                        value="patient" 
-                        className="px-4 py-1 h-10 data-[state=on]:bg-primary data-[state=on]:text-white"
-                      >
-                        Patient
-                      </ToggleGroupItem>
-                      <ToggleGroupItem 
-                        value="population"
-                        className="px-4 py-1 h-10 data-[state=on]:bg-primary data-[state=on]:text-white"
-                      >
-                        Population
-                      </ToggleGroupItem>
-                    </ToggleGroup>
-                  </div>
-                  <PopulationRiskDistribution
-                    selectedTimeframe={selectedTimeframe}
-                    selectedRiskType={selectedRiskType}
-                  />
-                </>
+                <ResultsTable
+                  data={filteredData || []}
+                  visibleRiskColumns={selectedRiskColumns}
+                  onSelectionChange={setSelectedPatients}
+                  averageRisks={averageRisks}
+                  selectedTimeframe={selectedTimeframe}
+                  onPatientClick={handlePatientClick}
+                  outcomeLabels={phenomModelsData?.outcomeLabelMap}
+                />
               )}
             </div>
           </div>
         </div>
       </div>
-    </div>
+    </>
   );
 }

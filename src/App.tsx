@@ -5,6 +5,8 @@ import { supabase } from './integrations/supabase/client';
 import { Session } from '@supabase/supabase-js';
 import { Login } from './pages/Login';
 import Index from './pages/Index';
+import Population from './pages/Population';
+import Regional from './pages/Regional';
 import { PatientDetails } from './pages/PatientDetails';
 import Settings from './pages/Settings';
 import { useAdminStatus } from './hooks/useAdminStatus';
@@ -34,7 +36,6 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   useEffect(() => {
     // Get initial session
     supabase.auth.getSession().then(({ data: { session } }) => {
-      console.log('Initial session:', session);
       setSession(session);
       setLoading(false);
     });
@@ -43,7 +44,6 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange((_event, session) => {
-      console.log('Auth state changed:', session);
       setSession(session);
       setLoading(false);
     });
@@ -83,6 +83,8 @@ function App() {
           }
         >
           <Route index element={<Index />} />
+          <Route path="population" element={<Population />} />
+          <Route path="regional" element={<Regional />} />
           <Route path="patient/:id" element={<PatientDetails />} />
           <Route path="settings" element={<Settings />} />
           <Route path="phenom-builder" element={<PhenomBuilder />} />

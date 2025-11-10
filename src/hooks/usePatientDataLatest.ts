@@ -36,7 +36,6 @@ export const usePatientDataLatest = () => {
 
       // Extract unique outcomes (include models with and without timeframe)
       const availableOutcomes = [...new Set(phenomModels?.map(item => item.indication_code) || [])];
-      console.log('Available outcomes:', availableOutcomes);
       
       // Fetch patients
       const { data: patients, error: patientsError } = await supabase
@@ -58,8 +57,6 @@ export const usePatientDataLatest = () => {
         console.error('Error fetching risks:', risksError);
         throw risksError;
       }
-
-      console.log('Raw data:', { patients, risks });
 
       // Get unique combinations and their latest records
       const latestRisks = risks?.reduce((acc, risk) => {
@@ -210,7 +207,7 @@ export const usePatientDataLatest = () => {
 
       const finalData = [...transformedData, ...todayRecords, ...syntheticTimeframeRecords];
 
-      console.log('Transformed latest data (with today and synthetic timeframe records):', finalData);
+      console.log('Fetched latest patient data successfully!');
       return finalData;
     }
   });

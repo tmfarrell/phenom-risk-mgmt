@@ -33,7 +33,7 @@ export const PatientDetails = () => {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-gray-50">
+      <>
         <Header />
         <div className="flex items-start">
           <div className="px-6 pt-6">
@@ -45,13 +45,13 @@ export const PatientDetails = () => {
             Loading...
           </div>
         </div>
-      </div>
+      </>
     );
   }
 
   if (error) {
     return (
-      <div className="min-h-screen bg-gray-50">
+      <>
         <Header />
         <div className="flex items-start">
           <div className="px-6 pt-6">
@@ -63,12 +63,12 @@ export const PatientDetails = () => {
             Error loading patient data
           </div>
         </div>
-      </div>
+      </>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <>
       <Header />
       <div className="flex items-start">
         <div className="px-6 pt-6">
@@ -88,6 +88,6 @@ export const PatientDetails = () => {
           <DetailView person={person} />
         </div>
       </div>
-    </div>
+    </>
   );
 };

@@ -37,8 +37,6 @@ export const RiskTable = ({
   const [newOutcome, setNewOutcome] = useState<string>(availableOutcomes[0] || '');
   const [newTimeframe, setNewTimeframe] = useState<string>((timeframes[0]?.toString()) || '1');
   
-  console.log("timeframes", timeframes);
-
   // Helper function to format timeframe for display
   const formatTimeframe = (timeframe: string | number): string => {
     // Handle 'today' string value
