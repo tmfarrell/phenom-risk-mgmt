@@ -137,8 +137,6 @@ export default function PhenomAPIDocs() {
                   </code>
                 </div>
 
-                
-
                 <div>
                   <h3 className="font-semibold mb-2">Security & Compliance</h3>
                   <ul className="list-disc list-inside text-sm text-muted-foreground space-y-1">
@@ -301,7 +299,7 @@ export default function PhenomAPIDocs() {
                     Create a Batch
                   </h3>
                   <pre className="bg-muted text-muted-foreground p-4 rounded-md overflow-x-auto text-sm">
-{`curl -X POST https://api.om1.com/phenom/v1/batch \\
+{`curl -X POST https://phenom-api-sandbox.iddev.om1.com/v1/batch \\
   -H "Authorization: Bearer <jwt>" \\
   -H "Content-Type: application/json" \\
   -d '{
@@ -324,7 +322,7 @@ export default function PhenomAPIDocs() {
                   </h3>
                   <pre className="bg-muted text-muted-foreground p-4 rounded-md overflow-x-auto text-sm">
 {`# Create upload session
-curl -X POST https://api.om1.com/phenom/v1/batch/{batch_id}/uploads \\
+curl -X POST https://phenom-api-sandbox.iddev.om1.com/v1/batch/{batch_id}/uploads \\
   -H "Authorization: Bearer <jwt>" \\
   -d '{
     "object_type": "patients",
@@ -343,7 +341,7 @@ curl -X POST https://api.om1.com/phenom/v1/batch/{batch_id}/uploads \\
                     Finalize the Batch
                   </h3>
                   <pre className="bg-muted p-4 text-muted-foreground rounded-md overflow-x-auto text-sm">
-{`curl -X POST https://api.om1.com/phenom/v1/batch/{batch_id}/finalize \\
+{`curl -X POST https://phenom-api-sandbox.iddev.om1.com/v1/batch/{batch_id}/finalize \\
   -H "Authorization: Bearer <jwt>"
 
 # Response:
@@ -361,7 +359,7 @@ curl -X POST https://api.om1.com/phenom/v1/batch/{batch_id}/uploads \\
                     Start the Job
                   </h3>
                   <pre className="bg-muted p-4 text-muted-foreground rounded-md overflow-x-auto text-sm">
-{`curl -X POST https://api.om1.com/phenom/v1/batch/{batch_id}/start \\
+{`curl -X POST https://phenom-api-sandbox.iddev.om1.com/v1/batch/{batch_id}/start \\
   -H "Authorization: Bearer <jwt>" \\
   -d '{
     "outcome_ids": [
@@ -383,7 +381,7 @@ curl -X POST https://api.om1.com/phenom/v1/batch/{batch_id}/uploads \\
                     Poll for Job Status
                   </h3>
                   <pre className="bg-muted p-4 text-muted-foreground rounded-md overflow-x-auto text-sm">
-{`curl https://api.om1.com/phenom/v1/jobs/{job_id} \\
+{`curl https://phenom-api-sandbox.iddev.om1.com/v1/jobs/{job_id} \\
   -H "Authorization: Bearer <jwt>"
 
 # Response when complete:
@@ -406,11 +404,11 @@ curl -X POST https://api.om1.com/phenom/v1/batch/{batch_id}/uploads \\
                   </h3>
                   <pre className="bg-muted p-4 text-muted-foreground rounded-md overflow-x-auto text-sm">
 {`# Option 1: Paginated API results
-curl https://api.om1.com/phenom/v1/jobs/{job_id}/results?page_size=1000 \\
+curl https://phenom-api-sandbox.iddev.om1.com/v1/jobs/{job_id}/results?page_size=1000 \\
   -H "Authorization: Bearer <jwt>"
 
 # Option 2: Download full results
-curl https://api.om1.com/phenom/v1/jobs/{job_id}/results/download \\
+curl https://phenom-api-sandbox.iddev.om1.com/v1/jobs/{job_id}/results/download \\
   -H "Authorization: Bearer <jwt>"`}
                   </pre>
                 </div>
@@ -427,7 +425,7 @@ curl https://api.om1.com/phenom/v1/jobs/{job_id}/results/download \\
                   <CardContent>
                   <h4 className="font-semibold mb-2">Request</h4>
                     <pre className="bg-muted p-4 text-muted-foreground rounded-md overflow-x-auto text-sm">
-{`curl -X POST https://api.om1.com/phenom/v1/jobs/from-patient \\
+{`curl -X POST https://phenom-api-sandbox.iddev.om1.com/v1/jobs/from-patient \\
   -H "Authorization: Bearer <jwt>" \\
   -H "Content-Type: application/json" \\
   -d '{
@@ -497,7 +495,7 @@ curl https://api.om1.com/phenom/v1/jobs/{job_id}/results/download \\
                   <CardContent>
                     <h4 className="font-semibold mb-2">Request</h4>
                     <pre className="bg-muted p-4 text-muted-foreground rounded-md overflow-x-auto text-sm">
-{`curl -X POST https://api.om1.com/phenom/v1/jobs/from-patients \\
+{`curl -X POST https://phenom-api-sandbox.iddev.om1.com/v1/jobs/from-patients \\
   -H "Authorization: Bearer <jwt>" \\
   -H "Content-Type: application/json" \\
   -d '{
