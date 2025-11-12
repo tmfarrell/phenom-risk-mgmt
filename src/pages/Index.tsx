@@ -9,9 +9,42 @@ import { calculateAverageRisks } from '@/components/table/utils/riskCalculations
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useLocation, useNavigate } from 'react-router-dom';
+import { Check, ChevronDown } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import {
+  Command,
+  CommandGroup,
+  CommandItem,
+  CommandList,
+} from '@/components/ui/command';
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from '@/components/ui/popover';
+import { cn } from '@/lib/utils';
 
 // Mock providers for testing
 const PROVIDERS = ['Provider A', 'Provider B', 'Provider C'];
+
+// Model type options with colors matching PhenomBuilder badges
+const MODEL_TYPES = [
+  { 
+    value: 'future_risk', 
+    label: 'Future Risk',
+    textColor: 'text-red-700'
+  },
+  { 
+    value: 'screening', 
+    label: 'Screening',
+    textColor: 'text-blue-700'
+  },
+  { 
+    value: 'care_opportunity', 
+    label: 'Care Opportunity',
+    textColor: 'text-green-700'
+  },
+];
 
 interface ProviderList {
   availableList: string[];
@@ -26,6 +59,7 @@ export interface IndexPageState {
   showSelectedOnly: boolean;
   providerList: ProviderList;
   selectedTimeframe: string;
+  selectedModelType: string;
 }
 
 export default function Index() {
@@ -39,6 +73,8 @@ export default function Index() {
   const [selectedRiskColumns, setSelectedRiskColumns] = useState<string[]>([]);
   const [selectedPatients, setSelectedPatients] = useState<Person[]>(savedState?.selectedPatients || []);
   const [showSelectedOnly, setShowSelectedOnly] = useState(savedState?.showSelectedOnly || false);
+  const [selectedModelType, setSelectedModelType] = useState<string>(savedState?.selectedModelType || 'future_risk');
+  const [modelTypeOpen, setModelTypeOpen] = useState(false);
   const [providerList, setProviderList] = useState<ProviderList>(
     savedState?.providerList || {
       availableList: PROVIDERS,
@@ -52,7 +88,7 @@ export default function Index() {
     queryFn: async () => {
       const { data, error } = await supabase
         .from('phenom_models')
-        .select('id, indication_code, model_name, prediction_timeframe_yrs')
+        .select('id, indication_code, model_name, prediction_timeframe_yrs, indication_type')
         .order('model_name');
       
       if (error) {
@@ -60,11 +96,24 @@ export default function Index() {
         throw error;
       }
       
+      // Helper function to determine model type
+      const getModelType = (item: any): string => {
+        if (item.indication_type === 'medication') {
+          return 'care_opportunity';
+        }
+        if (item.prediction_timeframe_yrs !== null && item.prediction_timeframe_yrs !== undefined) {
+          return 'future_risk';
+        }
+        return 'screening';
+      };
+      
       // Create a map of outcomes to their available timeframes and model info
       const outcomeTimeframeMap: Record<string, Array<number | 'today'>> = {};
       const outcomeModelMap: Record<string, Array<{id: string, timeframe: number | 'today'}>> = {};
       // Map indication_code to a display label (model_name)
       const outcomeLabelMap: Record<string, string> = {};
+      // Map indication_code to model type
+      const outcomeModelTypeMap: Record<string, string> = {};
       
       data?.forEach(item => {
         if (!outcomeTimeframeMap[item.indication_code]) {
@@ -74,6 +123,10 @@ export default function Index() {
         // set display label from model_name (prefer first seen)
         if (!outcomeLabelMap[item.indication_code] && item.model_name) {
           outcomeLabelMap[item.indication_code] = item.model_name;
+        }
+        // set model type for this outcome
+        if (!outcomeModelTypeMap[item.indication_code]) {
+          outcomeModelTypeMap[item.indication_code] = getModelType(item);
         }
         const tf = item.prediction_timeframe_yrs === null ? 'today' : item.prediction_timeframe_yrs;
         if (!outcomeTimeframeMap[item.indication_code].includes(tf)) {
@@ -85,28 +138,29 @@ export default function Index() {
         });
       });
       
-      // Extract unique timeframes, including 'today' if any nulls exist
-      const hasToday = (data || []).some(item => item.prediction_timeframe_yrs === null);
+      // Extract unique numeric timeframes only (exclude 'today' as it's now handled by model type)
       const numericTimeframes = [...new Set((data || [])
         .map(item => item.prediction_timeframe_yrs)
         .filter((v): v is number => typeof v === 'number'))].sort((a, b) => a - b);
-      const uniqueTimeframes: Array<number | 'today'> = hasToday ? ['today', ...numericTimeframes] : numericTimeframes;
+      const uniqueTimeframes: Array<number> = numericTimeframes;
       
       console.log('Outcome to timeframe mapping:', outcomeTimeframeMap);
+      console.log('Outcome to model type mapping:', outcomeModelTypeMap);
       console.log('Available timeframes from phenom_models:', uniqueTimeframes);
       
       return {
         outcomeTimeframeMap,
         outcomeModelMap,
         outcomeLabelMap,
+        outcomeModelTypeMap,
         timeframes: uniqueTimeframes,
         rawData: data
       };
     }
   });
 
-  // Use timeframes from phenom_models
-  const timePeriods = (phenomModelsData?.timeframes as Array<number | 'today'>) || [1, 2];
+  // Use timeframes from phenom_models (only numeric values, 'today' is now handled by model type)
+  const timePeriods = (phenomModelsData?.timeframes as Array<number>) || [1, 2];
 
   // Helper function to convert timeframe string to decimal years for database comparison
   const parseTimeframeToYears = (timeframe: string): number => {
@@ -125,23 +179,32 @@ export default function Index() {
   useEffect(() => {
     if (timePeriods && timePeriods.length > 0) {
       // Check if the current selection exists in the new options
-      const exists = selectedTimeframe === 'today'
-        ? (timePeriods as Array<number | 'today'>).includes('today')
-        : (timePeriods as Array<number | 'today'>).includes(parseInt(selectedTimeframe));
+      const currentValue = parseFloat(selectedTimeframe);
+      const exists = !isNaN(currentValue) && timePeriods.includes(currentValue);
       if (!exists) {
         // If not, select the first available option
-        const first = timePeriods[0];
-        setSelectedTimeframe(first === 'today' ? 'today' : (first as number).toString());
+        setSelectedTimeframe(timePeriods[0].toString());
       }
     }
   }, [timePeriods]);
 
-  // Get available outcomes with model info for the selected timeframe
+  // Get available outcomes with model info for the selected timeframe and model type
   const availableOutcomesForTimeframe = phenomModelsData?.outcomeTimeframeMap 
     ? Object.entries(phenomModelsData.outcomeTimeframeMap)
-        .filter(([_, timeframes]) => selectedTimeframe === 'today'
-          ? (timeframes as Array<number | 'today'>).includes('today')
-          : (timeframes as Array<number | 'today'>).includes(parseTimeframeToYears(selectedTimeframe)))
+        .filter(([outcome, timeframes]) => {
+          // Filter by model type
+          const modelType = phenomModelsData.outcomeModelTypeMap?.[outcome];
+          const modelTypeMatch = modelType === selectedModelType;
+          
+          // For Future Risk models, also filter by timeframe
+          if (selectedModelType === 'future_risk') {
+            const timeframeMatch = (timeframes as Array<number | 'today'>).includes(parseTimeframeToYears(selectedTimeframe));
+            return modelTypeMatch && timeframeMatch;
+          }
+          
+          // For Screening and Care Opportunity, show all outcomes of that type
+          return modelTypeMatch;
+        })
         .map(([outcome]) => outcome)
         .sort()
     : [];
@@ -150,15 +213,22 @@ export default function Index() {
   const availableModelsForTimeframe = phenomModelsData?.outcomeModelMap
     ? Object.entries(phenomModelsData.outcomeModelMap)
         .reduce((acc, [outcome, models]) => {
-          const modelsForTimeframe = models.filter(m =>
-            selectedTimeframe === 'today'
-              ? m.timeframe === 'today'
-              : m.timeframe === parseTimeframeToYears(selectedTimeframe)
-          );
-          if (modelsForTimeframe.length > 0) {
+          // Filter by model type
+          const modelType = phenomModelsData.outcomeModelTypeMap?.[outcome];
+          if (modelType !== selectedModelType) {
+            return acc;
+          }
+          
+          // For Future Risk models, filter by timeframe
+          let relevantModels = models;
+          if (selectedModelType === 'future_risk') {
+            relevantModels = models.filter(m => m.timeframe === parseTimeframeToYears(selectedTimeframe));
+          }
+          
+          if (relevantModels.length > 0) {
             acc.push({
               outcome,
-              modelId: modelsForTimeframe[0].id // Use the first model ID for this outcome/timeframe combination
+              modelId: relevantModels[0].id // Use the first model ID for this outcome/timeframe combination
             });
           }
           return acc;
@@ -166,8 +236,9 @@ export default function Index() {
         .sort((a, b) => a.outcome.localeCompare(b.outcome))
     : [];
 
-  // Track the previous timeframe to detect changes
+  // Track the previous timeframe and model type to detect changes
   const prevTimeframeRef = useRef<string>(selectedTimeframe);
+  const prevModelTypeRef = useRef<string>(selectedModelType);
   const hasInitializedRef = useRef<boolean>(false);
 
   // Set initial risk columns when outcomes are loaded (only once)
@@ -179,17 +250,18 @@ export default function Index() {
     }
   }, [availableOutcomesForTimeframe]);
 
-  // Whenever timeframe changes, select the first 4 outcomes for that timeframe
+  // Whenever timeframe or model type changes, select the first 4 outcomes for that combination
   useEffect(() => {
-    if (prevTimeframeRef.current !== selectedTimeframe) {
+    if (prevTimeframeRef.current !== selectedTimeframe || prevModelTypeRef.current !== selectedModelType) {
       if (availableOutcomesForTimeframe.length > 0) {
         setSelectedRiskColumns(availableOutcomesForTimeframe.slice(0, 4));
       } else {
         setSelectedRiskColumns([]);
       }
       prevTimeframeRef.current = selectedTimeframe;
+      prevModelTypeRef.current = selectedModelType;
     }
-  }, [selectedTimeframe, availableOutcomesForTimeframe]);
+  }, [selectedTimeframe, selectedModelType, availableOutcomesForTimeframe]);
 
   // Calculate average risks from the full dataset
   const averageRisks = patientData ? calculateAverageRisks(patientData) : {};
@@ -200,9 +272,16 @@ export default function Index() {
     const mrnMatch = patient.mrn?.toString().includes(searchQuery);
     const searchMatches = nameMatch || mrnMatch;
 
-    const timeframeMatches = selectedTimeframe === 'today'
-      ? (patient.prediction_timeframe_yrs === null || patient.prediction_timeframe_yrs === undefined)
-      : patient.prediction_timeframe_yrs === parseTimeframeToYears(selectedTimeframe);
+    // Timeframe filtering depends on model type
+    let timeframeMatches = true;
+    if (selectedModelType === 'future_risk') {
+      // For Future Risk models, filter by selected timeframe
+      timeframeMatches = patient.prediction_timeframe_yrs === parseTimeframeToYears(selectedTimeframe);
+    } else {
+      // For Screening and Care Opportunity models, show only patients with null/undefined timeframe (today)
+      timeframeMatches = patient.prediction_timeframe_yrs === null || patient.prediction_timeframe_yrs === undefined;
+    }
+    
     const riskTypeMatches = patient.risk_type === selectedRiskType;
     const selectedFilter = showSelectedOnly ? selectedPatients.some(p => p.patient_id === patient.patient_id) : true;
     
@@ -222,6 +301,7 @@ export default function Index() {
       showSelectedOnly,
       providerList,
       selectedTimeframe,
+      selectedModelType,
     };
     navigate(`/patient/${patientId}`, { state });
   };
@@ -245,10 +325,55 @@ export default function Index() {
   return (
     <>
       <Header />
-      <div className="flex items-start">
-        <div className="px-6 pt-6">
+      <div className="flex items-start justify-between px-6 pt-6">
+        <div>
           <h1 className="text-2xl font-bold text-blue-900 text-left">Patient Risk Panel</h1>
           {/* <p className="text-gray-600 text-left">Manage and analyze patient risks</p> */}
+        </div>
+        <div className="flex items-center gap-2">
+          <Popover open={modelTypeOpen} onOpenChange={setModelTypeOpen}>
+            <PopoverTrigger asChild>
+              <Button
+                variant="outline"
+                role="combobox"
+                aria-expanded={modelTypeOpen}
+                className="w-48 justify-between"
+              >
+                <span className={cn(MODEL_TYPES.find(mt => mt.value === selectedModelType)?.textColor)}>
+                  {MODEL_TYPES.find(mt => mt.value === selectedModelType)?.label || 'Future Risk'}
+                </span>
+                <ChevronDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent className="w-48 p-0">
+              <Command>
+                <CommandList>
+                  <CommandGroup>
+                    {MODEL_TYPES.map((modelType) => (
+                      <CommandItem
+                        key={modelType.value}
+                        value={modelType.value}
+                        onSelect={() => {
+                          setSelectedModelType(modelType.value);
+                          setModelTypeOpen(false);
+                        }}
+                      >
+                        <Check
+                          className={cn(
+                            "mr-2 h-4 w-4",
+                            selectedModelType === modelType.value ? "opacity-100" : "opacity-0"
+                          )}
+                        />
+                        <span className={cn(modelType.textColor, "font-medium")}>
+                          {modelType.label}
+                        </span>
+                      </CommandItem>
+                    ))}
+                  </CommandGroup>
+                </CommandList>
+              </Command>
+            </PopoverContent>
+          </Popover>
         </div>
       </div>
       <div className="p-6">
@@ -262,7 +387,7 @@ export default function Index() {
                 onTimeframeChange={setSelectedTimeframe}
                 selectedRiskColumns={selectedRiskColumns}
                 onRiskColumnsChange={setSelectedRiskColumns}
-                timeframes={isModelsLoading ? [1, 2] : (timePeriods as Array<number | 'today'>)}
+                timeframes={isModelsLoading ? [1, 2] : (timePeriods as Array<number>)}
                 selectedRiskType={selectedRiskType}
                 onRiskTypeChange={setSelectedRiskType}
                 providerList={providerList}
@@ -272,6 +397,7 @@ export default function Index() {
                 availableOutcomes={availableOutcomesForTimeframe}
                 availableModels={availableModelsForTimeframe}
                 outcomeLabels={phenomModelsData?.outcomeLabelMap}
+                hideTimePeriod={selectedModelType !== 'future_risk'}
               />
               <div className='flex justify-end mb-4'>
                   <p className='text-sm text-gray-600'>

@@ -956,8 +956,8 @@ export default function PhenomBuilder() {
                         <div className="bg-gray-50 p-3 rounded-lg">
                           <p className="text-sm">
                             <span className="font-medium">
-                              {selectedModel.history_no_history ? "No history of" : "History of"}:
-                            </span> {selectedModel.history_type}: {selectedModel.history_code}
+                              {selectedModel.history_no_history ? "No history of " : "History of "}
+                             {selectedModel.history_type}:</span> {selectedModel.history_code}
                           </p>
                         </div>
                       </div>

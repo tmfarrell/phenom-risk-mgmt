@@ -51,6 +51,7 @@ interface TableControlsProps {
   availableOutcomes?: string[]; // Dynamic outcomes from phenom_models
   availableModels?: Array<{outcome: string, modelId: string}>; // Model info for each outcome
   outcomeLabels?: Record<string, string>; // Map from indication_code -> model_name
+  hideTimePeriod?: boolean; // Hide the Time Period dropdown
 }
 
 export const TableControls = ({
@@ -70,6 +71,7 @@ export const TableControls = ({
   availableOutcomes = [],
   availableModels = [],
   outcomeLabels,
+  hideTimePeriod = false,
 }: TableControlsProps) => {
   const [open, setOpen] = useState(false);
   const [providerOpen, setProviderOpen] = useState(false);
@@ -152,81 +154,83 @@ export const TableControls = ({
         </Popover>
       </div>
 
-      <div className="flex flex-col gap-2">
-        <Label htmlFor="risk-timeframe" className="text-center text-muted-foreground mx-auto">Time Period</Label>
-        <Popover open={timeframeOpen} onOpenChange={setTimeframeOpen}>
-          <PopoverTrigger asChild>
-            <Button
-              variant="outline"
-              role="combobox"
-              aria-expanded={timeframeOpen}
-              className="w-28 justify-between"
-              id="risk-timeframe"
-            >
-              {selectedTimeframe === 'today'
-                ? 'Today'
-                : (() => {
-                    const timeframe = parseFloat(selectedTimeframe);
-                    const displayTimeframe = useMonthsForTimeframe ? timeframe * 12 : timeframe;
-                    const timeUnit = useMonthsForTimeframe ? "month" : "year";
-                    return `${displayTimeframe} ${timeUnit}${displayTimeframe > 1 ? 's' : ''}`;
-                  })()}
-              <ChevronDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-            </Button>
-          </PopoverTrigger>
-          <PopoverContent className="w-28 p-0">
-            <Command>
-              <CommandList>
-                <CommandGroup>
-                  {timeframes.map((timeframe) => {
-                    if (timeframe === 'today') {
+      {!hideTimePeriod && (
+        <div className="flex flex-col gap-2">
+          <Label htmlFor="risk-timeframe" className="text-center text-muted-foreground mx-auto">Time Period</Label>
+          <Popover open={timeframeOpen} onOpenChange={setTimeframeOpen}>
+            <PopoverTrigger asChild>
+              <Button
+                variant="outline"
+                role="combobox"
+                aria-expanded={timeframeOpen}
+                className="w-28 justify-between"
+                id="risk-timeframe"
+              >
+                {selectedTimeframe === 'today'
+                  ? 'Today'
+                  : (() => {
+                      const timeframe = parseFloat(selectedTimeframe);
+                      const displayTimeframe = useMonthsForTimeframe ? timeframe * 12 : timeframe;
+                      const timeUnit = useMonthsForTimeframe ? "month" : "year";
+                      return `${displayTimeframe} ${timeUnit}${displayTimeframe > 1 ? 's' : ''}`;
+                    })()}
+                <ChevronDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent className="w-28 p-0">
+              <Command>
+                <CommandList>
+                  <CommandGroup>
+                    {timeframes.map((timeframe) => {
+                      if (timeframe === 'today') {
+                        return (
+                          <CommandItem
+                            key={'today'}
+                            value={'today'}
+                            onSelect={() => {
+                              onTimeframeChange('today');
+                              setTimeframeOpen(false);
+                            }}
+                          >
+                            <Check
+                              className={cn(
+                                "mr-2 h-4 w-4",
+                                selectedTimeframe === 'today' ? "opacity-100" : "opacity-0"
+                              )}
+                            />
+                            Today
+                          </CommandItem>
+                        );
+                      }
+                      const numeric = timeframe as number;
+                      const displayTimeframe = useMonthsForTimeframe ? numeric * 12 : numeric;
+                      const timeUnit = useMonthsForTimeframe ? "month" : "year";
                       return (
                         <CommandItem
-                          key={'today'}
-                          value={'today'}
+                          key={numeric}
+                          value={numeric.toString()}
                           onSelect={() => {
-                            onTimeframeChange('today');
+                            onTimeframeChange(numeric.toString());
                             setTimeframeOpen(false);
                           }}
                         >
                           <Check
                             className={cn(
                               "mr-2 h-4 w-4",
-                              selectedTimeframe === 'today' ? "opacity-100" : "opacity-0"
+                              selectedTimeframe === numeric.toString() ? "opacity-100" : "opacity-0"
                             )}
                           />
-                          Today
+                          {displayTimeframe} {timeUnit}{displayTimeframe > 1 ? 's' : ''}
                         </CommandItem>
                       );
-                    }
-                    const numeric = timeframe as number;
-                    const displayTimeframe = useMonthsForTimeframe ? numeric * 12 : numeric;
-                    const timeUnit = useMonthsForTimeframe ? "month" : "year";
-                    return (
-                      <CommandItem
-                        key={numeric}
-                        value={numeric.toString()}
-                        onSelect={() => {
-                          onTimeframeChange(numeric.toString());
-                          setTimeframeOpen(false);
-                        }}
-                      >
-                        <Check
-                          className={cn(
-                            "mr-2 h-4 w-4",
-                            selectedTimeframe === numeric.toString() ? "opacity-100" : "opacity-0"
-                          )}
-                        />
-                        {displayTimeframe} {timeUnit}{displayTimeframe > 1 ? 's' : ''}
-                      </CommandItem>
-                    );
-                  })}
-                </CommandGroup>
-              </CommandList>
-            </Command>
-          </PopoverContent>
-        </Popover>
-      </div>
+                    })}
+                  </CommandGroup>
+                </CommandList>
+              </Command>
+            </PopoverContent>
+          </Popover>
+        </div>
+      )}
 
       <div className="flex flex-col gap-2">
         <Label htmlFor="risk-factors" className="text-center text-muted-foreground mx-auto">Outcomes</Label>
