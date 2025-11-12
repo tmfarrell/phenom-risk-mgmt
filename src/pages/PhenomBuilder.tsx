@@ -137,6 +137,74 @@ const formatPredictionTimeframe = (years: number | null) => {
   return `${years} yr${years > 1 ? 's' : ''}`
 }
 
+// Helper function to determine model type badge
+const getModelTypeBadge = (model: PreBuiltModel) => {
+  // Care Opportunity: when indication type is medication
+  if (model.indication_type === 'medication') {
+    return { label: 'Care Opportunity', variant: 'default' as const, className: 'bg-green-100 text-green-900 border-green-200 hover:bg-green-100 hover:text-green-900 cursor-default pointer-events-none' }
+  }
+  
+  // Risk: when model has a prediction time frame
+  if (model.prediction_timeframe_yrs !== null && model.prediction_timeframe_yrs !== undefined) {
+    return { label: 'Future Risk', variant: 'default' as const, className: 'bg-red-100 text-red-900 border-red-200 hover:bg-red-100 hover:text-red-900 cursor-default pointer-events-none' }
+  }
+  
+  // Screening: Otherwise
+  return { label: 'Screening', variant: 'default' as const, className: 'bg-blue-100 text-blue-900 border-blue-200 hover:bg-blue-100 hover:text-blue-900 cursor-default pointer-events-none' }
+}
+
+// Helper function to generate natural language description of the model
+const generateModelDescription = (model: PreBuiltModel) => {
+  const parts: string[] = []
+  
+  // Start with the model type
+  const isMedication = model.indication_type === 'medication'
+  const isDiagnosis = model.indication_type === 'diagnosis'
+  
+  // Build the main prediction statement
+  if (isMedication) {
+    parts.push(`This model identifies patients who are likely to receive treatment with ${model.indication_code} (top ${model.risk_threshold_pct}% similarity)`)
+  } else if (isDiagnosis) {
+    if (model.prediction_timeframe_yrs) {
+      parts.push(`This model identifies patients at top ${model.risk_threshold_pct}% risk of ${model.indication_code}${model.indication_new_onset ? ' (new onset)' : ''} within ${formatPredictionTimeframe(model.prediction_timeframe_yrs)}`)
+    } else {
+      parts.push(`This model identifies patients at top ${model.risk_threshold_pct}% risk of ${model.indication_code}${model.indication_new_onset ? ' (new onset)' : ''}`)
+    }
+  } else {
+    parts.push(`This model analyzes ${model.indication_type}: ${model.indication_code}`)
+  }
+  
+  // Add patient characteristics
+  const characteristics: string[] = []
+  
+  if (model.min_patient_age && model.max_patient_age) {
+    characteristics.push(`ages ${model.min_patient_age}-${model.max_patient_age}`)
+  } else if (model.min_patient_age) {
+    characteristics.push(`ages ${model.min_patient_age}+`)
+  } else if (model.max_patient_age) {
+    characteristics.push(`ages up to ${model.max_patient_age}`)
+  }
+  
+  if (model.patient_sex) {
+    characteristics.push(`${model.patient_sex.toLowerCase()} patients`)
+  }
+  
+  if (characteristics.length > 0) {
+    parts.push(`among ${characteristics.join(', ')}`)
+  }
+  
+  // Add history criteria
+  if (model.history_type && model.history_code) {
+    if (model.history_no_history) {
+      parts.push(`who have no history of ${model.history_code}`)
+    } else {
+      parts.push(`with a history of ${model.history_code}`)
+    }
+  }
+  
+  return parts.join(' ') + '.'
+}
+
 export default function PhenomBuilder() {
   const { session } = useContext(AuthContext)
   const user = session?.user
@@ -406,7 +474,7 @@ export default function PhenomBuilder() {
               }}
             >
               <Plus className="h-4 w-4 mr-2" />
-              Create Outcome
+              Create New Outcome
             </Button>
           </div>
 
@@ -450,7 +518,9 @@ export default function PhenomBuilder() {
                   )
                 }
                 
-                return filteredModels.map((model) => (
+                return filteredModels.map((model) => {
+                const modelTypeBadge = getModelTypeBadge(model)
+                return (
                 <Card 
                   key={model.id}
                   className={`cursor-pointer transition-all hover:shadow-md ${
@@ -460,12 +530,20 @@ export default function PhenomBuilder() {
                 >
                   <CardContent className="pt-6 pb-6 px-4">
                     <div className="space-y-2">
-                      <h3 className="font-medium text-gray-900 text-left">
-                        {model.model_name}
-                      </h3>
-                      <div className="flex flex-wrap gap-1">
+                      <div className="flex items-start justify-between gap-2">
+                        <h3 className="font-medium text-gray-900 text-left flex-1">
+                          {model.model_name}
+                        </h3>
+                        <Badge 
+                          variant={modelTypeBadge.variant} 
+                          className={`text-xs ${modelTypeBadge.className} flex-shrink-0`}
+                        >
+                          {modelTypeBadge.label}
+                        </Badge>
+                      </div>
+                      <div className="flex flex-wrap gap-1 pt-4">
                         {model.indication_new_onset && (
-                          <Badge variant="outline" className="text-xs">
+                          <Badge variant="secondary" className="text-xs">
                             New Onset
                           </Badge>
                         )}
@@ -485,7 +563,7 @@ export default function PhenomBuilder() {
                     </div>
                   </CardContent>
                 </Card>
-              ))
+              )})
               })()
             )}
           </div>
@@ -519,14 +597,14 @@ export default function PhenomBuilder() {
 
               <Card>
                 <CardHeader>
-                  <CardTitle className="text-left">Indication</CardTitle>
+                  <CardTitle className="text-left">Prediction Target</CardTitle>
                   <CardDescription className="text-left">
                     Define the target diagnosis or treatment
                   </CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-4">
                   <div className="space-y-3 text-left">
-                    <Label>Indication*</Label>
+                    <Label>Target*</Label>
                     <div className="flex gap-2 items-end">
                       <div className="flex-1">
                         <Select
@@ -562,7 +640,7 @@ export default function PhenomBuilder() {
                     </div>
                     
                     <div className="space-y-2">
-                      <Label htmlFor="prediction-timeframe" className="text-left">Prediction timeframe</Label>
+                      <Label htmlFor="prediction-timeframe" className="text-left">Timeframe</Label>
                       <Select
                         value={indication.predictionTimeframe || "no-timeframe"}
                         onValueChange={(value) => updateIndication("predictionTimeframe", value === "no-timeframe" ? "" : value)}
@@ -802,19 +880,33 @@ export default function PhenomBuilder() {
           <div className="relative">
             {/* Sticky Header */}
             <div className="sticky top-0 z-10 bg-white border-b border-gray-200 p-6 shadow-sm text-left">
-              <h1 className="text-3xl font-bold text-gray-900">{selectedModel.model_name}</h1>
-              <p className="text-gray-600 mt-1">Outcome Details & Performance</p>
+              <div className="flex items-start justify-between gap-4">
+                <h1 className="text-3xl font-bold text-gray-900 flex-1">{selectedModel.model_name}</h1>
+                <Badge 
+                  variant={getModelTypeBadge(selectedModel).variant} 
+                  className={`text-sm ${getModelTypeBadge(selectedModel).className} flex-shrink-0`}
+                >
+                  {getModelTypeBadge(selectedModel).label}
+                </Badge>
+              </div>
             </div>
             
             {/* Scrollable Content */}
             <div className="p-6 space-y-6">
 
-              {/* Model Configuration */}
+              {/* Model Description */}
               <Card>
-                <CardContent className="space-y-4 mt-4">
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <CardHeader>
+                  <CardTitle className="text-lg text-left">Model Description</CardTitle>
+                  <p className="text-gray-700 leading-relaxed text-left mb-8">
+                      {generateModelDescription(selectedModel)}
+                    </p>
+                  </CardHeader>
+                <CardContent className="text-left mt-0">
+                <Separator />
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-8">
                     <div className="text-left">
-                      <h4 className="font-medium text-gray-900 mb-2">Indication Criteria</h4>
+                      <h4 className="font-medium text-gray-900 mb-2">Prediction Target</h4>
                       <div className="bg-gray-50 p-3 rounded-lg">
                         <p className="text-sm">
                           <span className="font-medium">Type:</span> {selectedModel.indication_type}
@@ -823,12 +915,12 @@ export default function PhenomBuilder() {
                           <span className="font-medium">Code:</span> {selectedModel.indication_code}
                         </p>
                         {selectedModel.prediction_timeframe_yrs && (
-                          <p className="text-sm">
-                            <span className="font-medium">Prediction timeframe:</span> {formatPredictionTimeframe(selectedModel.prediction_timeframe_yrs)}
-                          </p>
+                          <Badge variant="outline" className="mt-2 bg-white border-gray-400">
+                            {formatPredictionTimeframe(selectedModel.prediction_timeframe_yrs)}
+                          </Badge>
                         )}
                         {selectedModel.indication_new_onset && (
-                          <Badge variant="outline" className="mt-2 bg-blue-100 text-blue-700">New Onset</Badge>
+                          <Badge variant="outline" className="mt-2 bg-white border-gray-400 ml-2">New Onset</Badge>
                         )}
                       </div>
                     </div>
@@ -873,10 +965,10 @@ export default function PhenomBuilder() {
                   </div>
                 </CardContent>
               </Card>
-
-              {(selectedModel?.patients_total ?? 0) > 0 && (selectedModel.patients_tp > 0) && (
+                    
+              {false && (
                 <>
-                  {/* Patient Identification Results */}
+                   {/* Patient Identification Results */}
                   <Card>
                     <CardContent className="p-0">
                       <div className="overflow-x-auto rounded-b-xl">
@@ -1003,7 +1095,7 @@ export default function PhenomBuilder() {
                             </div>
                           )}
                           {/* Cohort Size */}
-                          {selectedModel.patients_total > 0 && (
+                          {false && (
                           <div className="text-center p-3 rounded-lg">
                             <p className="text-2xl font-bold text-gray-600">{(selectedModel?.patients_total ? selectedModel.patients_total - (selectedModel.patients_phenom || 0) : 0).toLocaleString()}</p>
                             <p className="text-sm text-gray-800">Baseline Cohort</p>
