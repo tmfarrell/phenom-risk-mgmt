@@ -167,7 +167,6 @@ export default function PhenomAPIDocs() {
                     <div>
                       <p className="text-sm font-semibold mb-2">Best for:</p>
                       <ul className="list-disc list-inside text-sm text-muted-foreground space-y-1">
-                        <li>Processing thousands to millions of patients</li>
                         <li>Periodic risk assessments (weekly, monthly, quarterly)</li>
                         <li>Population health management</li>
                         <li>Research and analytics workloads</li>
@@ -233,7 +232,6 @@ export default function PhenomAPIDocs() {
                       <p className="text-sm font-semibold mb-2">Best for:</p>
                       <ul className="list-disc list-inside text-sm text-muted-foreground space-y-1">
                         <li>Point-of-care clinical decision support</li>
-                        <li>Individual patient risk assessments</li>
                         <li>Real-time care coordination</li>
                         <li>Immediate intervention decisions</li>
                         <li>Interactive patient care applications</li>
