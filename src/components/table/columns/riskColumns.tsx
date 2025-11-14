@@ -69,11 +69,6 @@ export const getRiskColumns = (
               </span>
             )}
           </Button>
-          {averageRisks[column] !== undefined && averageRisks[column] !== null && averageRisks[column] !== 'N/A' && (
-            <div className="text-xs text-blue-400/70 bg-white px-2 py-0.5 rounded mt-2 shadow-sm">
-              Avg: {averageRisks[column]}
-            </div>
-          )}
         </div>
       );
     },

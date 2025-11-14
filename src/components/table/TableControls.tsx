@@ -1,5 +1,6 @@
 import React from 'react';
 import { Search, Check, HelpCircle, ChevronDown, ExternalLink } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 import { Input } from '../ui/input';
 import {
   Command,
@@ -73,6 +74,7 @@ export const TableControls = ({
   outcomeLabels,
   hideTimePeriod = false,
 }: TableControlsProps) => {
+  const navigate = useNavigate();
   const [open, setOpen] = useState(false);
   const [providerOpen, setProviderOpen] = useState(false);
   const [riskTypeOpen, setRiskTypeOpen] = useState(false);
@@ -292,7 +294,7 @@ export const TableControls = ({
                             onClick={(e) => {
                               e.stopPropagation();
                               e.preventDefault();
-                              window.open(`/phenom-builder/${modelInfo.modelId}`, '_blank');
+                              navigate(`/phenom-builder/${modelInfo.modelId}`);
                             }}
                             className="ml-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200"
                             title="View model details"
