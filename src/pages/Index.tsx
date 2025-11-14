@@ -331,49 +331,52 @@ export default function Index() {
           {/* <p className="text-gray-600 text-left">Manage and analyze patient risks</p> */}
         </div>
         <div className="flex items-center gap-2">
-          <Popover open={modelTypeOpen} onOpenChange={setModelTypeOpen}>
-            <PopoverTrigger asChild>
-              <Button
-                variant="outline"
-                role="combobox"
-                aria-expanded={modelTypeOpen}
-                className="w-48 justify-between"
-              >
-                <span className={cn(MODEL_TYPES.find(mt => mt.value === selectedModelType)?.textColor)}>
-                  {MODEL_TYPES.find(mt => mt.value === selectedModelType)?.label || 'Future Risk'}
-                </span>
-                <ChevronDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-              </Button>
-            </PopoverTrigger>
-            <PopoverContent className="w-48 p-0">
-              <Command>
-                <CommandList>
-                  <CommandGroup>
-                    {MODEL_TYPES.map((modelType) => (
-                      <CommandItem
-                        key={modelType.value}
-                        value={modelType.value}
-                        onSelect={() => {
-                          setSelectedModelType(modelType.value);
-                          setModelTypeOpen(false);
-                        }}
-                      >
-                        <Check
-                          className={cn(
-                            "mr-2 h-4 w-4",
-                            selectedModelType === modelType.value ? "opacity-100" : "opacity-0"
-                          )}
-                        />
-                        <span className={cn(modelType.textColor, "font-medium")}>
-                          {modelType.label}
-                        </span>
-                      </CommandItem>
-                    ))}
-                  </CommandGroup>
-                </CommandList>
-              </Command>
-            </PopoverContent>
-          </Popover>
+          <div className="flex flex-col gap-1">
+            <label className="text-sm font-medium text-gray-700">Model Type</label>
+            <Popover open={modelTypeOpen} onOpenChange={setModelTypeOpen}>
+              <PopoverTrigger asChild>
+                <Button
+                  variant="outline"
+                  role="combobox"
+                  aria-expanded={modelTypeOpen}
+                  className="w-48 justify-between"
+                >
+                  <span className={cn(MODEL_TYPES.find(mt => mt.value === selectedModelType)?.textColor)}>
+                    {MODEL_TYPES.find(mt => mt.value === selectedModelType)?.label || 'Future Risk'}
+                  </span>
+                  <ChevronDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-48 p-0">
+                <Command>
+                  <CommandList>
+                    <CommandGroup>
+                      {MODEL_TYPES.map((modelType) => (
+                        <CommandItem
+                          key={modelType.value}
+                          value={modelType.value}
+                          onSelect={() => {
+                            setSelectedModelType(modelType.value);
+                            setModelTypeOpen(false);
+                          }}
+                        >
+                          <Check
+                            className={cn(
+                              "mr-2 h-4 w-4",
+                              selectedModelType === modelType.value ? "opacity-100" : "opacity-0"
+                            )}
+                          />
+                          <span className={cn(modelType.textColor, "font-medium")}>
+                            {modelType.label}
+                          </span>
+                        </CommandItem>
+                      ))}
+                    </CommandGroup>
+                  </CommandList>
+                </Command>
+              </PopoverContent>
+            </Popover>
+          </div>
         </div>
       </div>
       <div className="p-6">
