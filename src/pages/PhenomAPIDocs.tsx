@@ -19,6 +19,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
+import { ApiPlayground } from '@/components/ApiPlayground';
 
 interface ApiKey {
   id: string;
@@ -35,6 +36,7 @@ export default function PhenomAPIDocs() {
   const [newKeyName, setNewKeyName] = useState('');
   const [showCreateForm, setShowCreateForm] = useState(false);
   const [keyToDelete, setKeyToDelete] = useState<string | null>(null);
+  const [showPlayground, setShowPlayground] = useState(false);
 
   const generateApiKey = () => {
     if (!newKeyName.trim()) {
@@ -92,13 +94,42 @@ export default function PhenomAPIDocs() {
     return `${key.substring(0, 12)}${'•'.repeat(20)}${key.substring(key.length - 4)}`;
   };
 
+  // If showing playground, render separate view
+  if (showPlayground) {
+    return (
+      <div className="min-h-screen bg-gray-50">
+        <Header />
+        <div className="flex items-start justify-between px-6 pt-6">
+          <h1 className="text-2xl font-bold text-blue-900 text-left">PhenOM Inference API</h1>
+          <Button 
+            variant="outline" 
+            onClick={() => setShowPlayground(false)}
+            className="gap-2"
+          >
+            ← Back to Docs
+          </Button>
+        </div>
+        <div className="p-6">
+          <div className="max-w-[1250px] mx-auto">
+            <ApiPlayground />
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-gray-50">
       <Header />
-      <div className="flex items-start">
-        <div className="px-6 pt-6">
-          <h1 className="text-2xl font-bold text-blue-900 text-left">PhenOM Inference API</h1>
-        </div>
+      <div className="flex items-start justify-between px-6 pt-6">
+        <h1 className="text-2xl font-bold text-blue-900 text-left">PhenOM Inference API</h1>
+        <Button 
+          onClick={() => setShowPlayground(true)}
+          className="gap-2 bg-blue-600 hover:bg-blue-700"
+        >
+          <PlayCircle className="h-4 w-4" />
+          Try It Now
+        </Button>
       </div>
       <div className="p-6">
         <div className="max-w-[1250px] mx-auto">
