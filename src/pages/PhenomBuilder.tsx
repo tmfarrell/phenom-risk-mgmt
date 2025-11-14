@@ -163,12 +163,20 @@ const generateModelDescription = (model: PreBuiltModel) => {
   
   // Build the main prediction statement
   if (isMedication) {
-    parts.push(`This model identifies patients that are similar to those treated with ${model.indication_code} (top ${model.risk_threshold_pct}% similarity)`)
+    if (model.risk_threshold_pct) {
+      parts.push(`This model identifies patients that are similar to those treated with ${model.indication_code} (top ${model.risk_threshold_pct}% similarity)`)
+    } else {
+      parts.push(`This model identifies patients that are similar to those treated with ${model.indication_code}`)
+    }
   } else if (isDiagnosis) {
     if (model.prediction_timeframe_yrs) {
       parts.push(`This model predicts risk of ${model.indication_code}${model.indication_new_onset ? ' (new onset)' : ''} within ${formatPredictionTimeframe(model.prediction_timeframe_yrs)}`)
     } else {
-      parts.push(`This model identifies patients at top ${model.risk_threshold_pct}% risk of ${model.indication_code}${model.indication_new_onset ? ' (new onset)' : ''}`)
+      if (model.risk_threshold_pct) {
+        parts.push(`This model identifies patients at top ${model.risk_threshold_pct}% risk of ${model.indication_code}${model.indication_new_onset ? ' (new onset)' : ''}`)
+      } else {
+        parts.push(`This model identifies patients at risk of ${model.indication_code}${model.indication_new_onset ? ' (new onset)' : ''}`)
+      }
     }
   } else {
     parts.push(`This model analyzes ${model.indication_type}: ${model.indication_code}`)
