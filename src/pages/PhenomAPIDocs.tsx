@@ -449,27 +449,47 @@ curl https://phenom-api-sandbox.iddev.om1.com/v1/job/{job_id}/results/download \
   -H "Authorization: Bearer <jwt>" \\
   -H "Content-Type: application/json" \\
   -d '{
-    "outcome_ids": ["heart_failure_1y"],
-    "patient_history": {
-      "patient": {
-        "patient_id": "abc123",
-        "birth_date": "1964-05-18",
-        "sex": "F",
-        "zip3": "021"
-      },
-      "diagnosis": [{
-        "code": "I10",
-        "code_system": "ICD10",
-        "start_date": "2020-01-01"
-      }],
-      "lab_results": [{
-        "lab_code": "718-7",
-        "result_value": 12.8,
-        "result_units": "g/dL",
-        "result_date": "2025-07-03"
-      }]
-    }
-  }'
+        "outcome_ids": [
+            "v0p3_65plus_fixed_anchor_2023_JanToDec_04012025_any_time_hospitalization_future_1month"
+        ],
+        "patient_history": {
+            "patient": {
+            "patient_id": "abc123",
+            "birth_date": "1964-05-18",
+            "sex": "F",
+            "zip3": "021"
+            },
+            "lab_results": [
+            {
+                "lab_date": "2025-07-03",
+                "loinc": "718-7",
+                "value_abnormal": "N"
+            }
+            ],
+            "diagnoses": [
+            {
+                "diagnosis_date": "2020-01-01",
+                "code": "I10",
+                "code_type_name": "ICD10"
+            }
+            ],
+            "procedures": [
+            {
+                "procedure_date": "2024-12-15",
+                "code": "93000",
+                "code_type_name": "CPT"
+            }
+            ],
+            "medications": [
+            {
+                "medication_start": "2023-03-01",
+                "code": "C09AA02",
+                "code_type": "ATC"
+            }
+            ]
+        },
+        "idempotency_key": "idem-b-20251107-abc123"
+    }'
 `}
 </pre>
 <h4 className="font-semibold mb-2">Response</h4>
@@ -488,7 +508,7 @@ curl https://phenom-api-sandbox.iddev.om1.com/v1/job/{job_id}/results/download \
   "items": [
     {
       "patient_id": "abc123",
-      "outcome_id": "heart_failure_1y",
+      "outcome_id": "v0p3_65plus_fixed_anchor_2023_JanToDec_04012025_any_time_hospitalization_future_1month",
       "probability": 0.7421,
       "prob_upper_95_percent_bound": 0.7934,
       "prob_lower_95_percent_bound": 0.6912,
