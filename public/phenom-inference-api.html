@@ -1,0 +1,400 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>PhenOM Inference API</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <style>
+      :root {
+        color-scheme: light dark;
+        --bg: #f5f7fb;
+        --fg: #0f172a;
+        --muted: #4b5563;
+        --card-bg: #ffffff;
+        --border: #e5e7eb;
+        --accent: #2563eb;
+      }
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        margin: 0;
+        font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
+          sans-serif;
+        background: var(--bg);
+        color: var(--fg);
+      }
+      .page {
+        min-height: 100vh;
+        display: flex;
+        flex-direction: column;
+      }
+      .page-header {
+        border-bottom: 1px solid var(--border);
+        background: #ffffffcc;
+        backdrop-filter: blur(8px);
+      }
+      .page-header-inner {
+        max-width: 960px;
+        margin: 0 auto;
+        padding: 12px 20px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 16px;
+      }
+      .brand {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+      }
+      .brand img {
+        height: 32px;
+        width: auto;
+      }
+      .brand-title {
+        font-size: 18px;
+        font-weight: 600;
+        letter-spacing: 0.02em;
+      }
+      .page-main {
+        flex: 1;
+        padding: 24px 16px 40px;
+      }
+      .content-card {
+        max-width: 1120px;
+        margin: 0 auto;
+        background: var(--card-bg);
+        border-radius: 12px;
+        border: 1px solid var(--border);
+        box-shadow: 0 18px 45px rgba(15, 23, 42, 0.08);
+        padding: 24px 24px 32px;
+      }
+      @media (min-width: 768px) {
+        .content-card {
+          padding: 32px 40px 40px;
+        }
+      }
+      .markdown-body {
+        font-size: 13px;
+        line-height: 1.6;
+      }
+      .markdown-body h1,
+      .markdown-body h2,
+      .markdown-body h3 {
+        color: var(--fg);
+        font-weight: 600;
+      }
+      .markdown-body h1 {
+        font-size: 24px;
+        margin-top: 0;
+      }
+      .markdown-body h2 {
+        font-size: 19px;
+        margin-top: 24px;
+      }
+      .markdown-body h3 {
+        font-size: 16px;
+        margin-top: 20px;
+      }
+      .markdown-body p {
+        margin: 0 0 0.75em;
+        color: var(--muted);
+      }
+      .markdown-body code {
+        font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas,
+          "Liberation Mono", "Courier New", monospace;
+        font-size: 11px; /* smaller inline/code blocks */
+        background: #0f172a0d;
+        padding: 1px 3px;
+        border-radius: 3px;
+      }
+      .markdown-body pre code {
+        background: none;
+        padding: 0;
+      }
+      .markdown-body pre {
+        font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas,
+          "Liberation Mono", "Courier New", monospace;
+        font-size: 10px; /* much smaller code blocks */
+        line-height: 1.4;
+        background: #020617;
+        color: #e5e7eb;
+        padding: 10px 12px;
+        border-radius: 8px;
+        overflow-x: auto;
+        border: 1px solid #0f172a;
+        margin: 0 0 1.1em;
+      }
+      .markdown-body hr {
+        border: none;
+        border-top: 1px solid var(--border);
+        margin: 20px 0;
+      }
+      .markdown-body ul {
+        padding-left: 1.25rem;
+      }
+      .markdown-body li {
+        margin-bottom: 0.25em;
+      }
+      .badge {
+        display: inline-flex;
+        align-items: center;
+        padding: 2px 8px;
+        border-radius: 999px;
+        background: #dbeafe;
+        color: #1d4ed8;
+        font-size: 11px;
+        font-weight: 500;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="page">
+      <header class="page-header">
+        <div class="page-header-inner">
+          <div class="brand">
+            <img src="om1_logo_clr.png" alt="OM1 logo" />
+          </div>
+        </div>
+      </header>
+      <main class="page-main">
+        <div class="content-card">
+          <article class="markdown-body">
+<h2>PhenOM Inference API User Guide</h2>
+<p>This user guide summarizes how to use the PhenOM Inference API based on the latest spec.</p>
+<hr>
+<h3>Base URL &amp; Reference</h3>
+<ul>
+<li><strong>API base URL</strong><br><code>https://phenom-api-sandbox.idprod.om1.com</code></li>
+</ul>
+<hr>
+<h3>Authentication</h3>
+<ul>
+<li><strong>Auth method</strong>: OAuth2 Bearer token (Auth0)</li>
+<li><strong>Header format</strong>:</li>
+</ul>
+<pre><code class="language-http">Authorization: Bearer &lt;jwt&gt;
+</code></pre>
+<p>Your JWT determines which tenant and resources you can access.</p>
+<hr>
+<h3>Inference Options</h3>
+<p>You can run predictions in two ways:</p>
+<ul>
+<li><p><strong>Real-time inference (single patient)</strong>  </p>
+<ul>
+<li><strong>Best for</strong>: point-of-care workflows and interactive apps  </li>
+<li><strong>Pattern</strong>: submit a single <code>patient_history</code> JSON → get a <code>job_id</code> → poll job for results  </li>
+<li><strong>Endpoint</strong>: <code>/v1/job/from-patient</code>  </li>
+<li><strong>Multiple patients</strong>: use the <strong>batch</strong> workflow (<code>/v1/batch</code>) instead of a multi-patient real-time endpoint</li>
+</ul>
+</li>
+<li><p><strong>Batch inference (asynchronous)</strong>  </p>
+<ul>
+<li><strong>Best for</strong>: large populations, scheduled risk assessments, research &amp; analytics  </li>
+<li><strong>Pattern</strong>: upload files → finalize → (optionally) validate → start job → poll → fetch results  </li>
+<li><strong>Endpoints</strong>: <code>/v1/batch</code>, <code>/v1/batch/{batch_id}/upload</code>, <code>/v1/batch/{batch_id}/finalize</code>, <code>/v1/batch/{batch_id}/start</code>, plus job endpoints under <code>/v1/job/...</code></li>
+</ul>
+</li>
+</ul>
+<hr>
+<br/>
+<br/>
+<br/>
+<br/>
+<br/>
+<h2>Quick Start – Real-Time (Single Patient)</h2>
+<p>Use this for a single patient at a time.</p>
+<h3>Request: create job from patient</h3>
+<pre><code class="language-bash">curl -X POST https://phenom-api-sandbox.idprod.om1.com/v1/job/from-patient \
+  -H &quot;Authorization: Bearer &lt;jwt&gt;&quot; \
+  -H &quot;Content-Type: application/json&quot; \
+  -d &#39;{
+        &quot;outcome_ids&quot;: [
+            &quot;v0p3_65plus_fixed_anchor_2023_JanToDec_04012025_any_time_hospitalization_future_1month&quot;
+        ],
+        &quot;patient_history&quot;: {
+            &quot;patient&quot;: {
+            &quot;patient_id&quot;: &quot;abc123&quot;,
+            &quot;birth_date&quot;: &quot;1964-05-18&quot;,
+            &quot;sex&quot;: &quot;F&quot;,
+            &quot;zip3&quot;: &quot;021&quot;
+            },
+            &quot;lab_results&quot;: [
+            {
+                &quot;lab_date&quot;: &quot;2025-07-03&quot;,
+                &quot;loinc&quot;: &quot;718-7&quot;,
+                &quot;value_abnormal&quot;: &quot;N&quot;
+            }
+            ],
+            &quot;diagnoses&quot;: [
+            {
+                &quot;diagnosis_date&quot;: &quot;2020-01-01&quot;,
+                &quot;code&quot;: &quot;I10&quot;,
+                &quot;code_type_name&quot;: &quot;ICD10&quot;
+            }
+            ],
+            &quot;procedures&quot;: [
+            {
+                &quot;procedure_date&quot;: &quot;2024-12-15&quot;,
+                &quot;code&quot;: &quot;93000&quot;,
+                &quot;code_type_name&quot;: &quot;CPT&quot;
+            }
+            ],
+            &quot;medications&quot;: [
+            {
+                &quot;medication_start&quot;: &quot;2023-03-01&quot;,
+                &quot;code&quot;: &quot;C09AA02&quot;,
+                &quot;code_type&quot;: &quot;ATC&quot;
+            }
+            ]
+        },
+        &quot;idempotency_key&quot;: &quot;idem-b-20251107-abc123&quot;
+    }&#39;
+</code></pre>
+<p><strong>Immediate response (example):</strong></p>
+<pre><code class="language-json">{
+  &quot;job_id&quot;: &quot;job_01J90Q2TTM&quot;,
+  &quot;status&quot;: &quot;QUEUED&quot;
+}
+</code></pre>
+<br/>
+<br/>
+<h3>Poll for final result</h3>
+<pre><code class="language-bash"># Poll job until SUCCEEDED
+curl https://phenom-api-sandbox.idprod.om1.com/v1/job/job_01J90Q2TTM \
+  -H &quot;Authorization: Bearer &lt;jwt&gt;&quot;
+</code></pre>
+<p>Then fetch results:</p>
+<pre><code class="language-bash">curl &quot;https://phenom-api-sandbox.idprod.om1.com/v1/job/job_01J90Q2TTM/results?page_size=1000&quot; \
+  -H &quot;Authorization: Bearer &lt;jwt&gt;&quot;
+</code></pre>
+<p><strong>Example final result payload:</strong></p>
+<pre><code class="language-json">{
+  &quot;items&quot;: [
+    {
+      &quot;patient_id&quot;: &quot;abc123&quot;,
+      &quot;outcome_id&quot;: &quot;v0p3_65plus_fixed_anchor_2023_JanToDec_04012025_any_time_hospitalization_future_1month&quot;,
+      &quot;probability&quot;: 0.7421,
+      &quot;prob_upper_95_percent_bound&quot;: 0.7934,
+      &quot;prob_lower_95_percent_bound&quot;: 0.6912,
+      &quot;relative_probability&quot;: 2.18,
+      &quot;rel_upper_95_percent_bound&quot;: 2.36,
+      &quot;rel_lower_95_percent_bound&quot;: 2.02,
+      &quot;bin_id&quot;: 9,
+      &quot;num_bins&quot;: 100
+    }
+  ],
+  &quot;next_page_token&quot;: null,
+  &quot;total_rows&quot;: 1
+}
+</code></pre>
+<hr>
+<h2>Quick Start – Batch Inference</h2>
+<p>End-to-end example: upload data, run a job, fetch results.</p>
+<h3>1. Create a batch</h3>
+<pre><code class="language-bash">curl -X POST https://phenom-api-sandbox.idprod.om1.com/v1/batch \
+  -H &quot;Authorization: Bearer &lt;jwt&gt;&quot; \
+  -H &quot;Content-Type: application/json&quot; \
+  -d &#39;{
+    &quot;name&quot;: &quot;october_data_load&quot;,
+    &quot;upload_method&quot;: &quot;s3_multipart&quot;
+  }&#39;
+
+# Response (example)
+{
+  &quot;batch_id&quot;: &quot;batch_0199bb07-3b87-7e83-8842-ad9d52a3c472&quot;,
+  &quot;status&quot;: &quot;CREATED&quot;
+}
+</code></pre>
+<h3>2. Upload patient data</h3>
+<pre><code class="language-bash"># Create upload session for one CSV
+curl -X POST https://phenom-api-sandbox.idprod.om1.com/v1/batch/{batch_id}/upload \
+  -H &quot;Authorization: Bearer &lt;jwt&gt;&quot; \
+  -d &#39;{
+    &quot;object_type&quot;: &quot;patients&quot;,
+    &quot;filename&quot;: &quot;patients_2025_10.csv&quot;,
+    &quot;mode&quot;: &quot;single&quot;
+  }&#39;
+
+# Use the presigned URL returned in the response to upload the file.
+# Repeat for other object_types: lab_results, diagnosis, procedures, medications.
+</code></pre>
+<h3>3. Finalize the batch</h3>
+<pre><code class="language-bash">curl -X POST https://phenom-api-sandbox.idprod.om1.com/v1/batch/{batch_id}/finalize \
+  -H &quot;Authorization: Bearer &lt;jwt&gt;&quot;
+
+# Response (example)
+{
+  &quot;batch_id&quot;: &quot;batch_0199bb07-3b87-7e83-8842-ad9d52a3c472&quot;,
+  &quot;status&quot;: &quot;FINALIZED&quot;,
+  &quot;manifest_key&quot;: &quot;batches/batch_.../manifest.json&quot;
+}
+</code></pre>
+<h3>4. Start the job</h3>
+<pre><code class="language-bash">curl -X POST https://phenom-api-sandbox.idprod.om1.com/v1/batch/{batch_id}/start \
+  -H &quot;Authorization: Bearer &lt;jwt&gt;&quot; \
+  -H &quot;Content-Type: application/json&quot; \
+  -d &#39;{
+    &quot;outcome_ids&quot;: [
+      &quot;v0p3_65plus_fixed_anchor_2023_JanToDec_04012025_any_time_hospitalization_future_1month&quot;
+    ]
+  }&#39;
+
+# Response (example)
+{
+  &quot;job_id&quot;: &quot;job_01J90Q2TTM&quot;,
+  &quot;status&quot;: &quot;QUEUED&quot;
+}
+</code></pre>
+<h3>5. Poll job status</h3>
+<pre><code class="language-bash">curl https://phenom-api-sandbox.idprod.om1.com/v1/job/{job_id} \
+  -H &quot;Authorization: Bearer &lt;jwt&gt;&quot;
+
+# When complete (example)
+{
+  &quot;job_id&quot;: &quot;job_01J90Q2TTM&quot;,
+  &quot;status&quot;: &quot;SUCCEEDED&quot;,
+  &quot;metrics&quot;: {
+    &quot;records_processed&quot;: 1245678,
+    &quot;patients_scored&quot;: 101234,
+    &quot;patients_excluded&quot;: 1123
+  }
+}
+</code></pre>
+<br/>
+<br/>
+<br/>
+<br/>
+<h3>6. Fetch results</h3>
+<pre><code class="language-bash"># Option 1: Paginated API results
+curl &quot;https://phenom-api-sandbox.idprod.om1.com/v1/job/{job_id}/results?page_size=1000&quot; \
+  -H &quot;Authorization: Bearer &lt;jwt&gt;&quot;
+
+# Option 2: Download full results (manifest with shard URLs)
+curl https://phenom-api-sandbox.idprod.om1.com/v1/job/{job_id}/results/download \
+  -H &quot;Authorization: Bearer &lt;jwt&gt;&quot;
+</code></pre>
+<p>Additional job endpoints are available to inspect <strong>exclusions</strong> and <strong>errors</strong>:</p>
+<ul>
+<li><code>/v1/job/{job_id}/exclusions</code></li>
+<li><code>/v1/job/{job_id}/errors</code></li>
+</ul>
+<hr>
+<br/>
+<h3>Security &amp; Compliance</h3>
+<ul>
+<li><strong>HIPAA &amp; BAA</strong>: HIPAA-compliant infrastructure with BAA coverage  </li>
+<li><strong>Tenant isolation</strong>: All resources are scoped to your tenant via JWT claims  </li>
+<li><strong>Encryption</strong>: SSE-S3 at rest; TLS in transit  </li>
+<li><strong>PHI handling</strong>: PHI appears <strong>only</strong> in uploaded data, not in resource names or metadata</li>
+</ul>
+
+          </article>
+        </div>
+      </main>
+    </div>
+  </body>
+</html>

@@ -277,16 +277,7 @@ export default function PhenomAPIDocs() {
                       <p className="text-sm font-semibold mb-3">How to:</p>
                       <ul className="list-disc list-inside text-xs space-y-2">
                         <li>Recieve predictions in real-time by submitting a patient history JSON object</li>
-                        <li>Use the <code className="bg-muted px-1.5 py-0.5 rounded text-xs">/v1/jobs/from-patient</code> endpoint for single patient predictions</li>
-                        <li>
-                        Use the <code className="bg-muted px-1.5 py-0.5 rounded text-xs">/v1/jobs/from-patients</code> endpoint for multiple patient predictions
-                          <ul className="list-disc list-inside ml-6 mt-2 text-muted-foreground">
-                            <li>
-                              Limited to 10 patients at a time
-                            </li>
-                          </ul>
-                        </li>
-                        
+                        <li>Use the <code className="bg-muted px-1.5 py-0.5 rounded text-xs">/v1/job/from-patient</code> endpoint to generate single-patient predictions</li>
                       </ul>
                     </div>
                   </div>
@@ -351,7 +342,7 @@ export default function PhenomAPIDocs() {
                   </h3>
                   <pre className="bg-muted text-muted-foreground p-4 rounded-md overflow-x-auto text-sm">
 {`# Create upload session
-curl -X POST https://phenom-api-sandbox.iddev.om1.com/v1/batch/{batch_id}/uploads \\
+curl -X POST https://phenom-api-sandbox.iddev.om1.com/v1/batch/{batch_id}/upload \\
   -H "Authorization: Bearer <jwt>" \\
   -d '{
     "object_type": "patients",
@@ -410,7 +401,7 @@ curl -X POST https://phenom-api-sandbox.iddev.om1.com/v1/batch/{batch_id}/upload
                     Poll for Job Status
                   </h3>
                   <pre className="bg-muted p-4 text-muted-foreground rounded-md overflow-x-auto text-sm">
-{`curl https://phenom-api-sandbox.iddev.om1.com/v1/jobs/{job_id} \\
+{`curl https://phenom-api-sandbox.iddev.om1.com/v1/job/{job_id} \\
   -H "Authorization: Bearer <jwt>"
 
 # Response when complete:
@@ -433,11 +424,11 @@ curl -X POST https://phenom-api-sandbox.iddev.om1.com/v1/batch/{batch_id}/upload
                   </h3>
                   <pre className="bg-muted p-4 text-muted-foreground rounded-md overflow-x-auto text-sm">
 {`# Option 1: Paginated API results
-curl https://phenom-api-sandbox.iddev.om1.com/v1/jobs/{job_id}/results?page_size=1000 \\
+curl https://phenom-api-sandbox.iddev.om1.com/v1/job/{job_id}/results?page_size=1000 \\
   -H "Authorization: Bearer <jwt>"
 
 # Option 2: Download full results
-curl https://phenom-api-sandbox.iddev.om1.com/v1/jobs/{job_id}/results/download \\
+curl https://phenom-api-sandbox.iddev.om1.com/v1/job/{job_id}/results/download \\
   -H "Authorization: Bearer <jwt>"`}
                   </pre>
                 </div>
@@ -454,7 +445,7 @@ curl https://phenom-api-sandbox.iddev.om1.com/v1/jobs/{job_id}/results/download 
                   <CardContent>
                   <h4 className="font-semibold mb-2">Request</h4>
                     <pre className="bg-muted p-4 text-muted-foreground rounded-md overflow-x-auto text-sm">
-{`curl -X POST https://phenom-api-sandbox.iddev.om1.com/v1/jobs/from-patient \\
+{`curl -X POST https://phenom-api-sandbox.iddev.om1.com/v1/job/from-patient \\
   -H "Authorization: Bearer <jwt>" \\
   -H "Content-Type: application/json" \\
   -d '{
@@ -492,7 +483,7 @@ curl https://phenom-api-sandbox.iddev.om1.com/v1/jobs/{job_id}/results/download 
                     <div className="mt-4">
                       <h4 className="font-semibold mb-2">Final Result</h4>
                       <pre className="bg-muted p-4 text-muted-foreground rounded-md overflow-x-auto text-sm">
-{`# Poll GET /v1/jobs/job_01J90Q2TTM for results
+{`# Poll GET /v1/job/job_01J90Q2TTM for results
 {
   "items": [
     {
@@ -516,128 +507,6 @@ curl https://phenom-api-sandbox.iddev.om1.com/v1/jobs/{job_id}/results/download 
                   </CardContent>
                 </Card>
 
-                <Card>
-                  <CardHeader>
-                    <CardTitle>Real-Time Inference: Multiple Patient Predictions</CardTitle>
-                    <CardDescription>Generate predictions for up to 10 patients</CardDescription>
-                  </CardHeader>
-                  <CardContent>
-                    <h4 className="font-semibold mb-2">Request</h4>
-                    <pre className="bg-muted p-4 text-muted-foreground rounded-md overflow-x-auto text-sm">
-{`curl -X POST https://phenom-api-sandbox.iddev.om1.com/v1/jobs/from-patients \\
-  -H "Authorization: Bearer <jwt>" \\
-  -H "Content-Type: application/json" \\
-  -d '{
-    "outcome_ids": ["heart_failure_1y"],
-    "patient_histories": [
-      {
-        "patient": {
-          "patient_id": "patient_001",
-          "birth_date": "1964-05-18",
-          "sex": "F",
-          "zip3": "021"
-        },
-        "diagnosis": [{
-          "code": "I10",
-          "code_system": "ICD10",
-          "start_date": "2020-01-01"
-        }]
-      },
-      {
-        "patient": {
-          "patient_id": "patient_002",
-          "birth_date": "1978-03-22",
-          "sex": "M",
-          "zip3": "100"
-        },
-        "diagnosis": [{
-          "code": "E11.9",
-          "code_system": "ICD10",
-          "start_date": "2019-06-15"
-        }],
-        "medications": [{
-          "rx_code": "314076",
-          "code_system": "RXNORM",
-          "start_date": "2019-07-01"
-        }]
-      },
-      {
-        "patient": {
-          "patient_id": "patient_003",
-          "birth_date": "1955-11-08",
-          "sex": "F",
-          "zip3": "900"
-        },
-        "lab_results": [{
-          "lab_code": "2339-0",
-          "result_value": 6.8,
-          "result_units": "mmol/L",
-          "result_date": "2024-10-01"
-        }]
-      }
-    ]
-  }'
-`}
-</pre>
-
-<h4 className="font-semibold mb-2">Response</h4>
-<pre className="bg-muted p-4 text-muted-foreground rounded-md overflow-x-auto text-sm">
-{`{
-  "job_id": "job_01J90Q2UUZ",
-  "status": "QUEUED"
-}`}
-</pre>
-                    
-                    <div className="mt-4">
-                      <h4 className="font-semibold mb-2">Final Result</h4>
-                      <pre className="bg-muted p-4 text-muted-foreground rounded-md overflow-x-auto text-sm">
-{`# Poll GET /v1/jobs/job_01J90Q2UUZ for results
-{
-  "items": [
-    {
-      "patient_id": "patient_001",
-      "outcome_id": "heart_failure_1y",
-      "probability": 0.7421,
-      "prob_upper_95_percent_bound": 0.7934,
-      "prob_lower_95_percent_bound": 0.6912,
-      "relative_probability": 2.18,
-      "rel_upper_95_percent_bound": 2.36,
-      "rel_lower_95_percent_bound": 2.02,
-      "bin_id": 9,
-      "num_bins": 100
-    },
-    {
-      "patient_id": "patient_002",
-      "outcome_id": "heart_failure_1y",
-      "probability": 0.3215,
-      "prob_upper_95_percent_bound": 0.3687,
-      "prob_lower_95_percent_bound": 0.2801,
-      "relative_probability": 0.94,
-      "rel_upper_95_percent_bound": 1.08,
-      "rel_lower_95_percent_bound": 0.82,
-      "bin_id": 4,
-      "num_bins": 100
-    },
-    {
-      "patient_id": "patient_003",
-      "outcome_id": "heart_failure_1y",
-      "probability": 0.5634,
-      "prob_upper_95_percent_bound": 0.6102,
-      "prob_lower_95_percent_bound": 0.5198,
-      "relative_probability": 1.65,
-      "rel_upper_95_percent_bound": 1.79,
-      "rel_lower_95_percent_bound": 1.52,
-      "bin_id": 7,
-      "num_bins": 100
-    }
-  ],
-  "next_page_token": null,
-  "total_rows": 3
-}`}
-                      </pre>
-                    </div>
-                  </CardContent>
-                </Card>
               </TabsContent>
             </Tabs>
           </TabsContent>

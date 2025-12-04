@@ -341,7 +341,7 @@ export function ApiPlayground() {
       patient_history: history
     };
     
-    return `curl -X POST https://phenom-api-sandbox.iddev.om1.com/v1/jobs/from-patient \\
+    return `curl -X POST https://phenom-api-sandbox.iddev.om1.com/v1/job/from-patient \\
   -H "Authorization: Bearer <jwt>" \\
   -H "Content-Type: application/json" \\
   -d '${JSON.stringify(requestBody, null, 2)}'`;
@@ -351,7 +351,7 @@ export function ApiPlayground() {
     const history = buildPatientHistory();
     return `import requests
 
-endpoint = "https://phenom-api-sandbox.iddev.om1.com/v1/jobs/from-patient"
+endpoint = "https://phenom-api-sandbox.iddev.om1.com/v1/job/from-patient"
 headers = {
     "Authorization": "Bearer <jwt>",
     "Content-Type": "application/json"
