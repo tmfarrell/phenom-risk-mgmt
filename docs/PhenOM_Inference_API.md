@@ -7,7 +7,7 @@ This user guide summarizes how to use the PhenOM Inference API based on the late
 ### Base URL & Reference
 
 - **API base URL**  
-  `https://phenom-api-sandbox.idprod.om1.com`
+  `https://phenom-api.om1.com`
 
 ---
 
@@ -28,27 +28,27 @@ Your JWT determines which tenant and resources you can access.
 
 You can run predictions in two ways:
 
-- **Real-time inference (single patient)**  
+- **Single-patient inference**  
   - **Best for**: point-of-care workflows and interactive apps  
   - **Pattern**: submit a single `patient_history` JSON → get a `job_id` → poll job for results  
   - **Endpoint**: `/v1/job/from-patient`  
   - **Multiple patients**: use the **batch** workflow (`/v1/batch`) instead of a multi-patient real-time endpoint
 
-- **Batch inference (asynchronous)**  
+- **Batch inference**  
   - **Best for**: large populations, scheduled risk assessments, research & analytics  
   - **Pattern**: upload files → finalize → (optionally) validate → start job → poll → fetch results  
   - **Endpoints**: `/v1/batch`, `/v1/batch/{batch_id}/upload`, `/v1/batch/{batch_id}/finalize`, `/v1/batch/{batch_id}/start`, plus job endpoints under `/v1/job/...`
 
 ---
 
-## Quick Start – Real-Time (Single Patient)
+## Quick Start – Single Patient
 
 Use this for a single patient at a time.
 
 ### Request: create job from patient
 
 ```bash
-curl -X POST https://phenom-api-sandbox.idprod.om1.com/v1/job/from-patient \
+curl -X POST https://phenom-api.om1.com/v1/job/from-patient \
   -H "Authorization: Bearer <jwt>" \
   -H "Content-Type: application/json" \
   -d '{
@@ -108,14 +108,14 @@ curl -X POST https://phenom-api-sandbox.idprod.om1.com/v1/job/from-patient \
 
 ```bash
 # Poll job until SUCCEEDED
-curl https://phenom-api-sandbox.idprod.om1.com/v1/job/job_01J90Q2TTM \
+curl https://phenom-api.om1.com/v1/job/job_01J90Q2TTM \
   -H "Authorization: Bearer <jwt>"
 ```
 
 Then fetch results:
 
 ```bash
-curl "https://phenom-api-sandbox.idprod.om1.com/v1/job/job_01J90Q2TTM/results?page_size=1000" \
+curl "https://phenom-api.om1.com/v1/job/job_01J90Q2TTM/results?page_size=1000" \
   -H "Authorization: Bearer <jwt>"
 ```
 
@@ -144,14 +144,14 @@ curl "https://phenom-api-sandbox.idprod.om1.com/v1/job/job_01J90Q2TTM/results?pa
 
 ---
 
-## Quick Start – Batch Inference
+## Quick Start – Batch
 
 End-to-end example: upload data, run a job, fetch results.
 
 ### 1. Create a batch
 
 ```bash
-curl -X POST https://phenom-api-sandbox.idprod.om1.com/v1/batch \
+curl -X POST https://phenom-api.om1.com/v1/batch \
   -H "Authorization: Bearer <jwt>" \
   -H "Content-Type: application/json" \
   -d '{
@@ -170,7 +170,7 @@ curl -X POST https://phenom-api-sandbox.idprod.om1.com/v1/batch \
 
 ```bash
 # Create upload session for one CSV
-curl -X POST https://phenom-api-sandbox.idprod.om1.com/v1/batch/{batch_id}/upload \
+curl -X POST https://phenom-api.om1.com/v1/batch/{batch_id}/upload \
   -H "Authorization: Bearer <jwt>" \
   -d '{
     "object_type": "patients",
@@ -185,7 +185,7 @@ curl -X POST https://phenom-api-sandbox.idprod.om1.com/v1/batch/{batch_id}/uploa
 ### 3. Finalize the batch
 
 ```bash
-curl -X POST https://phenom-api-sandbox.idprod.om1.com/v1/batch/{batch_id}/finalize \
+curl -X POST https://phenom-api.om1.com/v1/batch/{batch_id}/finalize \
   -H "Authorization: Bearer <jwt>"
 
 # Response (example)
@@ -199,7 +199,7 @@ curl -X POST https://phenom-api-sandbox.idprod.om1.com/v1/batch/{batch_id}/final
 ### 4. Start the job
 
 ```bash
-curl -X POST https://phenom-api-sandbox.idprod.om1.com/v1/batch/{batch_id}/start \
+curl -X POST https://phenom-api.om1.com/v1/batch/{batch_id}/start \
   -H "Authorization: Bearer <jwt>" \
   -H "Content-Type: application/json" \
   -d '{
@@ -218,7 +218,7 @@ curl -X POST https://phenom-api-sandbox.idprod.om1.com/v1/batch/{batch_id}/start
 ### 5. Poll job status
 
 ```bash
-curl https://phenom-api-sandbox.idprod.om1.com/v1/job/{job_id} \
+curl https://phenom-api.om1.com/v1/job/{job_id} \
   -H "Authorization: Bearer <jwt>"
 
 # When complete (example)
@@ -237,11 +237,11 @@ curl https://phenom-api-sandbox.idprod.om1.com/v1/job/{job_id} \
 
 ```bash
 # Option 1: Paginated API results
-curl "https://phenom-api-sandbox.idprod.om1.com/v1/job/{job_id}/results?page_size=1000" \
+curl "https://phenom-api.om1.com/v1/job/{job_id}/results?page_size=1000" \
   -H "Authorization: Bearer <jwt>"
 
 # Option 2: Download full results (manifest with shard URLs)
-curl https://phenom-api-sandbox.idprod.om1.com/v1/job/{job_id}/results/download \
+curl https://phenom-api.om1.com/v1/job/{job_id}/results/download \
   -H "Authorization: Bearer <jwt>"
 ```
 

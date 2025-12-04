@@ -177,4 +177,4 @@ ${body}
   </body>
 </html>`;
 
-writeFileSync('public/phenom-inference-api.html', html);
+writeFileSync('docs/phenom-inference-api.html', html);

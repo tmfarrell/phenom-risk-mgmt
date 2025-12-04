@@ -5,8 +5,8 @@ import puppeteer from 'puppeteer';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
-const htmlPath = resolve(__dirname, '..', 'public', 'phenom-inference-api.html');
-const pdfPath = resolve(__dirname, '..', 'public', 'phenom-inference-api.pdf');
+const htmlPath = resolve(__dirname, '..', 'docs', 'phenom-inference-api.html');
+const pdfPath = resolve(__dirname, '..', 'docs', 'phenom-inference-api.pdf');
 
 const url = 'file://' + htmlPath;
 

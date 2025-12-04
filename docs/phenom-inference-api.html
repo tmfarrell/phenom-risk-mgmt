@@ -168,7 +168,7 @@
 <hr>
 <h3>Base URL &amp; Reference</h3>
 <ul>
-<li><strong>API base URL</strong><br><code>https://phenom-api-sandbox.idprod.om1.com</code></li>
+<li><strong>API base URL</strong><br><code>https://phenom-api.om1.com</code></li>
 </ul>
 <hr>
 <h3>Authentication</h3>
@@ -182,8 +182,8 @@
 <hr>
 <h3>Inference Options</h3>
 <p>You can run predictions in two ways:</p>
-<ul>
-<li><p><strong>Real-time inference (single patient)</strong>  </p>
+<ul> 
+<li><p><strong>Single-patient inference</strong>  </p>
 <ul>
 <li><strong>Best for</strong>: point-of-care workflows and interactive apps  </li>
 <li><strong>Pattern</strong>: submit a single <code>patient_history</code> JSON → get a <code>job_id</code> → poll job for results  </li>
@@ -191,7 +191,8 @@
 <li><strong>Multiple patients</strong>: use the <strong>batch</strong> workflow (<code>/v1/batch</code>) instead of a multi-patient real-time endpoint</li>
 </ul>
 </li>
-<li><p><strong>Batch inference (asynchronous)</strong>  </p>
+<br/>
+<li><p><strong>Batch inference</strong>  </p>
 <ul>
 <li><strong>Best for</strong>: large populations, scheduled risk assessments, research &amp; analytics  </li>
 <li><strong>Pattern</strong>: upload files → finalize → (optionally) validate → start job → poll → fetch results  </li>
@@ -205,10 +206,10 @@
 <br/>
 <br/>
 <br/>
-<h2>Quick Start – Real-Time (Single Patient)</h2>
+<h2>Quick Start – Single Patient</h2>
 <p>Use this for a single patient at a time.</p>
 <h3>Request: create job from patient</h3>
-<pre><code class="language-bash">curl -X POST https://phenom-api-sandbox.idprod.om1.com/v1/job/from-patient \
+<pre><code class="language-bash">curl -X POST https://phenom-api.om1.com/v1/job/from-patient \
   -H &quot;Authorization: Bearer &lt;jwt&gt;&quot; \
   -H &quot;Content-Type: application/json&quot; \
   -d &#39;{
@@ -264,11 +265,11 @@
 <br/>
 <h3>Poll for final result</h3>
 <pre><code class="language-bash"># Poll job until SUCCEEDED
-curl https://phenom-api-sandbox.idprod.om1.com/v1/job/job_01J90Q2TTM \
+curl https://phenom-api.om1.com/v1/job/job_01J90Q2TTM \
   -H &quot;Authorization: Bearer &lt;jwt&gt;&quot;
 </code></pre>
 <p>Then fetch results:</p>
-<pre><code class="language-bash">curl &quot;https://phenom-api-sandbox.idprod.om1.com/v1/job/job_01J90Q2TTM/results?page_size=1000&quot; \
+<pre><code class="language-bash">curl &quot;https://phenom-api.om1.com/v1/job/job_01J90Q2TTM/results?page_size=1000&quot; \
   -H &quot;Authorization: Bearer &lt;jwt&gt;&quot;
 </code></pre>
 <p><strong>Example final result payload:</strong></p>
@@ -292,10 +293,10 @@ curl https://phenom-api-sandbox.idprod.om1.com/v1/job/job_01J90Q2TTM \
 }
 </code></pre>
 <hr>
-<h2>Quick Start – Batch Inference</h2>
+<h2>Quick Start – Batch</h2>
 <p>End-to-end example: upload data, run a job, fetch results.</p>
 <h3>1. Create a batch</h3>
-<pre><code class="language-bash">curl -X POST https://phenom-api-sandbox.idprod.om1.com/v1/batch \
+<pre><code class="language-bash">curl -X POST https://phenom-api.om1.com/v1/batch \
   -H &quot;Authorization: Bearer &lt;jwt&gt;&quot; \
   -H &quot;Content-Type: application/json&quot; \
   -d &#39;{
@@ -311,7 +312,7 @@ curl https://phenom-api-sandbox.idprod.om1.com/v1/job/job_01J90Q2TTM \
 </code></pre>
 <h3>2. Upload patient data</h3>
 <pre><code class="language-bash"># Create upload session for one CSV
-curl -X POST https://phenom-api-sandbox.idprod.om1.com/v1/batch/{batch_id}/upload \
+curl -X POST https://phenom-api.om1.com/v1/batch/{batch_id}/upload \
   -H &quot;Authorization: Bearer &lt;jwt&gt;&quot; \
   -d &#39;{
     &quot;object_type&quot;: &quot;patients&quot;,
@@ -323,7 +324,7 @@ curl -X POST https://phenom-api-sandbox.idprod.om1.com/v1/batch/{batch_id}/uploa
 # Repeat for other object_types: lab_results, diagnosis, procedures, medications.
 </code></pre>
 <h3>3. Finalize the batch</h3>
-<pre><code class="language-bash">curl -X POST https://phenom-api-sandbox.idprod.om1.com/v1/batch/{batch_id}/finalize \
+<pre><code class="language-bash">curl -X POST https://phenom-api.om1.com/v1/batch/{batch_id}/finalize \
   -H &quot;Authorization: Bearer &lt;jwt&gt;&quot;
 
 # Response (example)
@@ -334,7 +335,7 @@ curl -X POST https://phenom-api-sandbox.idprod.om1.com/v1/batch/{batch_id}/uploa
 }
 </code></pre>
 <h3>4. Start the job</h3>
-<pre><code class="language-bash">curl -X POST https://phenom-api-sandbox.idprod.om1.com/v1/batch/{batch_id}/start \
+<pre><code class="language-bash">curl -X POST https://phenom-api.om1.com/v1/batch/{batch_id}/start \
   -H &quot;Authorization: Bearer &lt;jwt&gt;&quot; \
   -H &quot;Content-Type: application/json&quot; \
   -d &#39;{
@@ -350,7 +351,7 @@ curl -X POST https://phenom-api-sandbox.idprod.om1.com/v1/batch/{batch_id}/uploa
 }
 </code></pre>
 <h3>5. Poll job status</h3>
-<pre><code class="language-bash">curl https://phenom-api-sandbox.idprod.om1.com/v1/job/{job_id} \
+<pre><code class="language-bash">curl https://phenom-api.om1.com/v1/job/{job_id} \
   -H &quot;Authorization: Bearer &lt;jwt&gt;&quot;
 
 # When complete (example)
@@ -370,11 +371,11 @@ curl -X POST https://phenom-api-sandbox.idprod.om1.com/v1/batch/{batch_id}/uploa
 <br/>
 <h3>6. Fetch results</h3>
 <pre><code class="language-bash"># Option 1: Paginated API results
-curl &quot;https://phenom-api-sandbox.idprod.om1.com/v1/job/{job_id}/results?page_size=1000&quot; \
+curl &quot;https://phenom-api.om1.com/v1/job/{job_id}/results?page_size=1000&quot; \
   -H &quot;Authorization: Bearer &lt;jwt&gt;&quot;
 
 # Option 2: Download full results (manifest with shard URLs)
-curl https://phenom-api-sandbox.idprod.om1.com/v1/job/{job_id}/results/download \
+curl https://phenom-api.om1.com/v1/job/{job_id}/results/download \
   -H &quot;Authorization: Bearer &lt;jwt&gt;&quot;
 </code></pre>
 <p>Additional job endpoints are available to inspect <strong>exclusions</strong> and <strong>errors</strong>:</p>
