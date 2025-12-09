@@ -182,7 +182,7 @@
 <hr>
 <h3>Inference Options</h3>
 <p>You can run predictions in two ways:</p>
-<ul> 
+<ul>
 <li><p><strong>Single-patient inference</strong>  </p>
 <ul>
 <li><strong>Best for</strong>: point-of-care workflows and interactive apps  </li>
@@ -191,7 +191,6 @@
 <li><strong>Multiple patients</strong>: use the <strong>batch</strong> workflow (<code>/v1/batch</code>) instead of a multi-patient real-time endpoint</li>
 </ul>
 </li>
-<br/>
 <li><p><strong>Batch inference</strong>  </p>
 <ul>
 <li><strong>Best for</strong>: large populations, scheduled risk assessments, research &amp; analytics  </li>
@@ -205,7 +204,19 @@
 <br/>
 <br/>
 <br/>
-<br/>
+<h2>Quick Start – Outcomes</h2>
+<p>Use this to list the available PhenOM outcomes. </p>
+<h3>Request: list outcomes</h3>
+<pre><code class="language-bash">curl -X POST https://phenom-api.om1.com/v1/outcome \
+  -H &quot;Authorization: Bearer &lt;jwt&gt;&quot; \
+  -H &quot;Content-Type: application/json&quot;
+</code></pre>
+<p><strong>Immediate response (example):</strong></p>
+<pre><code class="language-json">[
+    &quot;v0p3_65plus_fixed_anchor_2023_JanToDec_04012025_any_time_hospitalization_future_1month&quot;
+]
+</code></pre>
+<hr>
 <h2>Quick Start – Single Patient</h2>
 <p>Use this for a single patient at a time.</p>
 <h3>Request: create job from patient</h3>
@@ -261,8 +272,6 @@
   &quot;status&quot;: &quot;QUEUED&quot;
 }
 </code></pre>
-<br/>
-<br/>
 <h3>Poll for final result</h3>
 <pre><code class="language-bash"># Poll job until SUCCEEDED
 curl https://phenom-api.om1.com/v1/job/job_01J90Q2TTM \
@@ -293,6 +302,14 @@ curl https://phenom-api.om1.com/v1/job/job_01J90Q2TTM \
 }
 </code></pre>
 <hr>
+<br/>
+<br/>
+<br/>
+<br/>
+<br/>
+<br/>
+<br/>
+<br/>
 <h2>Quick Start – Batch</h2>
 <p>End-to-end example: upload data, run a job, fetch results.</p>
 <h3>1. Create a batch</h3>
@@ -365,10 +382,6 @@ curl -X POST https://phenom-api.om1.com/v1/batch/{batch_id}/upload \
   }
 }
 </code></pre>
-<br/>
-<br/>
-<br/>
-<br/>
 <h3>6. Fetch results</h3>
 <pre><code class="language-bash"># Option 1: Paginated API results
 curl &quot;https://phenom-api.om1.com/v1/job/{job_id}/results?page_size=1000&quot; \
@@ -384,7 +397,6 @@ curl https://phenom-api.om1.com/v1/job/{job_id}/results/download \
 <li><code>/v1/job/{job_id}/errors</code></li>
 </ul>
 <hr>
-<br/>
 <h3>Security &amp; Compliance</h3>
 <ul>
 <li><strong>HIPAA &amp; BAA</strong>: HIPAA-compliant infrastructure with BAA coverage  </li>

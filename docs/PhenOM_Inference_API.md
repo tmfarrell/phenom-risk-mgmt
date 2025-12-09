@@ -41,6 +41,28 @@ You can run predictions in two ways:
 
 ---
 
+## Quick Start – Outcomes
+
+Use this to list the available PhenOM outcomes. 
+
+### Request: list outcomes 
+
+```bash
+curl -X POST https://phenom-api.om1.com/v1/outcome \
+  -H "Authorization: Bearer <jwt>" \
+  -H "Content-Type: application/json"
+```
+
+**Immediate response (example):**
+
+```json
+[
+    "v0p3_65plus_fixed_anchor_2023_JanToDec_04012025_any_time_hospitalization_future_1month"
+]
+```
+
+--- 
+
 ## Quick Start – Single Patient
 
 Use this for a single patient at a time.
