@@ -179,7 +179,7 @@ const generateModelDescription = (model: PreBuiltModel) => {
       }
     }
   } else {
-    parts.push(`This model predicts at top ${model.risk_threshold_pct}% probability of ${model.indication_code} within ${formatPredictionTimeframe(model.prediction_timeframe_yrs)}`)
+    parts.push(`This model identifies patients at top ${model.risk_threshold_pct}% probability of ${model.indication_code} within ${formatPredictionTimeframe(model.prediction_timeframe_yrs)}`)
   }
   
   // Add patient characteristics
