@@ -9,7 +9,7 @@ import { RiskTable } from './patient/RiskTable';
 import { useRiskSummaries } from '@/hooks/useRiskSummaries';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
-import { useLocation } from 'react-router-dom';
+import { usePatientPanelStore } from '@/stores/patientPanelStore';
 
 export interface DetailViewProps {
   person: Person | null;
@@ -21,14 +21,14 @@ export interface DetailViewProps {
 type RowConfig = { outcome: string; timeframe: string, name?: string };
 
 export const DetailView = ({ person, initialOutcomes, initialTimeframe, initialRiskType }: DetailViewProps) => {
-  const location = useLocation();
-  const savedState = location.state as {
-    selectedRiskColumns?: string[];
-    selectedTimeframe?: string;
-    selectedRiskType?: 'relative' | 'absolute';
-  } | null;
+  // Get saved state from Zustand store
+  const {
+    selectedRiskColumns: storeRiskColumns,
+    selectedTimeframe: storeTimeframe,
+    selectedRiskType: storeRiskType,
+  } = usePatientPanelStore();
 
-  const [selectedRiskType, setSelectedRiskType] = useState<'relative' | 'absolute'>(initialRiskType || savedState?.selectedRiskType || 'relative');
+  const [selectedRiskType, setSelectedRiskType] = useState<'relative' | 'absolute'>(initialRiskType || storeRiskType || 'relative');
   const [rowConfigs, setRowConfigs] = useState<RowConfig[]>([]);
 
   // Fetch available outcomes and timeframes (and models) from phenom_models
@@ -70,14 +70,14 @@ export const DetailView = ({ person, initialOutcomes, initialTimeframe, initialR
   // Initialize row configurations once models are loaded
   const initializedRowConfigs = useMemo(() => {
     if (!phenomModelsData) return null;
-    const tf = initialTimeframe || savedState?.selectedTimeframe || (phenomModelsData.timeframes?.[0]?.toString() || '1');
+    const tf = initialTimeframe || storeTimeframe || (phenomModelsData.timeframes?.[0]?.toString() || '1');
     const outcomes = (initialOutcomes && initialOutcomes.length > 0)
       ? initialOutcomes
-      : (savedState?.selectedRiskColumns && savedState.selectedRiskColumns.length > 0)
-        ? savedState.selectedRiskColumns
+      : (storeRiskColumns && storeRiskColumns.length > 0)
+        ? storeRiskColumns
         : availableOutcomes.slice(0, Math.min(5, availableOutcomes.length));
-    return outcomes.map(o => ({ outcome: o, timeframe: tf, name: phenomModelsData.outcomeModelMap[o][0]?.name }));
-  }, [phenomModelsData, initialOutcomes, initialTimeframe, availableOutcomes, savedState?.selectedRiskColumns, savedState?.selectedTimeframe]);
+    return outcomes.map(o => ({ outcome: o, timeframe: tf, name: phenomModelsData.outcomeModelMap[o]?.[0]?.name }));
+  }, [phenomModelsData, initialOutcomes, initialTimeframe, availableOutcomes, storeRiskColumns, storeTimeframe]);
 
   // Set initial rows when ready
   useEffect(() => {

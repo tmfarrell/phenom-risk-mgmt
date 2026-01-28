@@ -1,34 +1,18 @@
 import { DetailView } from '@/components/DetailView';
 import { Header } from '@/components/Header';
-import { TitleSection } from '@/components/TitleSection';
-import { useParams, useNavigate, useLocation } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 import { usePatientData } from '@/hooks/usePatientData';
 
 export const PatientDetails = () => {
   const { id } = useParams();
   const { data: patients, isLoading, error } = usePatientData();
   const navigate = useNavigate();
-  const location = useLocation();
-  const savedState = location.state as {
-    selectedRiskColumns?: string[];
-    selectedTimeframe?: string;
-    selectedRiskType?: 'relative' | 'absolute';
-  } | null;
-  
-  console.log('PatientDetails - ID:', id);
-  console.log('PatientDetails - All Patients:', patients);
-  console.log('PatientDetails - Location:', location);
   
   const person = patients?.find(p => p.patient_id === Number(id)) || null;
-  
-  console.log('PatientDetails - Selected Person:', person);
 
   const handleBack = () => {
-    if (location.state) {
-      navigate('/', { state: location.state });
-    } else {
-      navigate('/');
-    }
+    // State is persisted in Zustand store, just navigate back
+    navigate('/');
   };
 
   if (isLoading) {

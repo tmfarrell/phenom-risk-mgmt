@@ -8,7 +8,7 @@ import { TableControls } from '@/components/table/TableControls';
 import { calculateAverageRisks } from '@/components/table/utils/riskCalculations';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
-import { useLocation, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { Check, ChevronDown } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
@@ -26,10 +26,7 @@ import { cn } from '@/lib/utils';
 import { useSavedViews, SavedView } from '@/hooks/useSavedViews';
 import { SaveViewModal } from '@/components/SaveViewModal';
 import { SavedViewsDropdown } from '@/components/SavedViewsDropdown';
-import { SortingState } from '@tanstack/react-table';
-
-// Mock providers for testing
-const PROVIDERS = ['Provider A', 'Provider B', 'Provider C'];
+import { usePatientPanelStore } from '@/stores/patientPanelStore';
 
 // Model type options with colors matching PhenomBuilder badges
 const MODEL_TYPES = [
@@ -50,58 +47,51 @@ const MODEL_TYPES = [
   },
 ];
 
-interface ProviderList {
-  availableList: string[];
-  selectedList: string[];
-}
-
-export interface IndexPageState {
-  searchQuery: string;
-  selectedRiskType: 'relative' | 'absolute';
-  selectedRiskColumns: string[];
-  selectedPatients: Person[];
-  showSelectedOnly: boolean;
-  providerList: ProviderList;
-  selectedTimeframe: string;
-  selectedModelType: string;
-  sorting?: SortingState;
-}
-
 export default function Index() {
   const navigate = useNavigate();
-  const location = useLocation();
-  const savedState = location.state as IndexPageState;
 
   const { data: patientData, isLoading, error } = usePatientDataLatest();
   
-  // Saved views state and hooks
+  // Zustand store for persistent state
+  const {
+    searchQuery,
+    selectedRiskType,
+    selectedRiskColumns,
+    selectedPatients,
+    showSelectedOnly,
+    providerList,
+    selectedTimeframe,
+    selectedModelType,
+    sorting,
+    currentViewId,
+    hasInitializedColumns,
+    setSearchQuery,
+    setSelectedRiskType,
+    setSelectedRiskColumns,
+    setSelectedPatients,
+    setShowSelectedOnly,
+    setProviderList,
+    setSelectedTimeframe,
+    setSelectedModelType,
+    setSorting,
+    setCurrentViewId,
+    setHasInitializedColumns,
+    loadSavedView,
+  } = usePatientPanelStore();
+  
+  // Local UI state (not persisted)
   const [saveViewModalOpen, setSaveViewModalOpen] = useState(false);
-  const [currentViewId, setCurrentViewId] = useState<string | undefined>();
+  const [modelTypeOpen, setModelTypeOpen] = useState(false);
+  
+  // Saved views hooks
   const {
     savedViews,
     isLoading: isLoadingViews,
-    createView,
     createViewAsync,
     deleteView,
     isCreating,
     isDeleting,
   } = useSavedViews();
-  const [searchQuery, setSearchQuery] = useState(savedState?.searchQuery || '');
-  const [selectedRiskType, setSelectedRiskType] = useState<'relative' | 'absolute'>(savedState?.selectedRiskType || 'absolute');
-  const [selectedRiskColumns, setSelectedRiskColumns] = useState<string[]>([]);
-  const [selectedPatients, setSelectedPatients] = useState<Person[]>(savedState?.selectedPatients || []);
-  const [showSelectedOnly, setShowSelectedOnly] = useState(savedState?.showSelectedOnly || false);
-  const [selectedModelType, setSelectedModelType] = useState<string>(savedState?.selectedModelType || 'future_risk');
-  const [modelTypeOpen, setModelTypeOpen] = useState(false);
-  const [providerList, setProviderList] = useState<ProviderList>(
-    savedState?.providerList || {
-      availableList: PROVIDERS,
-      selectedList: [],
-    }
-  );
-  const [sorting, setSorting] = useState<SortingState>(
-    savedState?.sorting || [{ id: 'composite_risk', desc: true }]
-  );
 
   // Fetch available outcomes and time periods from phenom_models
   const { data: phenomModelsData, isLoading: isModelsLoading } = useQuery({
@@ -193,9 +183,6 @@ export default function Index() {
     return parseFloat(timeframe); // For years (including decimal values like 0.25)
   };
 
-  // Make sure we have a valid initial timeframe selection
-  const [selectedTimeframe, setSelectedTimeframe] = useState<string>(savedState?.selectedTimeframe || '1');
-  
   // Set the timeframe and outcomes once data is loaded
   useEffect(() => {
     if (timePeriods && timePeriods.length > 0) {
@@ -260,17 +247,16 @@ export default function Index() {
   // Track the previous timeframe and model type to detect changes
   const prevTimeframeRef = useRef<string>(selectedTimeframe);
   const prevModelTypeRef = useRef<string>(selectedModelType);
-  const hasInitializedRef = useRef<boolean>(false);
   const isLoadingViewRef = useRef<boolean>(false);
 
   // Set initial risk columns when outcomes are loaded (only once)
   useEffect(() => {
-    if (availableOutcomesForTimeframe.length > 0 && !hasInitializedRef.current) {
+    if (availableOutcomesForTimeframe.length > 0 && !hasInitializedColumns) {
       // Select first 4 outcomes by default
       setSelectedRiskColumns(availableOutcomesForTimeframe.slice(0, 4));
-      hasInitializedRef.current = true;
+      setHasInitializedColumns(true);
     }
-  }, [availableOutcomesForTimeframe]);
+  }, [availableOutcomesForTimeframe, hasInitializedColumns, setSelectedRiskColumns, setHasInitializedColumns]);
 
   // Whenever timeframe or model type changes, select the first 4 outcomes for that combination
   useEffect(() => {
@@ -288,7 +274,7 @@ export default function Index() {
     }
     // Reset the flag after the effect runs
     isLoadingViewRef.current = false;
-  }, [selectedTimeframe, selectedModelType, availableOutcomesForTimeframe]);
+  }, [selectedTimeframe, selectedModelType, availableOutcomesForTimeframe, setSelectedRiskColumns]);
 
   // Calculate average risks from the full dataset
   const averageRisks = patientData ? calculateAverageRisks(patientData) : {};
@@ -342,12 +328,7 @@ export default function Index() {
   const handleSelectView = (view: SavedView) => {
     // Set flag to prevent auto-reset during view loading
     isLoadingViewRef.current = true;
-    setSelectedModelType(view.model_type);
-    setSelectedRiskType(view.risk_type);
-    setSelectedTimeframe(view.timeframe);
-    setSelectedRiskColumns(view.outcomes);
-    setSorting(view.sorting || [{ id: 'composite_risk', desc: true }]);
-    setCurrentViewId(view.id);
+    loadSavedView(view);
   };
 
   // Handler to delete a saved view
@@ -383,18 +364,8 @@ export default function Index() {
   }, [selectedModelType, selectedRiskType, selectedTimeframe, selectedRiskColumns, sorting, currentViewId, savedViews]);
 
   const handlePatientClick = (patientId: number) => {
-    const state: IndexPageState = {
-      searchQuery,
-      selectedRiskType,
-      selectedRiskColumns,
-      selectedPatients,
-      showSelectedOnly,
-      providerList,
-      selectedTimeframe,
-      selectedModelType,
-      sorting,
-    };
-    navigate(`/patient/${patientId}`, { state });
+    // State is persisted in Zustand store, no need to pass via location.state
+    navigate(`/patient/${patientId}`);
   };
 
   if (error) {

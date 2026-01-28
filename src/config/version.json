@@ -12,7 +12,8 @@
         "Fixed time period formatting in display",
         "Added FAQ documentation page",
         "Added Releases page with version tracking",
-        "Updated sidebar UI with improved navigation structure"
+        "Updated sidebar UI with improved navigation structure",
+        "Fixed patient panel state persistence when navigating to patient details and back"
       ]
     },
     {
