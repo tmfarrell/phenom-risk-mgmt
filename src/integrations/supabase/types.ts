@@ -577,6 +577,42 @@ export type Database = {
         }
         Relationships: []
       }
+      saved_views: {
+        Row: {
+          id: string
+          name: string
+          model_type: string
+          risk_type: string
+          timeframe: string
+          outcomes: Json
+          created_by: string | null
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          name: string
+          model_type: string
+          risk_type: string
+          timeframe: string
+          outcomes?: Json
+          created_by?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          name?: string
+          model_type?: string
+          risk_type?: string
+          timeframe?: string
+          outcomes?: Json
+          created_by?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       session_settings: {
         Row: {
           created_at: string

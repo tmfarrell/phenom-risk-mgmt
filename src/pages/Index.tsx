@@ -23,6 +23,9 @@ import {
   PopoverTrigger,
 } from '@/components/ui/popover';
 import { cn } from '@/lib/utils';
+import { useSavedViews, SavedView } from '@/hooks/useSavedViews';
+import { SaveViewModal } from '@/components/SaveViewModal';
+import { SavedViewsDropdown } from '@/components/SavedViewsDropdown';
 
 // Mock providers for testing
 const PROVIDERS = ['Provider A', 'Provider B', 'Provider C'];
@@ -68,6 +71,18 @@ export default function Index() {
   const savedState = location.state as IndexPageState;
 
   const { data: patientData, isLoading, error } = usePatientDataLatest();
+  
+  // Saved views state and hooks
+  const [saveViewModalOpen, setSaveViewModalOpen] = useState(false);
+  const [currentViewId, setCurrentViewId] = useState<string | undefined>();
+  const {
+    savedViews,
+    isLoading: isLoadingViews,
+    createView,
+    deleteView,
+    isCreating,
+    isDeleting,
+  } = useSavedViews();
   const [searchQuery, setSearchQuery] = useState(savedState?.searchQuery || '');
   const [selectedRiskType, setSelectedRiskType] = useState<'relative' | 'absolute'>(savedState?.selectedRiskType || 'absolute');
   const [selectedRiskColumns, setSelectedRiskColumns] = useState<string[]>([]);
@@ -292,6 +307,55 @@ export default function Index() {
     return searchMatches && timeframeMatches && riskTypeMatches && selectedFilter && providerMatches;
   });
 
+  // Handler to save the current view
+  const handleSaveView = (name: string) => {
+    createView({
+      name,
+      model_type: selectedModelType,
+      risk_type: selectedRiskType,
+      timeframe: selectedTimeframe,
+      outcomes: selectedRiskColumns,
+    });
+    setSaveViewModalOpen(false);
+  };
+
+  // Handler to load a saved view
+  const handleSelectView = (view: SavedView) => {
+    setSelectedModelType(view.model_type);
+    setSelectedRiskType(view.risk_type);
+    setSelectedTimeframe(view.timeframe);
+    setSelectedRiskColumns(view.outcomes);
+    setCurrentViewId(view.id);
+  };
+
+  // Handler to delete a saved view
+  const handleDeleteView = (id: string) => {
+    deleteView(id);
+    if (currentViewId === id) {
+      setCurrentViewId(undefined);
+    }
+  };
+
+  // Clear the current view selection if filters deviate from the saved view
+  useEffect(() => {
+    if (!currentViewId) return;
+    
+    const currentView = savedViews.find(v => v.id === currentViewId);
+    if (!currentView) return;
+
+    // Check if any filter has deviated from the saved view
+    const hasDeviated = 
+      currentView.model_type !== selectedModelType ||
+      currentView.risk_type !== selectedRiskType ||
+      currentView.timeframe !== selectedTimeframe ||
+      currentView.outcomes.length !== selectedRiskColumns.length ||
+      !currentView.outcomes.every(outcome => selectedRiskColumns.includes(outcome));
+
+    if (hasDeviated) {
+      setCurrentViewId(undefined);
+    }
+  }, [selectedModelType, selectedRiskType, selectedTimeframe, selectedRiskColumns, currentViewId, savedViews]);
+
   const handlePatientClick = (patientId: number) => {
     const state: IndexPageState = {
       searchQuery,
@@ -377,6 +441,18 @@ export default function Index() {
               </PopoverContent>
             </Popover>
           </div>
+          <div className="flex flex-col gap-1">
+            <label className="text-sm font-medium text-gray-700">Panel Views</label>
+            <SavedViewsDropdown
+              savedViews={savedViews}
+              isLoading={isLoadingViews}
+              onSaveClick={() => setSaveViewModalOpen(true)}
+              onSelectView={handleSelectView}
+              onDeleteView={handleDeleteView}
+              isDeleting={isDeleting}
+              currentViewId={currentViewId}
+            />
+          </div>
         </div>
       </div>
       <div className="p-6">
@@ -428,6 +504,20 @@ export default function Index() {
           </div>
         </div>
       </div>
+
+      <SaveViewModal
+        open={saveViewModalOpen}
+        onOpenChange={setSaveViewModalOpen}
+        onSave={handleSaveView}
+        isSaving={isCreating}
+        currentView={{
+          modelType: selectedModelType,
+          riskType: selectedRiskType,
+          timeframe: selectedTimeframe,
+          outcomes: selectedRiskColumns,
+        }}
+        outcomeLabels={phenomModelsData?.outcomeLabelMap}
+      />
     </>
   );
 }
