@@ -81,8 +81,17 @@ export const TableControls = ({
   const [timeframeOpen, setTimeframeOpen] = useState(false);
   const { appVersion } = useAppVersion();
   
-  // Determine if we should show time periods in months or years
-  const useMonthsForTimeframe = appVersion !== 'patient';
+  // Helper function to format timeframe display
+  const formatTimeframe = (timeframe: number) => {
+    if (timeframe < 1) {
+      // Show in months for timeframes less than 1 year
+      const months = timeframe * 12;
+      return `${months} month${months !== 1 ? 's' : ''}`;
+    } else {
+      // Show in years for timeframes >= 1 year
+      return `${timeframe} year${timeframe !== 1 ? 's' : ''}`;
+    }
+  };
   
   // Ensure we always have an array to work with
   const currentSelectedColumns = Array.isArray(selectedRiskColumns) ? selectedRiskColumns : [];
@@ -170,12 +179,7 @@ export const TableControls = ({
               >
                 {selectedTimeframe === 'today'
                   ? 'Today'
-                  : (() => {
-                      const timeframe = parseFloat(selectedTimeframe);
-                      const displayTimeframe = useMonthsForTimeframe ? timeframe * 12 : timeframe;
-                      const timeUnit = useMonthsForTimeframe ? "month" : "year";
-                      return `${displayTimeframe} ${timeUnit}${displayTimeframe > 1 ? 's' : ''}`;
-                    })()}
+                  : formatTimeframe(parseFloat(selectedTimeframe))}
                 <ChevronDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
               </Button>
             </PopoverTrigger>
@@ -205,8 +209,6 @@ export const TableControls = ({
                         );
                       }
                       const numeric = timeframe as number;
-                      const displayTimeframe = useMonthsForTimeframe ? numeric * 12 : numeric;
-                      const timeUnit = useMonthsForTimeframe ? "month" : "year";
                       return (
                         <CommandItem
                           key={numeric}
@@ -222,7 +224,7 @@ export const TableControls = ({
                               selectedTimeframe === numeric.toString() ? "opacity-100" : "opacity-0"
                             )}
                           />
-                          {displayTimeframe} {timeUnit}{displayTimeframe > 1 ? 's' : ''}
+                          {formatTimeframe(numeric)}
                         </CommandItem>
                       );
                     })}
