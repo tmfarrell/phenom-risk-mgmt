@@ -54,6 +54,15 @@ export const SaveViewModal = ({
     onOpenChange(false);
   };
 
+  const formatTimeframe = (timeframe: string): string => {
+    const years = parseFloat(timeframe);
+    if (years < 1) {
+      const months = Math.round(years * 12);
+      return `${months} month${months !== 1 ? 's' : ''}`;
+    }
+    return `${timeframe} year${years !== 1 ? 's' : ''}`;
+  };
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[425px]">
@@ -91,7 +100,7 @@ export const SaveViewModal = ({
               {currentView.modelType === 'future_risk' && (
                 <>
                   <div className="text-muted-foreground">Time Period:</div>
-                  <div className="font-medium">{currentView.timeframe} year{parseFloat(currentView.timeframe) !== 1 ? 's' : ''}</div>
+                  <div className="font-medium">{formatTimeframe(currentView.timeframe)}</div>
                 </>
               )}
             </div>
