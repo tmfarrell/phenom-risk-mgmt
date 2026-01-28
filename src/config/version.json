@@ -6,10 +6,13 @@
       "date": "2026-01-28",
       "title": "Saved Views & Documentation",
       "changes": [
-        "Added save panel view feature to main page",
-        "Fixed time period formatting",
-        "Added FAQ documentation",
-        "Added Releases page with version tracking"
+        "Added saved views feature to save and load panel configurations",
+        "Added save panel view modal with name and description",
+        "Added saved views dropdown to load previously saved configurations",
+        "Fixed time period formatting in display",
+        "Added FAQ documentation page",
+        "Added Releases page with version tracking",
+        "Updated sidebar UI with improved navigation structure"
       ]
     },
     {
