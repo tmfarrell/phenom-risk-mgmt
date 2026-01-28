@@ -79,6 +79,7 @@ export default function Index() {
     savedViews,
     isLoading: isLoadingViews,
     createView,
+    createViewAsync,
     deleteView,
     isCreating,
     isDeleting,
@@ -255,6 +256,7 @@ export default function Index() {
   const prevTimeframeRef = useRef<string>(selectedTimeframe);
   const prevModelTypeRef = useRef<string>(selectedModelType);
   const hasInitializedRef = useRef<boolean>(false);
+  const isLoadingViewRef = useRef<boolean>(false);
 
   // Set initial risk columns when outcomes are loaded (only once)
   useEffect(() => {
@@ -268,14 +270,19 @@ export default function Index() {
   // Whenever timeframe or model type changes, select the first 4 outcomes for that combination
   useEffect(() => {
     if (prevTimeframeRef.current !== selectedTimeframe || prevModelTypeRef.current !== selectedModelType) {
-      if (availableOutcomesForTimeframe.length > 0) {
-        setSelectedRiskColumns(availableOutcomesForTimeframe.slice(0, 4));
-      } else {
-        setSelectedRiskColumns([]);
+      // Only auto-reset if we're not loading a saved view
+      if (!isLoadingViewRef.current) {
+        if (availableOutcomesForTimeframe.length > 0) {
+          setSelectedRiskColumns(availableOutcomesForTimeframe.slice(0, 4));
+        } else {
+          setSelectedRiskColumns([]);
+        }
       }
       prevTimeframeRef.current = selectedTimeframe;
       prevModelTypeRef.current = selectedModelType;
     }
+    // Reset the flag after the effect runs
+    isLoadingViewRef.current = false;
   }, [selectedTimeframe, selectedModelType, availableOutcomesForTimeframe]);
 
   // Calculate average risks from the full dataset
@@ -308,19 +315,27 @@ export default function Index() {
   });
 
   // Handler to save the current view
-  const handleSaveView = (name: string) => {
-    createView({
-      name,
-      model_type: selectedModelType,
-      risk_type: selectedRiskType,
-      timeframe: selectedTimeframe,
-      outcomes: selectedRiskColumns,
-    });
-    setSaveViewModalOpen(false);
+  const handleSaveView = async (name: string) => {
+    try {
+      const newView = await createViewAsync({
+        name,
+        model_type: selectedModelType,
+        risk_type: selectedRiskType,
+        timeframe: selectedTimeframe,
+        outcomes: selectedRiskColumns,
+      });
+      setCurrentViewId(newView.id);
+      setSaveViewModalOpen(false);
+    } catch (error) {
+      // Error is already handled by the mutation's onError callback
+      console.error('Failed to save view:', error);
+    }
   };
 
   // Handler to load a saved view
   const handleSelectView = (view: SavedView) => {
+    // Set flag to prevent auto-reset during view loading
+    isLoadingViewRef.current = true;
     setSelectedModelType(view.model_type);
     setSelectedRiskType(view.risk_type);
     setSelectedTimeframe(view.timeframe);

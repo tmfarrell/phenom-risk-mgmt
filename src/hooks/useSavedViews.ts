@@ -164,6 +164,7 @@ export const useSavedViews = () => {
     isLoading,
     error,
     createView: createViewMutation.mutate,
+    createViewAsync: createViewMutation.mutateAsync,
     updateView: updateViewMutation.mutate,
     deleteView: deleteViewMutation.mutate,
     isCreating: createViewMutation.isPending,
