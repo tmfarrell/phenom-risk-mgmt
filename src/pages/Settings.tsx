@@ -49,7 +49,7 @@ export const Settings = () => {
   };
 
   return (
-    <div className="flex flex-col min-h-screen">
+    <div className="flex flex-col min-h-screen w-full">
       <Header />
       <main className="flex-1 container max-w-4xl mx-auto py-8 px-4">
         <div className="flex items-center mb-6">

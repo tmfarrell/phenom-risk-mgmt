@@ -373,21 +373,19 @@ export default function Index() {
   if (error) {
     console.error('Error loading patient data:', error);
     return (
-      <>
+      <div className="min-h-screen w-full">
         <Header />
-        <div className="p-6">
-          <div className="max-w-[1600px] mx-auto">
-            <div className="glass-card p-6">
-              <p className="text-red-500">Error loading patient data. Please try again later.</p>
-            </div>
+        <div>
+          <div className="glass-card p-6">
+            <p className="text-red-500">Error loading patient data. Please try again later.</p>
           </div>
         </div>
-      </>
+      </div>
     );
   }
 
   return (
-    <>
+    <div className="min-h-screen w-full">
       <Header />
       <div className="flex items-start justify-between px-6 pt-6">
         <div>
@@ -456,9 +454,8 @@ export default function Index() {
         </div>
       </div>
       <div className="p-6">
-        <div className="max-w-[1250px] mx-auto">
-          <div className="flex flex-col space-y-6">
-            <div className="glass-card p-4 overflow-hidden">
+        <div className="flex flex-col space-y-6">
+          <div className="glass-card p-4 overflow-hidden">
               <TableControls
                 searchQuery={searchQuery}
                 onSearchChange={setSearchQuery}
@@ -502,7 +499,6 @@ export default function Index() {
               )}
             </div>
           </div>
-        </div>
       </div>
 
       <SaveViewModal
@@ -518,6 +514,6 @@ export default function Index() {
         }}
         outcomeLabels={phenomModelsData?.outcomeLabelMap}
       />
-    </>
+    </div>
   );
 }

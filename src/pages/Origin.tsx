@@ -115,7 +115,7 @@ export default function Origin() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen w-full bg-gray-50">
       <Header />
       <div className="flex items-start">
         <div className="px-6 pt-6">
@@ -123,8 +123,7 @@ export default function Origin() {
         </div>
       </div>
       <div className="p-6">
-        <div className="max-w-[1250px] mx-auto">
-          <div className="flex flex-col space-y-6">
+        <div className="flex flex-col space-y-6">
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           {/* Upload Section */}
           <Card>
@@ -256,7 +255,6 @@ export default function Origin() {
             </CardContent>
           </Card>
             </div>
-          </div>
         </div>
       </div>
     </div>

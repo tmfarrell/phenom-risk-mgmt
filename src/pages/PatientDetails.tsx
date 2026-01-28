@@ -33,7 +33,7 @@ export const PatientDetails = () => {
 
   if (isLoading) {
     return (
-      <>
+      <div className="min-h-screen w-full">
         <Header />
         <div className="flex items-start">
           <div className="px-6 pt-6">
@@ -41,17 +41,15 @@ export const PatientDetails = () => {
           </div>
         </div>
         <div className="p-6">
-          <div className="max-w-[1250px] mx-auto">
-            Loading...
-          </div>
+          Loading...
         </div>
-      </>
+      </div>
     );
   }
 
   if (error) {
     return (
-      <>
+      <div className="min-h-screen w-full">
         <Header />
         <div className="flex items-start">
           <div className="px-6 pt-6">
@@ -59,16 +57,14 @@ export const PatientDetails = () => {
           </div>
         </div>
         <div className="p-6">
-          <div className="max-w-[1250px] mx-auto">
-            Error loading patient data
-          </div>
+          Error loading patient data
         </div>
-      </>
+      </div>
     );
   }
 
   return (
-    <>
+    <div className="min-h-screen w-full">
       <Header />
       <div className="flex items-start">
         <div className="px-6 pt-6">
@@ -76,18 +72,16 @@ export const PatientDetails = () => {
         </div>
       </div>
       <div className="px-6 pb-6">
-        <div className="max-w-[1250px] mx-auto">
-          <div className="flex items-center justify-end mb-6">
-            <button 
-              onClick={handleBack}
-              className="text-blue-600 hover:text-blue-800 transition-colors"
-            >
-              ← Back to Dashboard
-            </button>
-          </div>
-          <DetailView person={person} />
+        <div className="flex items-center justify-end mb-6">
+          <button 
+            onClick={handleBack}
+            className="text-blue-600 hover:text-blue-800 transition-colors"
+          >
+            ← Back to Dashboard
+          </button>
         </div>
+        <DetailView person={person} />
       </div>
-    </>
+    </div>
   );
 };

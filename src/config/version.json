@@ -1,0 +1,409 @@
+{
+  "current": "2026.01.28",
+  "releases": [
+    {
+      "version": "2026.01.28",
+      "date": "2026-01-28",
+      "title": "Saved Views & Documentation",
+      "changes": [
+        "Added save panel view feature to main page",
+        "Fixed time period formatting",
+        "Added FAQ documentation",
+        "Added Releases page with version tracking"
+      ]
+    },
+    {
+      "version": "2026.01.16",
+      "date": "2026-01-16",
+      "title": "Model Description Updates",
+      "changes": [
+        "Updated model descriptions for non-diagnosis/ treatment model types",
+        "Improved clarity of model documentation"
+      ]
+    },
+    {
+      "version": "2025.12.09",
+      "date": "2025-12-09",
+      "title": "API Documentation Enhancement",
+      "changes": [
+        "Updated API docs from latest spec",
+        "Added scripts to generate PDF documentation",
+        "Multiple improvements to API reference formatting"
+      ]
+    },
+    {
+      "version": "2025.11.14",
+      "date": "2025-11-14",
+      "title": "API Playground & Regional View",
+      "changes": [
+        "Added API playground for testing",
+        "Separated Population view from Patient Risk Panel",
+        "Added Regional Risk Panel with geographical mapping",
+        "Added model type labels to interface",
+        "Improved map risk labels and table selection",
+        "Fixed model link bugs and null risk threshold handling"
+      ]
+    },
+    {
+      "version": "2025.11.03",
+      "date": "2025-11-03",
+      "title": "Landing Page & Navigation",
+      "changes": [
+        "Added landing page with overview",
+        "Updated model list in catalog",
+        "Improved API reference formatting",
+        "Updated sidebar navigation structure"
+      ]
+    },
+    {
+      "version": "2025.10.20",
+      "date": "2025-10-20",
+      "title": "Model Updates",
+      "changes": [
+        "Updated with latest PhenOM models list",
+        "Fixed patient details page display issues",
+        "Improved logging and debugging"
+      ]
+    },
+    {
+      "version": "2025.10.09",
+      "date": "2025-10-09",
+      "title": "API Documentation Refactor",
+      "changes": [
+        "Refactored prediction builder to API docs",
+        "Added prediction API interface",
+        "Improved API documentation alignment and formatting",
+        "Updated sidebar structure"
+      ]
+    },
+    {
+      "version": "2025.10.02",
+      "date": "2025-10-02",
+      "title": "Origin Application",
+      "changes": [
+        "Added Origin application for data management",
+        "Updated PhenOM catalog page",
+        "Various UI improvements and updates"
+      ]
+    },
+    {
+      "version": "2025.09.12",
+      "date": "2025-09-12",
+      "title": "Patient Details Enhancement",
+      "changes": [
+        "Integrated Patient Risk Panel with PhenOM catalog",
+        "Added model links to patient detail page",
+        "Updated patient details page layout",
+        "Updated login page header",
+        "Improved default outcome selection"
+      ]
+    },
+    {
+      "version": "2025.09.02",
+      "date": "2025-09-02",
+      "title": "Heart Surgery Outcome Support",
+      "changes": [
+        "Added Heart Surgery (HS) outcome",
+        "Added composite risk calculations",
+        "Updated risk sorting functionality",
+        "Fixed average risk calculations for HS"
+      ]
+    },
+    {
+      "version": "2025.08.28",
+      "date": "2025-08-28",
+      "title": "App Version Management",
+      "changes": [
+        "Set default app version configuration",
+        "Hide provider fields on patient details for certain versions",
+        "Hide provider filter for specific app versions"
+      ]
+    },
+    {
+      "version": "2025.07.25",
+      "date": "2025-07-25",
+      "title": "Database Security & Migrations",
+      "changes": [
+        "Ran SQL security fixes",
+        "Applied database migrations",
+        "Updated project documentation"
+      ]
+    },
+    {
+      "version": "2025.07.10",
+      "date": "2025-07-10",
+      "title": "Payor Version Support",
+      "changes": [
+        "Added Patient Risk Panel (Payor) app version",
+        "Updated patient ID label to work with different versions",
+        "Updated application version names and defaults"
+      ]
+    },
+    {
+      "version": "2025.07.01",
+      "date": "2025-07-01",
+      "title": "HAE Risk Support",
+      "changes": [
+        "Added Hereditary Angioedema (HAE) outcome",
+        "Updated risk outcome terminology"
+      ]
+    },
+    {
+      "version": "2025.06.10",
+      "date": "2025-06-10",
+      "title": "Provider Integration",
+      "changes": [
+        "Added provider NPI tracking",
+        "Added provider information to frontend",
+        "Synchronized demo with production features"
+      ]
+    },
+    {
+      "version": "2025.06.09",
+      "date": "2025-06-09",
+      "title": "Risk Display Enhancements",
+      "changes": [
+        "Updated high risk highlighting thresholds",
+        "Added patient history to detail view",
+        "Updated risk summary display formatting",
+        "Updated trademark symbols"
+      ]
+    },
+    {
+      "version": "2025.04.22",
+      "date": "2025-04-22",
+      "title": "Cohort Selection Improvements",
+      "changes": [
+        "Updated population view cohort selection behavior",
+        "Fixed cohort selection bugs",
+        "Improved General Population cohort handling"
+      ]
+    },
+    {
+      "version": "2025.04.19",
+      "date": "2025-04-19",
+      "title": "Mortality Risk Support",
+      "changes": [
+        "Added support for Mortality risk/outcome",
+        "Fixed mortality risk value display",
+        "Updated risk calculations for mortality",
+        "Improved handling of null values in results"
+      ]
+    },
+    {
+      "version": "2025.04.15",
+      "date": "2025-04-15",
+      "title": "Population View & Cost Analysis",
+      "changes": [
+        "Added estimated events per 1000 patients",
+        "Added custom cost input functionality",
+        "Enabled cohort comparison with general population",
+        "Dynamically populated time periods from database",
+        "Updated risk distribution visualization",
+        "Updated time period labels based on app version"
+      ]
+    },
+    {
+      "version": "2025.04.11",
+      "date": "2025-04-11",
+      "title": "App Version Configuration",
+      "changes": [
+        "Refactored app version management",
+        "Updated labels and units based on app version",
+        "Fixed import errors in risk columns"
+      ]
+    },
+    {
+      "version": "2025.04.10",
+      "date": "2025-04-10",
+      "title": "Settings & Admin Features",
+      "changes": [
+        "Added Settings page with app version selection",
+        "Added admin user detection and controls",
+        "Added backlink to home page in Settings",
+        "Displayed app version in header",
+        "Applied database migrations for admin support"
+      ]
+    },
+    {
+      "version": "2025.04.07",
+      "date": "2025-04-07",
+      "title": "Population View Enhancements",
+      "changes": [
+        "Added intervention summary table with cost calculations",
+        "Added tabs to population view (distribution and interventions)",
+        "Updated population risk distribution display",
+        "Improved event cost input layout",
+        "Fixed intervention table queries"
+      ]
+    },
+    {
+      "version": "2025.04.04",
+      "date": "2025-04-04",
+      "title": "Risk Distribution Improvements",
+      "changes": [
+        "Updated risk distribution plot with categories",
+        "Improved risk distribution plot labels",
+        "Fixed type instantiation errors",
+        "Updated population view components"
+      ]
+    },
+    {
+      "version": "2025.03.22",
+      "date": "2025-03-22",
+      "title": "Risk Options Expansion",
+      "changes": [
+        "Added new risk types to dropdown",
+        "Adjusted risk summary text alignment",
+        "Updated project template"
+      ]
+    },
+    {
+      "version": "2025.03.02",
+      "date": "2025-03-02",
+      "title": "Risk Summary Features",
+      "changes": [
+        "Added collapsible risk summaries",
+        "Display risk score trend explanations",
+        "Fixed risk summary display formatting"
+      ]
+    },
+    {
+      "version": "2025.02.27",
+      "date": "2025-02-27",
+      "title": "Chart Improvements",
+      "changes": [
+        "Updated population risk distribution chart",
+        "Updated risk distribution tooltips"
+      ]
+    },
+    {
+      "version": "2024.12.12",
+      "date": "2024-12-12",
+      "title": "Risk Change Indicators",
+      "changes": [
+        "Added risk change indicators with arrows",
+        "Updated risk score arrow colors and logic",
+        "Added tooltips for change indicators",
+        "Updated Mental Health column naming",
+        "Improved results table highlighting"
+      ]
+    },
+    {
+      "version": "2024.12.11",
+      "date": "2024-12-11",
+      "title": "Table Layout Updates",
+      "changes": [
+        "Updated results table styles",
+        "Removed DOB column from results table",
+        "Merged patient name and risk factors",
+        "Updated patient details display alignment"
+      ]
+    },
+    {
+      "version": "2024.12.10",
+      "date": "2024-12-10",
+      "title": "Panel View & Selection",
+      "changes": [
+        "Added Panel view for risk summary",
+        "Added patient selection with checkboxes",
+        "Made patient cards clickable",
+        "Added risk type toggle to averages",
+        "Fixed pagination and selection bugs",
+        "Improved panel overview aesthetics"
+      ]
+    },
+    {
+      "version": "2024.12.09",
+      "date": "2024-12-09",
+      "title": "Risk Controls & Layout",
+      "changes": [
+        "Converted risk type dropdown to toggle buttons",
+        "Added date of birth to patient details and table",
+        "Added risk timeframe toggle buttons",
+        "Added tooltips to risk type controls",
+        "Updated detail view layout",
+        "Fixed authentication and type errors"
+      ]
+    },
+    {
+      "version": "2024.12.08",
+      "date": "2024-12-08",
+      "title": "Branding & Header",
+      "changes": [
+        "Added header with logo and wave pattern background",
+        "Refactored Header to TitleSection component",
+        "Updated UI text and placeholders",
+        "Fixed image rendering issues"
+      ]
+    },
+    {
+      "version": "2024.12.07",
+      "date": "2024-12-07",
+      "title": "Risk Type Selection",
+      "changes": [
+        "Added risk type dropdown for absolute/relative risk",
+        "Added multiselection dropdown for risk columns",
+        "Updated person data type and fetching",
+        "Improved table formatting and filtering",
+        "Added labels for risk inputs",
+        "Made table horizontally scrollable"
+      ]
+    },
+    {
+      "version": "2024.12.06",
+      "date": "2024-12-06",
+      "title": "Database Integration",
+      "changes": [
+        "Connected Supabase database",
+        "Populated dashboard with patient data from database",
+        "Added login page with authentication",
+        "Fixed data fetching and transformation",
+        "Updated repository structure"
+      ]
+    },
+    {
+      "version": "2024.11.27",
+      "date": "2024-11-27",
+      "title": "Table Enhancements",
+      "changes": [
+        "Added horizontal scrolling with frozen first column",
+        "Renamed 'Change' to 'Relative Risk'",
+        "Aligned risk change arrows with numbers",
+        "Added floating point column display"
+      ]
+    },
+    {
+      "version": "2024.11.26",
+      "date": "2024-11-26",
+      "title": "Filter Improvements",
+      "changes": [
+        "Updated age range filtering",
+        "Added 'All' option for filters",
+        "Refactored FilterPanel for compact layout"
+      ]
+    },
+    {
+      "version": "2024.11.25",
+      "date": "2024-11-25",
+      "title": "Results Display",
+      "changes": [
+        "Implemented scrollable results table",
+        "Added more example individuals",
+        "Reorganized panel layout",
+        "Fixed header alignment"
+      ]
+    },
+    {
+      "version": "2024.11.22",
+      "date": "2024-11-22",
+      "title": "Initial Release",
+      "changes": [
+        "Created population health risk dashboard",
+        "Implemented age range selector with dual slider",
+        "Added individual selection and highlighting",
+        "Set up project with Vite, React, Shadcn/ui, and TypeScript"
+      ]
+    }
+  ]
+}

@@ -43,7 +43,7 @@ export const Header = ({ hideLogout = false, bgClassName = 'bg-blue-900', logoSr
   };
 
   return (
-    <div className={`w-full ${bgClassName} px-6 py-3 flex justify-between items-center`}>
+    <div className={`${bgClassName} px-6 py-3 flex justify-between items-center`}>
       <div className="flex items-center">
         <img 
           src={logoSrc} 
