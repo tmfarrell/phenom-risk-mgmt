@@ -176,7 +176,7 @@ const Regional = () => {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="min-h-screen w-full space-y-6">
       <Header />
       {/* Header */}
       <div className="flex justify-between items-start">

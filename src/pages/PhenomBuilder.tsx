@@ -461,7 +461,7 @@ export default function PhenomBuilder() {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="min-h-screen w-full space-y-6">
       <Header />
       <div className="flex items-start">
         <div className="px-6">

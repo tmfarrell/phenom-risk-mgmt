@@ -14,7 +14,9 @@ import './App.css';
 import PhenomBuilder from './pages/PhenomBuilder';
 import Origin from './pages/Origin';
 import PhenomAPIDocs from './pages/PhenomAPIDocs';
-import { SidebarProvider } from './components/ui/sidebar';
+import { FAQ } from './components/FAQ';
+import Releases from './pages/Releases';
+import { SidebarProvider, useSidebar } from './components/ui/sidebar';
 import { AppSidebar } from './components/AppSidebar';
 
 // Create a context to share auth and admin status
@@ -91,6 +93,8 @@ function App() {
           <Route path="phenom-builder/:modelId" element={<PhenomBuilder />} />
           <Route path="origin" element={<Origin />} />
           <Route path="api-docs" element={<PhenomAPIDocs />} />
+          <Route path="faq" element={<FAQ />} />
+          <Route path="releases" element={<Releases />} />
         </Route>
       </Routes>
     </Router>
@@ -102,12 +106,21 @@ export default App;
 function MainLayout() {
   return (
     <SidebarProvider>
-      <div className="min-h-screen flex bg-gray-50">
-        <AppSidebar />
-        <main className="flex-1">
-          <Outlet />
-        </main>
-      </div>
+      <MainLayoutInner />
     </SidebarProvider>
+  );
+}
+
+function MainLayoutInner() {
+  const { state } = useSidebar();
+  const isCollapsed = state === "collapsed";
+
+  return (
+    <div className="min-h-screen w-full bg-gray-50">
+      <AppSidebar />
+      <main className={`min-h-screen ${isCollapsed ? 'ml-14' : 'ml-52'} transition-all duration-200`}>
+        <Outlet />
+      </main>
+    </div>
   );
 }

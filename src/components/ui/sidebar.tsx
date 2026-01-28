@@ -46,12 +46,12 @@ export function Sidebar(
   }
 ) {
   return (
-    <aside className={`border-r border-gray-200 bg-white ${className}`}>{children}</aside>
+    <aside className={`fixed left-0 top-0 h-screen border-r border-gray-200 bg-white flex flex-col z-40 ${className}`}>{children}</aside>
   );
 }
 
 export function SidebarContent({ children }: { children: React.ReactNode }) {
-  return <div className="h-full flex flex-col">{children}</div>;
+  return <div className="flex-1 flex flex-col overflow-hidden">{children}</div>;
 }
 
 export function SidebarGroup({ children }: { children: React.ReactNode }) {
@@ -91,6 +91,12 @@ export function SidebarMenuButton(
       {children}
     </button>
   );
+}
+
+export function SidebarFooter(
+  { children, className = "" }: { children: React.ReactNode; className?: string }
+) {
+  return <div className={`mt-auto ${className}`}>{children}</div>;
 }
 
 

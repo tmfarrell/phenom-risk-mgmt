@@ -97,7 +97,7 @@ export default function PhenomAPIDocs() {
   // If showing playground, render separate view
   if (showPlayground) {
     return (
-      <div className="min-h-screen bg-gray-50">
+      <div className="min-h-screen w-full bg-gray-50">
         <Header />
         <div className="flex items-start justify-between px-6 pt-6">
           <h1 className="text-2xl font-bold text-blue-900 text-left">PhenOM Inference API</h1>
@@ -110,16 +110,14 @@ export default function PhenomAPIDocs() {
           </Button>
         </div>
         <div className="p-6">
-          <div className="max-w-[1250px] mx-auto">
-            <ApiPlayground />
-          </div>
+          <ApiPlayground />
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen w-full bg-gray-50">
       <Header />
       <div className="flex items-start justify-between px-6 pt-6">
         <h1 className="text-2xl font-bold text-blue-900 text-left">PhenOM Inference API</h1>
@@ -132,8 +130,7 @@ export default function PhenomAPIDocs() {
         </Button>
       </div>
       <div className="p-6">
-        <div className="max-w-[1250px] mx-auto">
-          <div className="flex flex-col space-y-6">
+        <div className="flex flex-col space-y-6">
 
         <Tabs defaultValue="overview" className="w-full">
           <TabsList className="w-auto inline-flex h-11 p-1.5">
@@ -826,7 +823,6 @@ curl https://phenom-api-sandbox.iddev.om1.com/v1/job/{job_id}/results/download \
             </Card>
           </TabsContent>
         </Tabs>
-          </div>
         </div>
       </div>
 

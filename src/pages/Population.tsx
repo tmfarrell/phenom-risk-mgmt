@@ -50,7 +50,7 @@ export default function Population() {
   }, [timePeriods]);
 
   return (
-    <>
+    <div className="min-h-screen w-full">
       <Header />
       <div className="flex items-start">
         <div className="px-6 pt-6">
@@ -58,8 +58,7 @@ export default function Population() {
         </div>
       </div>
       <div className="p-6">
-        <div className="max-w-[1250px] mx-auto">
-          <div className="flex flex-col space-y-6">
+        <div className="flex flex-col space-y-6">
             <div className="glass-card p-4 overflow-hidden">
               {/* Population Risk Distribution Component */}
               <PopulationRiskDistribution
@@ -67,10 +66,9 @@ export default function Population() {
                 selectedRiskType={selectedRiskType}
               />
             </div>
-          </div>
         </div>
       </div>
-    </>
+    </div>
   );
 }
 
