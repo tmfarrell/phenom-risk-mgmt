@@ -29,6 +29,8 @@ interface ResultsTableProps {
   selectedTimeframe: string;
   onPatientClick?: (patientId: number) => void;
   outcomeLabels?: Record<string, string>;
+  initialSorting?: SortingState;
+  onSortingChange?: (sorting: SortingState) => void;
 }
 
 export const ResultsTable = ({ 
@@ -38,21 +40,32 @@ export const ResultsTable = ({
   averageRisks,
   selectedTimeframe,
   onPatientClick,
-  outcomeLabels
+  outcomeLabels,
+  initialSorting,
+  onSortingChange
 }: ResultsTableProps) => {
-  const [sorting, setSorting] = useState<SortingState>([
-    { id: 'composite_risk', desc: true } // Default sort by composite_risk descending (highest to lowest)
-  ]);
+  const [sorting, setSorting] = useState<SortingState>(
+    initialSorting || [{ id: 'composite_risk', desc: true }] // Use provided sorting or default
+  );
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
   const [rowSelection, setRowSelection] = useState<RowSelectionState>({});
 
   const columns = useTableColumns(visibleRiskColumns, averageRisks[selectedTimeframe] || {}, onPatientClick, outcomeLabels);
 
+  const handleSortingChange = (updater: any) => {
+    setSorting(updater);
+    // Also notify parent if callback provided
+    if (onSortingChange) {
+      const newSorting = typeof updater === 'function' ? updater(sorting) : updater;
+      onSortingChange(newSorting);
+    }
+  };
+
   const table = useReactTable({
     data,
     columns,
     getCoreRowModel: getCoreRowModel(),
-    onSortingChange: setSorting,
+    onSortingChange: handleSortingChange,
     getSortedRowModel: getSortedRowModel(),
     onColumnFiltersChange: setColumnFilters,
     getFilteredRowModel: getFilteredRowModel(),
@@ -68,13 +81,20 @@ export const ResultsTable = ({
       pagination: {
         pageSize: 8,
       },
-      sorting: [
+      sorting: initialSorting || [
         { id: 'composite_risk', desc: true } // Default sort by composite_risk descending
       ],
     },
     getRowId: (row) => row.patient_id.toString(),
     autoResetPageIndex: false,
   });
+
+  // Update sorting when initialSorting prop changes (e.g., when loading a saved view)
+  useEffect(() => {
+    if (initialSorting) {
+      setSorting(initialSorting);
+    }
+  }, [initialSorting]);
 
   useEffect(() => {
     if (onSelectionChange) {

@@ -1,6 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
+import { SortingState } from '@tanstack/react-table';
 
 export interface SavedView {
   id: string;
@@ -9,6 +10,7 @@ export interface SavedView {
   risk_type: 'relative' | 'absolute';
   timeframe: string;
   outcomes: string[];
+  sorting: SortingState;
   created_by: string | null;
   created_at: string;
   updated_at: string;
@@ -20,6 +22,7 @@ export interface SavedViewInput {
   risk_type: 'relative' | 'absolute';
   timeframe: string;
   outcomes: string[];
+  sorting: SortingState;
 }
 
 export const useSavedViews = () => {
@@ -40,11 +43,12 @@ export const useSavedViews = () => {
         throw error;
       }
 
-      // Transform the data to ensure outcomes is an array
+      // Transform the data to ensure outcomes is an array and sorting is properly typed
       return (data || []).map(view => ({
         ...view,
         risk_type: view.risk_type as 'relative' | 'absolute',
-        outcomes: Array.isArray(view.outcomes) ? view.outcomes as string[] : []
+        outcomes: Array.isArray(view.outcomes) ? view.outcomes as string[] : [],
+        sorting: Array.isArray(view.sorting) ? view.sorting as SortingState : []
       })) as SavedView[];
     }
   });
@@ -63,6 +67,7 @@ export const useSavedViews = () => {
           risk_type: input.risk_type,
           timeframe: input.timeframe,
           outcomes: input.outcomes,
+          sorting: input.sorting,
           created_by: user?.id || null
         })
         .select()
@@ -101,7 +106,8 @@ export const useSavedViews = () => {
           model_type: input.model_type,
           risk_type: input.risk_type,
           timeframe: input.timeframe,
-          outcomes: input.outcomes
+          outcomes: input.outcomes,
+          sorting: input.sorting
         })
         .eq('id', id)
         .select()

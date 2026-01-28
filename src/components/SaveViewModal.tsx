@@ -11,6 +11,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
+import { SortingState } from '@tanstack/react-table';
 
 interface SaveViewModalProps {
   open: boolean;
@@ -22,6 +23,7 @@ interface SaveViewModalProps {
     riskType: 'relative' | 'absolute';
     timeframe: string;
     outcomes: string[];
+    sorting: SortingState;
   };
   outcomeLabels?: Record<string, string>;
 }
@@ -61,6 +63,33 @@ export const SaveViewModal = ({
       return `${months} month${months !== 1 ? 's' : ''}`;
     }
     return `${timeframe} year${years !== 1 ? 's' : ''}`;
+  };
+
+  const formatSorting = (sorting: SortingState): string => {
+    if (!sorting || sorting.length === 0) {
+      return 'Default (Composite Risk - High to Low)';
+    }
+    const sort = sorting[0];
+    const direction = sort.desc ? 'High to Low' : 'Low to High';
+    
+    // Map column IDs to user-friendly names
+    let columnName: string;
+    if (sort.id === 'composite_risk') {
+      columnName = 'Composite Risk';
+    } else if (sort.id === 'name') {
+      columnName = 'Patient Name';
+    } else if (sort.id === 'mrn') {
+      columnName = 'MRN';
+    } else if (sort.id === 'age') {
+      columnName = 'Age';
+    } else if (sort.id === 'gender') {
+      columnName = 'Gender';
+    } else {
+      // It's likely an outcome column, try to get label
+      columnName = outcomeLabels?.[sort.id] || sort.id;
+    }
+    
+    return `${columnName} (${direction})`;
   };
 
   return (
@@ -103,6 +132,9 @@ export const SaveViewModal = ({
                   <div className="font-medium">{formatTimeframe(currentView.timeframe)}</div>
                 </>
               )}
+              
+              <div className="text-muted-foreground">Sort By:</div>
+              <div className="font-medium">{formatSorting(currentView.sorting)}</div>
             </div>
             <div className="space-y-1">
               <div className="text-sm text-muted-foreground">Outcomes ({currentView.outcomes.length}):</div>

@@ -26,6 +26,7 @@ import { cn } from '@/lib/utils';
 import { useSavedViews, SavedView } from '@/hooks/useSavedViews';
 import { SaveViewModal } from '@/components/SaveViewModal';
 import { SavedViewsDropdown } from '@/components/SavedViewsDropdown';
+import { SortingState } from '@tanstack/react-table';
 
 // Mock providers for testing
 const PROVIDERS = ['Provider A', 'Provider B', 'Provider C'];
@@ -63,6 +64,7 @@ export interface IndexPageState {
   providerList: ProviderList;
   selectedTimeframe: string;
   selectedModelType: string;
+  sorting?: SortingState;
 }
 
 export default function Index() {
@@ -96,6 +98,9 @@ export default function Index() {
       availableList: PROVIDERS,
       selectedList: [],
     }
+  );
+  const [sorting, setSorting] = useState<SortingState>(
+    savedState?.sorting || [{ id: 'composite_risk', desc: true }]
   );
 
   // Fetch available outcomes and time periods from phenom_models
@@ -323,6 +328,7 @@ export default function Index() {
         risk_type: selectedRiskType,
         timeframe: selectedTimeframe,
         outcomes: selectedRiskColumns,
+        sorting: sorting,
       });
       setCurrentViewId(newView.id);
       setSaveViewModalOpen(false);
@@ -340,6 +346,7 @@ export default function Index() {
     setSelectedRiskType(view.risk_type);
     setSelectedTimeframe(view.timeframe);
     setSelectedRiskColumns(view.outcomes);
+    setSorting(view.sorting || [{ id: 'composite_risk', desc: true }]);
     setCurrentViewId(view.id);
   };
 
@@ -358,18 +365,22 @@ export default function Index() {
     const currentView = savedViews.find(v => v.id === currentViewId);
     if (!currentView) return;
 
+    // Compare sorting states
+    const sortingDeviated = JSON.stringify(currentView.sorting || []) !== JSON.stringify(sorting);
+
     // Check if any filter has deviated from the saved view
     const hasDeviated = 
       currentView.model_type !== selectedModelType ||
       currentView.risk_type !== selectedRiskType ||
       currentView.timeframe !== selectedTimeframe ||
       currentView.outcomes.length !== selectedRiskColumns.length ||
-      !currentView.outcomes.every(outcome => selectedRiskColumns.includes(outcome));
+      !currentView.outcomes.every(outcome => selectedRiskColumns.includes(outcome)) ||
+      sortingDeviated;
 
     if (hasDeviated) {
       setCurrentViewId(undefined);
     }
-  }, [selectedModelType, selectedRiskType, selectedTimeframe, selectedRiskColumns, currentViewId, savedViews]);
+  }, [selectedModelType, selectedRiskType, selectedTimeframe, selectedRiskColumns, sorting, currentViewId, savedViews]);
 
   const handlePatientClick = (patientId: number) => {
     const state: IndexPageState = {
@@ -381,6 +392,7 @@ export default function Index() {
       providerList,
       selectedTimeframe,
       selectedModelType,
+      sorting,
     };
     navigate(`/patient/${patientId}`, { state });
   };
@@ -510,6 +522,8 @@ export default function Index() {
                   selectedTimeframe={selectedTimeframe}
                   onPatientClick={handlePatientClick}
                   outcomeLabels={phenomModelsData?.outcomeLabelMap}
+                  initialSorting={sorting}
+                  onSortingChange={setSorting}
                 />
               )}
             </div>
@@ -526,6 +540,7 @@ export default function Index() {
           riskType: selectedRiskType,
           timeframe: selectedTimeframe,
           outcomes: selectedRiskColumns,
+          sorting: sorting,
         }}
         outcomeLabels={phenomModelsData?.outcomeLabelMap}
       />
