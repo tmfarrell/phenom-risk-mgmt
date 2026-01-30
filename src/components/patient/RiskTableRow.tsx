@@ -85,6 +85,9 @@ export const RiskTableRow = ({
   // Check if all values for this risk factor are null
   const displayKey = valueKey || risk;
   const hasValidRiskData = allRisks.some(r => getRiskValue(r, displayKey) !== null);
+  
+  // Only show dropdown if both risk data exists AND summary is available
+  const hasExpandableContent = hasValidRiskData && summary && summary.trim().length > 0;
 
   const formatDate = (dateStr: string | undefined | null) => {
     if (!dateStr) return null;
@@ -95,10 +98,10 @@ export const RiskTableRow = ({
 
   return (
     <>
-      <TableRow className={`group ${hasValidRiskData ? 'cursor-pointer hover:bg-gray-50' : ''}`} onClick={() => hasValidRiskData && setIsExpanded(!isExpanded)}>
+      <TableRow className={`group ${hasExpandableContent ? 'cursor-pointer hover:bg-gray-50' : ''}`} onClick={() => hasExpandableContent && setIsExpanded(!isExpanded)}>
         <TableCell className="font-medium text-left">
           <div className="flex items-start gap-2">
-            {hasValidRiskData && (
+            {hasExpandableContent && (
               <div className="mt-1 text-gray-400">
                 {isExpanded ? <ChevronDown size={16} /> : <ChevronRight size={16} />}
               </div>
@@ -180,12 +183,12 @@ export const RiskTableRow = ({
           </TableCell>
         )}
       </TableRow>
-      {hasValidRiskData && isExpanded && (
+      {hasExpandableContent && isExpanded && (
         <TableRow>
           <TableCell colSpan={5} className="bg-gray-50 pb-4 animate-accordion-down text-left">
             <div className="text-sm text-gray-700 p-2 border-l-2 border-blue-400 ml-8">
               <span className="font-medium text-blue-600">Risk Analysis: </span>
-              {summary || <span className="italic text-gray-500">No Risk Analysis available</span>}
+              {summary}
             </div>
           </TableCell>
         </TableRow>

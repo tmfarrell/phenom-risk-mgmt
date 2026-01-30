@@ -17,8 +17,9 @@ interface RiskTableProps {
   onAddRow: (outcome: string, timeframe: string) => void;
   availableOutcomes: string[];
   timeframes: number[];
-  outcomeTimeframeMap: Record<string, number[]>;
-  outcomeModelMap: Record<string, Array<{id: string, timeframe: number, name?: string}>>;
+  outcomeTimeframeMap: Record<string, Array<number | 'today'>>;
+  outcomeModelMap: Record<string, Array<{id: string, timeframe: number | 'today', name?: string}>>;
+  outcomeLabelMap?: Record<string, string>;
 }
 
 export const RiskTable = ({ 
@@ -31,7 +32,8 @@ export const RiskTable = ({
   availableOutcomes,
   timeframes,
   outcomeTimeframeMap,
-  outcomeModelMap
+  outcomeModelMap,
+  outcomeLabelMap
 }: RiskTableProps) => {
   const { data: patientData } = usePatientData();
   const [newOutcome, setNewOutcome] = useState<string>(availableOutcomes[0] || '');
@@ -58,8 +60,14 @@ export const RiskTable = ({
   // Exclude outcomes already on the table
   const existingOutcomes = useMemo(() => rowConfigs.map(r => r.outcome), [rowConfigs]);
   const selectableOutcomes = useMemo(
-    () => availableOutcomes.filter(o => !existingOutcomes.includes(o)),
-    [availableOutcomes, existingOutcomes]
+    () => availableOutcomes
+      .filter(o => !existingOutcomes.includes(o))
+      .sort((a, b) => {
+        const aLabel = outcomeLabelMap?.[a] || a;
+        const bLabel = outcomeLabelMap?.[b] || b;
+        return aLabel.localeCompare(bLabel);
+      }),
+    [availableOutcomes, existingOutcomes, outcomeLabelMap]
   );
 
   // Ensure newOutcome is valid when list changes
@@ -192,7 +200,7 @@ export const RiskTable = ({
             // Find model id for this outcome and timeframe (first match)
             const modelId = (outcomeModelMap[cfg.outcome] || []).find(m => {
               if (cfg.timeframe === 'today') {
-                return m.timeframe === null || m.timeframe === undefined;
+                return m.timeframe === 'today';
               } else {
                 return m.timeframe === timeframeNum;
               }
@@ -237,7 +245,7 @@ export const RiskTable = ({
                     </SelectTrigger>
                     <SelectContent>
                       {selectableOutcomes.map(o => (
-                        <SelectItem key={o} value={o}>{o}</SelectItem>
+                        <SelectItem key={o} value={o}>{outcomeLabelMap?.[o] || o}</SelectItem>
                       ))}
                     </SelectContent>
                   </Select>

@@ -43,21 +43,30 @@ export const DetailView = ({ person, initialOutcomes, initialTimeframe, initialR
         console.error('Error fetching phenom_models:', error);
         throw error;
       }
-      const outcomeTimeframeMap: Record<string, number[]> = {};
-      const outcomeModelMap: Record<string, Array<{id: string, timeframe: number, name: string}>> = {};
+      const outcomeTimeframeMap: Record<string, Array<number | 'today'>> = {};
+      const outcomeModelMap: Record<string, Array<{id: string, timeframe: number | 'today', name: string}>> = {};
+      const outcomeLabelMap: Record<string, string> = {};
       data?.forEach(item => {
-        if (!outcomeTimeframeMap[item.indication_code]) outcomeTimeframeMap[item.indication_code] = [];
-        if (!outcomeModelMap[item.indication_code]) outcomeModelMap[item.indication_code] = [];
-        if (!outcomeTimeframeMap[item.indication_code].includes(item.prediction_timeframe_yrs)) {
-          outcomeTimeframeMap[item.indication_code].push(item.prediction_timeframe_yrs);
+        if (!outcomeTimeframeMap[item.indication_code]) {
+          outcomeTimeframeMap[item.indication_code] = [];
+          outcomeModelMap[item.indication_code] = [];
         }
-        outcomeModelMap[item.indication_code].push({ id: item.id, timeframe: item.prediction_timeframe_yrs, name: item.model_name });
+        // Set display label from model_name (prefer first seen)
+        if (!outcomeLabelMap[item.indication_code] && item.model_name) {
+          outcomeLabelMap[item.indication_code] = item.model_name;
+        }
+        const tf = item.prediction_timeframe_yrs === null ? 'today' : item.prediction_timeframe_yrs;
+        if (!outcomeTimeframeMap[item.indication_code].includes(tf)) {
+          outcomeTimeframeMap[item.indication_code].push(tf);
+        }
+        outcomeModelMap[item.indication_code].push({ id: item.id, timeframe: tf, name: item.model_name });
       });
       const uniqueTimeframes = [...new Set(data?.map(item => item.prediction_timeframe_yrs) || [])].filter(Boolean).sort();
       const availableOutcomes = Object.keys(outcomeTimeframeMap).sort();
       return {
         outcomeTimeframeMap,
         outcomeModelMap,
+        outcomeLabelMap,
         timeframes: uniqueTimeframes as number[],
         availableOutcomes
       };
@@ -140,6 +149,7 @@ export const DetailView = ({ person, initialOutcomes, initialTimeframe, initialR
             timeframes={timePeriods}
             outcomeTimeframeMap={phenomModelsData.outcomeTimeframeMap}
             outcomeModelMap={phenomModelsData.outcomeModelMap}
+            outcomeLabelMap={phenomModelsData.outcomeLabelMap}
           />
         )}
       </Card>

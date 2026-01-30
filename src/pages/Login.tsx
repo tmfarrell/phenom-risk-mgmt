@@ -310,9 +310,9 @@ export const Login = () => {
                       />
                     </svg>
                   </div>
-                  <CardTitle>AI-Powered Phenotyping</CardTitle>
+                  <CardTitle>Foundational AI Model</CardTitle>
                   <CardDescription>
-                    Leverages state-of-the-art AI to precisely quantify patient risk across a wide range of clinical outcomes and time domains. 
+                    Leverages a state-of-the-art foundational AI model to quantify patient risk across a wide range of clinical outcomes and time domains. 
                   </CardDescription>
                 </CardHeader>
               </Card>
