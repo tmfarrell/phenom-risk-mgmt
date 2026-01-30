@@ -1,6 +1,19 @@
 {
-  "current": "2026.01.28",
+  "current": "2026.01.30",
   "releases": [
+    {
+      "version": "2026.01.30",
+      "date": "2026-01-30",
+      "title": "Landing Page & Patient Details Fixes",
+      "changes": [
+        "Updated landing page text to 'Foundational AI Model'",
+        "Added support for 'today' as a timeframe value in patient risk tables",
+        "Added outcome label mapping to display model names instead of codes",
+        "Fixed expandable row behavior to only show dropdown when summary text exists",
+        "Improved outcome selection dropdown with alphabetical sorting by display name",
+        "Fixed timeframe matching logic for models with null prediction timeframes"
+      ]
+    },
     {
       "version": "2026.01.28",
       "date": "2026-01-28",
