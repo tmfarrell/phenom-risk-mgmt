@@ -310,9 +310,9 @@ export const Login = () => {
                       />
                     </svg>
                   </div>
-                  <CardTitle>Foundational AI Model</CardTitle>
+                  <CardTitle>Foundation Model</CardTitle>
                   <CardDescription>
-                    Leverages a state-of-the-art foundational AI model to quantify patient risk across a wide range of clinical outcomes and time domains. 
+                    Leverages a state-of-the-art proprietary foundation model to quantify patient risk across a wide range of clinical outcomes and time domains. 
                   </CardDescription>
                 </CardHeader>
               </Card>
