@@ -123,8 +123,8 @@ export default function Index() {
       const outcomeModelMap: Record<string, Array<{id: string, timeframe: number | 'today'}>> = {};
       // Map indication_code to a display label (model_name)
       const outcomeLabelMap: Record<string, string> = {};
-      // Map indication_code to model type
-      const outcomeModelTypeMap: Record<string, string> = {};
+      // Map indication_code to model types (an outcome can have both screening and future_risk, etc.)
+      const outcomeModelTypeMap: Record<string, string[]> = {};
       
       data?.forEach(item => {
         if (!outcomeTimeframeMap[item.indication_code]) {
@@ -135,9 +135,13 @@ export default function Index() {
         if (!outcomeLabelMap[item.indication_code] && item.model_name) {
           outcomeLabelMap[item.indication_code] = item.model_name;
         }
-        // set model type for this outcome
+        // collect all model types for this outcome (same indication_code can have multiple rows → multiple types)
+        const type = getModelType(item);
         if (!outcomeModelTypeMap[item.indication_code]) {
-          outcomeModelTypeMap[item.indication_code] = getModelType(item);
+          outcomeModelTypeMap[item.indication_code] = [];
+        }
+        if (!outcomeModelTypeMap[item.indication_code].includes(type)) {
+          outcomeModelTypeMap[item.indication_code].push(type);
         }
         const tf = item.prediction_timeframe_yrs === null ? 'today' : item.prediction_timeframe_yrs;
         if (!outcomeTimeframeMap[item.indication_code].includes(tf)) {
@@ -200,9 +204,9 @@ export default function Index() {
   const availableOutcomesForTimeframe = phenomModelsData?.outcomeTimeframeMap 
     ? Object.entries(phenomModelsData.outcomeTimeframeMap)
         .filter(([outcome, timeframes]) => {
-          // Filter by model type
-          const modelType = phenomModelsData.outcomeModelTypeMap?.[outcome];
-          const modelTypeMatch = modelType === selectedModelType;
+          // Filter by model type (outcome can support multiple types)
+          const modelTypes = phenomModelsData.outcomeModelTypeMap?.[outcome] ?? [];
+          const modelTypeMatch = modelTypes.includes(selectedModelType);
           
           // For Future Risk models, also filter by timeframe
           if (selectedModelType === 'future_risk') {
@@ -221,9 +225,9 @@ export default function Index() {
   const availableModelsForTimeframe = phenomModelsData?.outcomeModelMap
     ? Object.entries(phenomModelsData.outcomeModelMap)
         .reduce((acc, [outcome, models]) => {
-          // Filter by model type
-          const modelType = phenomModelsData.outcomeModelTypeMap?.[outcome];
-          if (modelType !== selectedModelType) {
+          // Filter by model type (outcome can support multiple types)
+          const modelTypes = phenomModelsData.outcomeModelTypeMap?.[outcome] ?? [];
+          if (!modelTypes.includes(selectedModelType)) {
             return acc;
           }
           
