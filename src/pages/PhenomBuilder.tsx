@@ -72,7 +72,7 @@ const getModelPerformance = (model: PreBuiltModel) => {
   const f1Score = (2 * precision * recall) / (precision + recall)
   
   return {
-    auc: parseFloat(auc.toFixed(3)),
+    auc: parseFloat(auc.toFixed(2)),
     accuracy: parseFloat(accuracy.toFixed(3)),
     precision: parseFloat(precision.toFixed(3)),
     recall: parseFloat(recall.toFixed(3)),
@@ -1064,7 +1064,7 @@ export default function PhenomBuilder() {
                       {/* Key Metrics */}
                       <div className="grid grid-cols-1 sm:grid-cols-4 gap-4">
                           <div className="text-center p-3 rounded-lg">
-                            <p className="text-2xl font-bold text-blue-600">{selectedModel?.auc?.toFixed(3) || 'N/A'}</p>
+                            <p className="text-2xl font-bold text-blue-600">{selectedModel?.auc?.toFixed(2) || 'N/A'}</p>
                             <p className="text-sm text-blue-800">AUC</p>
                           </div>
                           {typeof selectedModel.risk_threshold_pct === 'number' && (
