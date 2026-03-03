@@ -257,7 +257,8 @@ export default function PhenomBuilder() {
       const { data, error } = await (supabase as any)
         .from('phenom_models')
         .select('*')
-        .order('model_name', { ascending: true }) // Order by model name alphabetically
+        .order('prediction_timeframe_yrs', { ascending: true, nullsFirst: true }) // null timeframe treated as 0
+        .order('model_name', { ascending: true })
 
       console.log('Supabase response:', { data, error })
 
