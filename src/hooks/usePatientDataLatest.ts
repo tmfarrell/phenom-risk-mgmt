@@ -205,7 +205,47 @@ export const usePatientDataLatest = () => {
         });
       });
 
-      const finalData = [...transformedData, ...todayRecords, ...syntheticTimeframeRecords];
+      // Create synthetic 2-year entries using 5-year records as source (demo purpose)
+      const synthetic2YearRecords: Person[] = (patients || []).flatMap((patient) => {
+        const assignedProvider = getRandomProvider(patient.patient_id);
+        const riskTypes: Array<'relative' | 'absolute'> = ['relative', 'absolute'];
+        const targetTimeframe = 2; // 2 years
+        const sourceTimeframe = 5; // 5 years
+
+        return riskTypes.flatMap((rt) => {
+          const key = `${patient.patient_id}-${rt}-${sourceTimeframe}`;
+          const sourceRisk: any = (latestRisks || {})[key];
+          if (!sourceRisk) return [];
+
+          const scalingFactor = targetTimeframe / sourceTimeframe; // 2/5
+
+          const basePatient: Person = {
+            ...patient,
+            provider: assignedProvider.name,
+            provider_npi: assignedProvider.npi,
+            history: null,
+            composite_risk: sourceRisk.composite_risk ? sourceRisk.composite_risk * scalingFactor : null,
+            recorded_date: sourceRisk.calculated_date,
+            prediction_timeframe_yrs: targetTimeframe,
+            risk_type: (rt as 'relative' | 'absolute'),
+            change_since: sourceRisk.change_since || null
+          };
+
+          const riskFields = ['EMERGENCY_VISIT', 'HOSPITALIZATION', 'FALL', 'STROKE', 'INFARCTION', 'DEATH'];
+          availableOutcomes.forEach(outcome => {
+            const randomField = riskFields[Math.floor(Math.random() * riskFields.length)];
+            const changeField = `${randomField}_change`;
+            const baseValue = sourceRisk[randomField] || null;
+            const changeValue = sourceRisk[changeField] || null;
+            basePatient[outcome] = baseValue ? baseValue * scalingFactor : null;
+            basePatient[`${outcome}_change`] = changeValue ? changeValue * scalingFactor : null;
+          });
+
+          return [basePatient];
+        });
+      });
+
+      const finalData = [...transformedData, ...todayRecords, ...syntheticTimeframeRecords, ...synthetic2YearRecords];
 
       console.log('Fetched latest patient data successfully!');
       return finalData;
