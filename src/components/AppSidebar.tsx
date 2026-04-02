@@ -1,5 +1,5 @@
 import { NavLink, useLocation } from "react-router-dom"
-import { Users, ChevronLeft, Fingerprint, Upload, CodeXml, BarChart3, Map, BookOpen, RefreshCw } from "lucide-react"
+import { Users, ChevronLeft, Fingerprint, Upload, CodeXml, BarChart3, Map, BookOpen, RefreshCw, ClipboardCheck } from "lucide-react"
 import { useVersion } from "@/hooks/useVersion"
 
 import {
@@ -36,7 +36,7 @@ const aiMlSection = [
   }
 ]
 
-const applicationsSection = [
+const riskPanelsSection = [
   {
     title: "Patient Risk Panel",
     url: "/",
@@ -51,6 +51,14 @@ const applicationsSection = [
     title: "Regional Risk Panel",
     url: "/regional",
     icon: Map,
+  },
+]
+
+const specialtyWorkflowsSection = [
+  {
+    title: "Procedure Readiness",
+    url: "/procedure-readiness",
+    icon: ClipboardCheck,
   }
 ]
 
@@ -78,6 +86,7 @@ export function AppSidebar() {
     if (path === "/phenom-builder" && currentPath.startsWith("/phenom-builder")) return true;
     if (path === "/population" && currentPath.startsWith("/population")) return true;
     if (path === "/regional" && currentPath.startsWith("/regional")) return true;
+    if (path === "/procedure-readiness" && currentPath.startsWith("/procedure-readiness")) return true;
     if (path === "/origin" && currentPath.startsWith("/origin")) return true;
     if (path === "/api-docs" && currentPath.startsWith("/api-docs")) return true;
     if (path === "/faq" && currentPath.startsWith("/faq")) return true;
@@ -85,7 +94,7 @@ export function AppSidebar() {
     return currentPath === path;
   }
   
-  const allItems = [...dataSection, ...aiMlSection, ...applicationsSection, ...documentationSection]
+  const allItems = [...dataSection, ...aiMlSection, ...riskPanelsSection, ...specialtyWorkflowsSection, ...documentationSection]
   const isExpanded = allItems.some((app) => isActive(app.url))
   const isCollapsed = state === "collapsed"
 
@@ -148,7 +157,7 @@ export function AppSidebar() {
           <SidebarGroup>
             {!isCollapsed && (
               <SidebarGroupLabel className="text-gray-400 font-semibold text-left pt-3">
-                AI/ ML
+                Models/ Outcomes
               </SidebarGroupLabel>
             )}
 
@@ -171,17 +180,44 @@ export function AppSidebar() {
             </SidebarGroupContent>
           </SidebarGroup>
 
-          {/* Applications Section */}
+          {/* Risk Panels Section */}
           <SidebarGroup>
             {!isCollapsed && (
               <SidebarGroupLabel className="text-gray-400 font-semibold text-left pt-3">
-                Applications
+                Risk Panels
               </SidebarGroupLabel>
             )}
 
             <SidebarGroupContent>
               <SidebarMenu>
-                {applicationsSection.map((app) => (
+                {riskPanelsSection.map((app) => (
+                  <SidebarMenuItem key={app.title}>
+                    <SidebarMenuButton asChild>
+                      <NavLink 
+                        to={app.url} 
+                        className={`${getNavClass(isActive(app.url))} flex items-center gap-3 px-3 py-2 rounded text-sm text-left`}
+                      >
+                        <app.icon className="mr-1.5 h-5 w-5 shrink-0" />
+                        {!isCollapsed && <span className="font-medium leading-none">{app.title}</span>}
+                      </NavLink>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                ))}
+              </SidebarMenu>
+            </SidebarGroupContent>
+          </SidebarGroup>
+
+          {/* Specialty Workflows Section */}
+          <SidebarGroup>
+            {!isCollapsed && (
+              <SidebarGroupLabel className="text-gray-400 font-semibold text-left pt-3">
+                Specialty Workflows
+              </SidebarGroupLabel>
+            )}
+
+            <SidebarGroupContent>
+              <SidebarMenu>
+                {specialtyWorkflowsSection.map((app) => (
                   <SidebarMenuItem key={app.title}>
                     <SidebarMenuButton asChild>
                       <NavLink 

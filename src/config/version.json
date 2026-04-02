@@ -1,6 +1,15 @@
 {
-  "current": "2026.01.30",
+  "current": "2026.04.02",
   "releases": [
+    {
+      "version": "2026.04.02",
+      "date": "2026-04-02",
+      "title": "Procedure Risk Dashboard",
+      "changes": [
+        "Added Procedure Risk Dashboard for analyzing member risk by procedure type, which estimates risk and procedure-related costs based on that risk",
+        "Added new sidebar navigation section for 'Specialty Workflows' like the Procedure Risk Dashboard"
+      ]
+    },
     {
       "version": "2026.01.30",
       "date": "2026-01-30",
