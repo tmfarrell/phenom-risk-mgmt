@@ -16,6 +16,7 @@ import Origin from './pages/Origin';
 import PhenomAPIDocs from './pages/PhenomAPIDocs';
 import { FAQ } from './components/FAQ';
 import Releases from './pages/Releases';
+import ProcedureReadiness from './pages/ProcedureReadiness';
 import { SidebarProvider, useSidebar } from './components/ui/sidebar';
 import { AppSidebar } from './components/AppSidebar';
 
@@ -93,6 +94,7 @@ function App() {
           <Route path="phenom-builder/:modelId" element={<PhenomBuilder />} />
           <Route path="origin" element={<Origin />} />
           <Route path="api-docs" element={<PhenomAPIDocs />} />
+          <Route path="procedure-readiness" element={<ProcedureReadiness />} />
           <Route path="faq" element={<FAQ />} />
           <Route path="releases" element={<Releases />} />
         </Route>
