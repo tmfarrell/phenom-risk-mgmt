@@ -25,7 +25,7 @@ export function CostCalculator({ defaultCost, estimatedProcedures, onCostChange 
   const totalCost = estimatedProcedures * cost;
 
   return (
-    <div className="space-y-6">
+    <div className="grid md:grid-cols-2 gap-6 items-start">
       <div className="space-y-4">
         <Label htmlFor="procedure-cost" className="text-sm font-medium">
           Procedure Cost ($)
@@ -43,18 +43,18 @@ export function CostCalculator({ defaultCost, estimatedProcedures, onCostChange 
         <Slider
           value={[cost]}
           onValueChange={(values) => handleCostChange(values[0])}
-          min={10000}
+          min={1000}
           max={150000}
           step={1000}
           className="w-full"
         />
         <div className="flex justify-between text-xs text-muted-foreground">
-          <span>$10,000</span>
+          <span>$1,000</span>
           <span>$150,000</span>
         </div>
       </div>
 
-      <div className="p-4 rounded-xl bg-accent border border-primary/20">
+      <div className="p-4 rounded-xl bg-accent border border-primary/20 h-full flex flex-col justify-center">
         <div className="flex items-center gap-3 mb-3">
           <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
             <Calculator className="w-5 h-5 text-primary" />

@@ -64,4 +64,25 @@ export const procedures: Procedure[] = [
     baseRate: 0.0125,
     averageCost: 8500,
   },
+  {
+    id: 'mri-knee',
+    name: 'MRI Knee',
+    category: 'Imaging',
+    baseRate: 0.0150,
+    averageCost: 2500,
+  },
+  {
+    id: 'mri-shoulder',
+    name: 'MRI Shoulder',
+    category: 'Imaging',
+    baseRate: 0.0130,
+    averageCost: 2500,
+  },
+  {
+    id: 'mri-hip',
+    name: 'MRI Hip',
+    category: 'Imaging',
+    baseRate: 0.0120,
+    averageCost: 2500,
+  },
 ];

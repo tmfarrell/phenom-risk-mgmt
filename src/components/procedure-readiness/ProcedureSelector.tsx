@@ -1,4 +1,4 @@
-import { Check, ChevronDown, Activity } from 'lucide-react';
+import { Check, ChevronDown, Activity, CheckCircle } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import {
@@ -41,15 +41,25 @@ export function ProcedureSelector({ value, onChange }: ProcedureSelectorProps) {
           variant="outline"
           role="combobox"
           aria-expanded={open}
-          className="w-full justify-between h-auto py-3 px-4"
+          className={cn(
+            "w-full justify-between h-auto py-3 px-4",
+            value && "border-success bg-success/5"
+          )}
         >
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
-              <Activity className="w-5 h-5 text-primary" />
+            <div className={cn(
+              "w-10 h-10 rounded-lg flex items-center justify-center",
+              value ? "bg-success/10" : "bg-primary/10"
+            )}>
+              {value ? (
+                <CheckCircle className="w-5 h-5 text-success" />
+              ) : (
+                <Activity className="w-5 h-5 text-primary" />
+              )}
             </div>
             {value ? (
               <div className="text-left">
-                <p className="font-medium">{value.name}</p>
+                <p className="font-medium text-success">{value.name}</p>
                 <p className="text-xs text-muted-foreground">{value.category}</p>
               </div>
             ) : (

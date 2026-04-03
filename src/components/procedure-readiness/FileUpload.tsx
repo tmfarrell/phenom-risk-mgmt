@@ -141,6 +141,10 @@ export function FileUpload({ onUpload }: FileUploadProps) {
         </div>
       </div>
 
+      <p className="text-xs text-muted-foreground text-center">
+        CSV format: patient_id, first_name, last_name, dob, gender, token_1, token_2
+      </p>
+
       <div className="flex items-center gap-2">
         <div className="flex-1 h-px bg-border" />
         <span className="text-xs text-muted-foreground uppercase tracking-wide">or</span>
@@ -153,12 +157,8 @@ export function FileUpload({ onUpload }: FileUploadProps) {
         className="w-full"
       >
         <FileText className="w-4 h-4 mr-2" />
-        Load Sample Data (1000 members)
+        Load Sample Data (10,000 members)
       </Button>
-
-      <p className="text-xs text-muted-foreground text-center">
-        CSV format: member_id, first_name, last_name, age, gender (M/F)
-      </p>
     </div>
   );
 }
