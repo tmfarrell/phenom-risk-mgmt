@@ -55,14 +55,13 @@ const ProcedureReadiness = () => {
   const isAnalysisReady = rawMembers.length > 0 && selectedProcedure;
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen w-full">
       <Header />
 
-      <div className="px-6 py-4 border-b bg-white">
-        <h1 className="text-2xl font-bold tracking-tight">Procedure Risk Dashboard</h1>
-      </div>
-
       <main className="container mx-auto px-6 py-8">
+        <div className="mb-6">
+          <h1 className="text-2xl font-bold text-blue-900 text-left">Procedure Risk Dashboard</h1>
+        </div>
         <Tabs defaultValue="analysis" className="space-y-8">
           <TabsList className="grid w-full max-w-md grid-cols-2">
             <TabsTrigger value="analysis">

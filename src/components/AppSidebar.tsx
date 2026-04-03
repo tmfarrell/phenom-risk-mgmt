@@ -56,7 +56,7 @@ const riskPanelsSection = [
 
 const specialtyWorkflowsSection = [
   {
-    title: "Procedure Readiness",
+    title: "Procedure Risk Dashboard",
     url: "/procedure-readiness",
     icon: ClipboardCheck,
   }
