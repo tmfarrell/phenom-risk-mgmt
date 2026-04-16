@@ -69,7 +69,7 @@ const ProcedureReadiness = () => {
               Risk Analysis
             </TabsTrigger>
             <TabsTrigger value="cost" disabled={!isAnalysisReady}>
-              ROI Calculator
+              Cost Calculator
             </TabsTrigger>
             <TabsTrigger value="members" disabled={!isAnalysisReady}>
               Member List
@@ -217,30 +217,89 @@ const ProcedureReadiness = () => {
 
           <TabsContent value="cost" className="space-y-5 animate-fade-in">
             {isAnalysisReady && (
-              <Card>
-                <CardHeader className="flex flex-row items-start justify-between">
-                  <div>
-                    <CardTitle>Cost &amp; Screening Analysis</CardTitle>
+              <>
+                <div className="grid sm:grid-cols-2 gap-4">
+                  <Card>
+                    <CardContent className="py-6">
+                      <p className="text-sm text-muted-foreground mb-2">Selected Procedure</p>
+                      <Badge className="bg-blue-100 text-blue-900 border border-blue-200 hover:bg-blue-100 px-3 py-1 text-md font-medium rounded-md">
+                        {selectedProcedure.name}
+                      </Badge>
+                    </CardContent>
+                  </Card>
+                  <StatCard
+                    title="Total Estimated Procedures"
+                    value={summary.estimatedProcedures.toFixed(1)}
+                    subtitle="In next 12 months"
+                    variant="warning"
+                  />
+                </div>
+
+                <Card>
+                  <CardContent className="pt-6 space-y-4">
+                    <div className="grid sm:grid-cols-3 gap-4">
+                      <div className="p-4 rounded-lg border bg-muted/30">
+                        <p className="text-sm text-muted-foreground">Cohort Size</p>
+                        <p className="text-2xl font-bold">{summary.totalMembers.toLocaleString()}</p>
+                        <p className="text-xs text-muted-foreground mt-1">Members analyzed</p>
+                      </div>
+                      <div className="p-4 rounded-lg border bg-muted/30">
+                        <p className="text-sm text-muted-foreground">Base Rate</p>
+                        <p className="text-2xl font-bold">{(selectedProcedure.baseRate * 100).toFixed(2)}%</p>
+                        <p className="text-xs text-muted-foreground mt-1">Population annual incidence</p>
+                      </div>
+                      <div className="p-4 rounded-lg border bg-muted/30">
+                        <p className="text-sm text-muted-foreground">Avg. Member Probability</p>
+                        <p className="text-2xl font-bold">
+                          {summary.totalMembers > 0
+                            ? ((summary.estimatedProcedures / summary.totalMembers) * 100).toFixed(2)
+                            : '0'}%
+                        </p>
+                        <p className="text-xs text-muted-foreground mt-1">Risk-adjusted, 12-month</p>
+                      </div>
+                    </div>
+                    <div className="grid sm:grid-cols-3 gap-4">
+                      <div className="p-4 rounded-lg border bg-risk-high/5 border-risk-high/20">
+                        <p className="text-sm text-muted-foreground">From High Risk</p>
+                        <p className="text-2xl font-bold text-risk-high">
+                          {analyzedMembers.filter(m => m.riskScore >= 60).reduce((s, m) => s + m.absoluteProbability / 100, 0).toFixed(1)}
+                        </p>
+                        <p className="text-xs text-muted-foreground mt-1">{summary.highRiskMembers} members (score 60+)</p>
+                      </div>
+                      <div className="p-4 rounded-lg border bg-risk-medium/5 border-risk-medium/20">
+                        <p className="text-sm text-muted-foreground">From Medium Risk</p>
+                        <p className="text-2xl font-bold text-risk-medium">
+                          {analyzedMembers.filter(m => m.riskScore >= 30 && m.riskScore < 60).reduce((s, m) => s + m.absoluteProbability / 100, 0).toFixed(1)}
+                        </p>
+                        <p className="text-xs text-muted-foreground mt-1">{summary.mediumRiskMembers} members (score 30–60)</p>
+                      </div>
+                      <div className="p-4 rounded-lg border bg-risk-low/5 border-risk-low/20">
+                        <p className="text-sm text-muted-foreground">From Low Risk</p>
+                        <p className="text-2xl font-bold text-risk-low">
+                          {analyzedMembers.filter(m => m.riskScore < 30).reduce((s, m) => s + m.absoluteProbability / 100, 0).toFixed(1)}
+                        </p>
+                        <p className="text-xs text-muted-foreground mt-1">{summary.lowRiskMembers} members (score &lt;30)</p>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Cost Estimation</CardTitle>
                     <CardDescription>
-                      Set procedure cost and model the ROI of screening patients by risk threshold
+                      Calculate projected costs based on procedure price
                     </CardDescription>
-                  </div>
-                  <div className="flex flex-col items-end gap-1">
-                    <p className="text-xs text-muted-foreground">Selected Procedure</p>
-                    <Badge className="bg-blue-100 text-blue-900 border border-blue-200 hover:bg-blue-100 text-md px-3 py-1 font-medium rounded-md whitespace-nowrap">
-                      {selectedProcedure.name}
-                    </Badge>
-                  </div>
-                </CardHeader>
-                <CardContent>
+                  </CardHeader>
+                  <CardContent>
                     <CostCalculator
                       defaultCost={selectedProcedure.averageCost}
-                      members={analyzedMembers}
-                    procedureCost={procedureCost}
-                    onCostChange={setProcedureCost}
-                  />
-                </CardContent>
-              </Card>
+                      estimatedProcedures={summary.estimatedProcedures}
+                      onCostChange={setProcedureCost}
+                    />
+                  </CardContent>
+                </Card>
+              </>
             )}
           </TabsContent>
 
@@ -254,12 +313,9 @@ const ProcedureReadiness = () => {
                       Click column headers to sort. Export to CSV for offline analysis.
                     </CardDescription>
                   </div>
-                  <div className="flex flex-col items-end gap-1">
-                    <p className="text-xs text-muted-foreground">Selected Procedure</p>
-                    <Badge className="bg-blue-100 text-blue-900 border border-blue-200 hover:bg-blue-100 text-md px-3 py-1 font-medium rounded-md whitespace-nowrap">
-                      {selectedProcedure.name}
-                    </Badge>
-                  </div>
+                  <Badge className="bg-blue-100 text-blue-900 border border-blue-200 hover:bg-blue-100 text-md px-3 py-1 font-medium rounded-md whitespace-nowrap">
+                    {selectedProcedure.name}
+                  </Badge>
                 </CardHeader>
                 <CardContent>
                   <MemberTable
