@@ -1,6 +1,18 @@
 {
-  "current": "2026.04.02",
+  "current": "2026.04.16",
   "releases": [
+    {
+      "version": "2026.04.16",
+      "date": "2026-04-16",
+      "title": "Cost & Screening Analysis",
+      "changes": [
+        "Rebuilt the Cost Calculator tab on the Procedure Risk Dashboard into a full Cost & Screening Analysis tool",
+        "Added per-patient screening cost input with slider ($0–$5,000) to model intervention expenses",
+        "Added screening risk threshold input with slider and preset buttons (High ≥60, Medium+ ≥30, At-Risk ≥20)",
+        "Added Screening Impact Summary cards showing Patients Screened, Total Screening Cost, Cost Avoided, Procedures Avoided, and Net Savings",
+        "Added Net Savings sensitivity chart (recharts LineChart) sweeping risk threshold 0–100 with optimal threshold reference line and selected threshold dot"
+      ]
+    },
     {
       "version": "2026.04.02",
       "date": "2026-04-02",
